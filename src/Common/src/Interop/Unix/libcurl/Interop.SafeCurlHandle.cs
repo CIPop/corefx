@@ -77,7 +77,7 @@ internal static partial class Interop
                 {
                     fixed(int* fds = _specialFds)
                     {
-                        while (Interop.CheckIo(libc.pipe(fds)));
+                        while (Interop.CheckIo(Interop.Sys.Pipe(fds)));
                     }
                 }
             }
@@ -116,8 +116,8 @@ internal static partial class Interop
                     // is ready for a read/write. The special fd is the read end of a pipe
                     // Whenever an fd is added/removed in _fdSet, a write happens to the
                     // write end of the pipe thus causing the poll to return.
-                    pollFds[0].fd = _specialFds[libc.ReadEndOfPipe];
-                    pollFds[0].events = PollFlags.POLLIN | PollFlags.POLLOUT;
+                    pollFds[0].fd = _specialFds[Interop.Sys.ReadEndOfPipe];
+                    pollFds[0].events = PollFlags.POLLIN;
                     int i = 1;
                     foreach (int fd in _fdSet)
                     {
@@ -177,17 +177,21 @@ internal static partial class Interop
             {
                 Debug.Assert(Monitor.IsEntered(this));
 
-                bool changed = isRemove ? _fdSet.Remove(fd) : _fdSet.Add(fd);
-                if (!changed)
+                // If there is no valid fd, the poll still needs to be unblocked
+                if (-1 != fd)
                 {
-                    return;
+                    bool changed = isRemove ? _fdSet.Remove(fd) : _fdSet.Add(fd);
+                    if (!changed)
+                    {
+                        return;
+                    }
                 }
 
                 unsafe
                 {
                     // Write to special fd
                     byte* dummyBytes = stackalloc byte[1];
-                    if ((int)libc.write(_specialFds[libc.WriteEndOfPipe], dummyBytes, (size_t)1) <= 0)
+                    if ((int)libc.write(_specialFds[Interop.Sys.WriteEndOfPipe], dummyBytes, (size_t)1) <= 0)
                     {
                         // TODO: How to handle errors?
                         throw new InvalidOperationException("Cannot write data: " + Marshal.GetLastWin32Error());
@@ -213,8 +217,8 @@ internal static partial class Interop
                 Debug.Assert(0 == _requestCount);
                 Debug.Assert(_pollCancelled);
 
-                libc.close(_specialFds[libc.ReadEndOfPipe]);
-                libc.close(_specialFds[libc.WriteEndOfPipe]);
+                Interop.Sys.Close(_specialFds[Interop.Sys.ReadEndOfPipe]);
+                Interop.Sys.Close(_specialFds[Interop.Sys.WriteEndOfPipe]);
                 libcurl.curl_multi_cleanup(this.handle);
 
                 return true;
@@ -227,7 +231,8 @@ internal static partial class Interop
                 {
                     return -1;
                 }
-                int pipeReadFd = _specialFds[libc.ReadEndOfPipe];
+                Debug.Assert((revents & PollFlags.POLLIN) != 0);
+                int pipeReadFd = _specialFds[Interop.Sys.ReadEndOfPipe];
                 int bytesRead = 0;
                 unsafe
                 {

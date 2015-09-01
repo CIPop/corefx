@@ -367,11 +367,10 @@ namespace System.Net.Http
                         throw new HttpRequestException(SR.net_http_client_execution_error,
                             GetCurlException(result, true));
                     }
+                    state.SocketFd = socketFd;
                     state.SessionHandle.SignalFdSetChange(socketFd, false);
                 }
             }
-
-            CheckForCompletedTransfers(state.SessionHandle);
 
             return retVal;
         }
