@@ -7,6 +7,7 @@
     <ProjectGuid>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Net.Http</AssemblyName>
+    <AssemblyVersion>4.0.1.0</AssemblyVersion>
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
@@ -149,14 +150,17 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.close.cs">
-      <Link>Common\Interop\Unix\libc\Interop.close.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Close.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.open.cs">
-      <Link>Common\Interop\Unix\libc\Interop.open.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Open.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.pipe.cs">
-      <Link>Common\Interop\Unix\libc\Interop.pipe.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.OpenFlags.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.OpenFlags.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Pipe.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Pipe.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.poll.cs">
       <Link>Common\Interop\Unix\libc\Interop.poll.cs</Link>
@@ -178,24 +182,11 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>    
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.OpenFlags.cs">
-      <Link>Common\Interop\Linux\libc\Interop.OpenFlags.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Http\HttpHandlerDefaults.cs">
+      <Link>Common\System\Net\Http\HttpHandlerDefaults.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.OpenFlags.cs">
-      <Link>Common\Interop\OSX\libc\Interop.OpenFlags.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true' ">
-    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.OpenFlags.cs">
-      <Link>Common\Interop\FreeBSD\libc\Interop.OpenFlags.cs</Link>
-    </Compile>
-  </ItemGroup>
-  
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
