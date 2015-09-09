@@ -5,6 +5,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Collections.Generic;
+using Microsoft.Win32.SafeHandles;
+
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -114,21 +116,21 @@ namespace System.Net.NetworkInformation
         {
             uint size = 0;
             uint result = 0;
-            SafeLocalFree buffer = null;
+            SafeLocalAllocHandle buffer = null;
             List<SystemTcpConnectionInformation> tcpConnections = new List<SystemTcpConnectionInformation>();
 
             // Check if it supports IPv4 for IPv6 only modes.
             if (Socket.OSSupportsIPv4)
             {
                 // Get the size of buffer needed
-                result = UnsafeNetInfoNativeMethods.GetTcpTable(SafeLocalFree.Zero, ref size, true);
+                result = UnsafeNetInfoNativeMethods.GetTcpTable(SafeLocalAllocHandle.Zero, ref size, true);
 
                 while (result == IpHelperErrors.ErrorInsufficientBuffer)
                 {
                     try
                     {
                         //allocate the buffer and get the tcptable
-                        buffer = SafeLocalFree.LocalAlloc((int)size);
+                        buffer = SafeLocalAllocHandle.LocalAlloc((int)size);
                         result = UnsafeNetInfoNativeMethods.GetTcpTable(buffer, ref size, true);
 
                         if (result == IpHelperErrors.Success)
@@ -172,7 +174,7 @@ namespace System.Net.NetworkInformation
                 // IPv6 tcp connections
                 // Get the size of buffer needed
                 size = 0;
-                result = UnsafeNetInfoNativeMethods.GetExtendedTcpTable(SafeLocalFree.Zero, ref size, true,
+                result = UnsafeNetInfoNativeMethods.GetExtendedTcpTable(SafeLocalAllocHandle.Zero, ref size, true,
                                                                         (uint)AddressFamily.InterNetworkV6,
                                                                         TcpTableClass.TcpTableOwnerPidAll, 0);
 
@@ -181,7 +183,7 @@ namespace System.Net.NetworkInformation
                     try
                     {
                         // Allocate the buffer and get the tcptable
-                        buffer = SafeLocalFree.LocalAlloc((int)size);
+                        buffer = SafeLocalAllocHandle.LocalAlloc((int)size);
                         result = UnsafeNetInfoNativeMethods.GetExtendedTcpTable(buffer, ref size, true,
                                                                                 (uint)AddressFamily.InterNetworkV6,
                                                                                 TcpTableClass.TcpTableOwnerPidAll, 0);
@@ -233,20 +235,20 @@ namespace System.Net.NetworkInformation
         {
             uint size = 0;
             uint result = 0;
-            SafeLocalFree buffer = null;
+            SafeLocalAllocHandle buffer = null;
             List<IPEndPoint> udpListeners = new List<IPEndPoint>();
 
             // Check if it support IPv4 for IPv6 only modes.
             if (Socket.OSSupportsIPv4)
             {
                 // Get the size of buffer needed
-                result = UnsafeNetInfoNativeMethods.GetUdpTable(SafeLocalFree.Zero, ref size, true);
+                result = UnsafeNetInfoNativeMethods.GetUdpTable(SafeLocalAllocHandle.Zero, ref size, true);
                 while (result == IpHelperErrors.ErrorInsufficientBuffer)
                 {
                     try
                     {
                         //allocate the buffer and get the udptable
-                        buffer = SafeLocalFree.LocalAlloc((int)size);
+                        buffer = SafeLocalAllocHandle.LocalAlloc((int)size);
                         result = UnsafeNetInfoNativeMethods.GetUdpTable(buffer, ref size, true);
 
                         if (result == IpHelperErrors.Success)
@@ -289,7 +291,7 @@ namespace System.Net.NetworkInformation
             {
                 // Get the size of buffer needed
                 size = 0;
-                result = UnsafeNetInfoNativeMethods.GetExtendedUdpTable(SafeLocalFree.Zero, ref size, true,
+                result = UnsafeNetInfoNativeMethods.GetExtendedUdpTable(SafeLocalAllocHandle.Zero, ref size, true,
                                                                         (uint)AddressFamily.InterNetworkV6,
                                                                         UdpTableClass.UdpTableOwnerPid, 0);
                 while (result == IpHelperErrors.ErrorInsufficientBuffer)
@@ -297,7 +299,7 @@ namespace System.Net.NetworkInformation
                     try
                     {
                         // Allocate the buffer and get the udptable
-                        buffer = SafeLocalFree.LocalAlloc((int)size);
+                        buffer = SafeLocalAllocHandle.LocalAlloc((int)size);
                         result = UnsafeNetInfoNativeMethods.GetExtendedUdpTable(buffer, ref size, true,
                                                                                 (uint)AddressFamily.InterNetworkV6,
                                                                                 UdpTableClass.UdpTableOwnerPid, 0);

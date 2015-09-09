@@ -2,6 +2,8 @@
 using System.Net;
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -93,15 +95,15 @@ namespace System.Net.NetworkInformation
             if (index != 0)
             {
                 uint size = 0;
-                SafeLocalFree buffer = null;
+                SafeLocalAllocHandle buffer = null;
 
-                uint result = UnsafeNetInfoNativeMethods.GetPerAdapterInfo(index, SafeLocalFree.Zero, ref size);
+                uint result = UnsafeNetInfoNativeMethods.GetPerAdapterInfo(index, SafeLocalAllocHandle.Zero, ref size);
                 while (result == IpHelperErrors.ErrorBufferOverflow)
                 {
                     try
                     {
                         //now we allocate the buffer and read the network parameters.
-                        buffer = SafeLocalFree.LocalAlloc((int)size);
+                        buffer = SafeLocalAllocHandle.LocalAlloc((int)size);
                         result = UnsafeNetInfoNativeMethods.GetPerAdapterInfo(index, buffer, ref size);
                         if (result == IpHelperErrors.Success)
                         {

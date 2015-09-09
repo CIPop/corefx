@@ -91,7 +91,7 @@ namespace System.Net.NetworkInformation
             Contract.Ensures(Contract.Result<NetworkInterface[]>() != null);
             AddressFamily family = AddressFamily.Unspecified;
             uint bufferSize = 0;
-            SafeLocalFree buffer = null;
+            SafeLocalAllocHandle buffer = null;
             FIXED_INFO fixedInfo = HostInformation.GetFixedInfo();
             List<SystemNetworkInterface> interfaceList = new List<SystemNetworkInterface>();
 
@@ -101,14 +101,14 @@ namespace System.Net.NetworkInformation
 
             // Figure out the right buffer size for the adapter information
             uint result = UnsafeNetInfoNativeMethods.GetAdaptersAddresses(
-                family, (uint)flags, IntPtr.Zero, SafeLocalFree.Zero, ref bufferSize);
+                family, (uint)flags, IntPtr.Zero, SafeLocalAllocHandle.Zero, ref bufferSize);
 
             while (result == IpHelperErrors.ErrorBufferOverflow)
             {
                 try
                 {
                     // Allocate the buffer and get the adapter info
-                    buffer = SafeLocalFree.LocalAlloc((int)bufferSize);
+                    buffer = SafeLocalAllocHandle.LocalAlloc((int)bufferSize);
                     result = UnsafeNetInfoNativeMethods.GetAdaptersAddresses(
                         family, (uint)flags, IntPtr.Zero, buffer, ref bufferSize);
 

@@ -580,7 +580,7 @@ namespace System.Net.NetworkInformation
             AddressFamily family,
             uint flags,
             IntPtr pReserved,
-            SafeLocalFree adapterAddresses,
+            SafeLocalAllocHandle adapterAddresses,
             ref uint outBufLen);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
@@ -605,46 +605,21 @@ namespace System.Net.NetworkInformation
         internal extern static uint GetIcmpStatisticsEx(out MibIcmpInfoEx statistics, AddressFamily family);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
-        internal extern static uint GetTcpTable(SafeLocalFree pTcpTable, ref uint dwOutBufLen, bool order);
+        internal extern static uint GetTcpTable(SafeLocalAllocHandle pTcpTable, ref uint dwOutBufLen, bool order);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
-        internal extern static uint GetExtendedTcpTable(SafeLocalFree pTcpTable, ref uint dwOutBufLen, bool order,
+        internal extern static uint GetExtendedTcpTable(SafeLocalAllocHandle pTcpTable, ref uint dwOutBufLen, bool order,
                                                         uint IPVersion, TcpTableClass tableClass, uint reserved);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
-        internal extern static uint GetUdpTable(SafeLocalFree pUdpTable, ref uint dwOutBufLen, bool order);
+        internal extern static uint GetUdpTable(SafeLocalAllocHandle pUdpTable, ref uint dwOutBufLen, bool order);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
-        internal extern static uint GetExtendedUdpTable(SafeLocalFree pUdpTable, ref uint dwOutBufLen, bool order,
+        internal extern static uint GetExtendedUdpTable(SafeLocalAllocHandle pUdpTable, ref uint dwOutBufLen, bool order,
                                                         uint IPVersion, UdpTableClass tableClass, uint reserved);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
-        internal extern static uint GetPerAdapterInfo(uint IfIndex, SafeLocalFree pPerAdapterInfo, ref uint pOutBufLen);
-
-        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
-        internal extern static SafeCloseIcmpHandle IcmpCreateFile();
-
-        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
-        internal extern static SafeCloseIcmpHandle Icmp6CreateFile();
-
-        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
-        internal extern static bool IcmpCloseHandle(IntPtr handle);
-
-        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
-        internal extern static uint IcmpSendEcho2(SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
-            uint ipAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
-
-        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
-        internal extern static uint IcmpSendEcho2(SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
-            uint ipAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
-
-        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
-        internal extern static uint Icmp6SendEcho2(SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
-            byte[] sourceSocketAddress, byte[] destSocketAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
-
-        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
-        internal extern static uint Icmp6SendEcho2(SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
-            byte[] sourceSocketAddress, byte[] destSocketAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
+        internal extern static uint GetPerAdapterInfo(uint IfIndex, SafeLocalAllocHandle pPerAdapterInfo, ref uint pOutBufLen);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
         internal static extern void FreeMibTable(IntPtr handle);
