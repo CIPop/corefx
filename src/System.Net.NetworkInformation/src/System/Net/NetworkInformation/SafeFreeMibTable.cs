@@ -12,7 +12,7 @@ namespace System.Net.NetworkInformation
 
         protected override bool ReleaseHandle()
         {
-            UnsafeNetInfoNativeMethods.FreeMibTable(base.handle);
+            Interop.IpHlpApi.FreeMibTable(base.handle);
             base.handle = IntPtr.Zero;
             return true;
         }

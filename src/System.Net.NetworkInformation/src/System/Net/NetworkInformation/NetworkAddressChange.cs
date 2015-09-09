@@ -226,10 +226,9 @@ namespace System.Net.NetworkInformation
                     // setup changedEvent and native overlapped struct.
                     if (s_ipv4Socket == null)
                     {
-                        Socket.InitializeSockets();
-
                         int blocking;
 
+                        // Sockets will be initialized by the call to OSSupportsIP*.
                         if (Socket.OSSupportsIPv4)
                         {
                             blocking = -1;

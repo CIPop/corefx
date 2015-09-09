@@ -18,14 +18,14 @@ namespace System.Net.NetworkInformation
     /// <summary>IP statistics</summary>
     internal class SystemIPGlobalStatistics : IPGlobalStatistics
     {
-        private MibIpStats _stats = new MibIpStats();
+        private Interop.IpHlpApi.MibIpStats _stats = new Interop.IpHlpApi.MibIpStats();
 
         private SystemIPGlobalStatistics() { }
         internal SystemIPGlobalStatistics(AddressFamily family)
         {
-            uint result = UnsafeNetInfoNativeMethods.GetIpStatisticsEx(out _stats, family);
+            uint result = Interop.IpHlpApi.GetIpStatisticsEx(out _stats, family);
 
-            if (result != IpHelperErrors.Success)
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }

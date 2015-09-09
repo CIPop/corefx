@@ -17,14 +17,14 @@ namespace System.Net.NetworkInformation
     /// <summary>Tcp specific statistics.</summary>
     internal class SystemTcpStatistics : TcpStatistics
     {
-        private MibTcpStats _stats;
+        private Interop.IpHlpApi.MibTcpStats _stats;
 
         private SystemTcpStatistics() { }
         internal SystemTcpStatistics(AddressFamily family)
         {
-            uint result = UnsafeNetInfoNativeMethods.GetTcpStatisticsEx(out _stats, family);
+            uint result = Interop.IpHlpApi.GetTcpStatisticsEx(out _stats, family);
 
-            if (result != IpHelperErrors.Success)
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }

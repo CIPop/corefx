@@ -17,14 +17,14 @@ namespace System.Net.NetworkInformation
     /// <summary>Udp statistics.</summary>
     internal class SystemUdpStatistics : UdpStatistics
     {
-        private MibUdpStats _stats;
+        private Interop.IpHlpApi.MibUdpStats _stats;
 
         private SystemUdpStatistics() { }
         internal SystemUdpStatistics(AddressFamily family)
         {
-            uint result = UnsafeNetInfoNativeMethods.GetUdpStatisticsEx(out _stats, family);
+            uint result = Interop.IpHlpApi.GetUdpStatisticsEx(out _stats, family);
 
-            if (result != IpHelperErrors.Success)
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }

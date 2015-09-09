@@ -30,7 +30,7 @@ namespace System.Net.NetworkInformation
         private UnicastIPAddressInformationCollection _unicastAddresses = null;
         private MulticastIPAddressInformationCollection _multicastAddresses = null;
         private IPAddressInformationCollection _anycastAddresses = null;
-        private AdapterFlags _adapterFlags;
+        private Interop.IpHlpApi.AdapterFlags _adapterFlags;
         private string _dnsSuffix;
         private SystemIPv4InterfaceProperties _ipv4Properties;
         private SystemIPv6InterfaceProperties _ipv6Properties;
@@ -39,24 +39,24 @@ namespace System.Net.NetworkInformation
         private IPAddressCollection _dhcpServers;
 
         // This constructor is for Vista and newer
-        internal SystemIPInterfaceProperties(FIXED_INFO fixedInfo, IpAdapterAddresses ipAdapterAddresses)
+        internal SystemIPInterfaceProperties(Interop.IpHlpApi.FIXED_INFO fixedInfo, Interop.IpHlpApi.IpAdapterAddresses ipAdapterAddresses)
         {
             _adapterFlags = ipAdapterAddresses.flags;
             _dnsSuffix = ipAdapterAddresses.dnsSuffix;
             _dnsEnabled = fixedInfo.enableDns;
-            _dynamicDnsEnabled = ((ipAdapterAddresses.flags & AdapterFlags.DnsEnabled) > 0);
+            _dynamicDnsEnabled = ((ipAdapterAddresses.flags & Interop.IpHlpApi.AdapterFlags.DnsEnabled) > 0);
 
             _multicastAddresses = SystemMulticastIPAddressInformation.ToMulticastIpAddressInformationCollection(
-                IpAdapterAddress.MarshalIpAddressInformationCollection(ipAdapterAddresses.firstMulticastAddress));
-            _dnsAddresses = IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstDnsServerAddress);
-            _anycastAddresses = IpAdapterAddress.MarshalIpAddressInformationCollection(
+                Interop.IpHlpApi.IpAdapterAddress.MarshalIpAddressInformationCollection(ipAdapterAddresses.firstMulticastAddress));
+            _dnsAddresses = Interop.IpHlpApi.IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstDnsServerAddress);
+            _anycastAddresses = Interop.IpHlpApi.IpAdapterAddress.MarshalIpAddressInformationCollection(
                 ipAdapterAddresses.firstAnycastAddress);
             _unicastAddresses = SystemUnicastIPAddressInformation.MarshalUnicastIpAddressInformationCollection(
                 ipAdapterAddresses.firstUnicastAddress);
-            _winsServersAddresses = IpAdapterAddress.MarshalIpAddressCollection(
+            _winsServersAddresses = Interop.IpHlpApi.IpAdapterAddress.MarshalIpAddressCollection(
                 ipAdapterAddresses.firstWinsServerAddress);
             _gatewayAddresses = SystemGatewayIPAddressInformation.ToGatewayIpAddressInformationCollection(
-                IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstGatewayAddress));
+                Interop.IpHlpApi.IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstGatewayAddress));
 
             _dhcpServers = new IPAddressCollection();
             if (ipAdapterAddresses.dhcpv4Server.address != IntPtr.Zero)
@@ -64,12 +64,12 @@ namespace System.Net.NetworkInformation
             if (ipAdapterAddresses.dhcpv6Server.address != IntPtr.Zero)
                 _dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv6Server.MarshalIPAddress());
 
-            if ((_adapterFlags & AdapterFlags.IPv4Enabled) != 0)
+            if ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.IPv4Enabled) != 0)
             {
                 _ipv4Properties = new SystemIPv4InterfaceProperties(fixedInfo, ipAdapterAddresses);
             }
 
-            if ((_adapterFlags & AdapterFlags.IPv6Enabled) != 0)
+            if ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.IPv6Enabled) != 0)
             {
                 _ipv6Properties = new SystemIPv6InterfaceProperties(ipAdapterAddresses.ipv6Index,
                     ipAdapterAddresses.mtu, ipAdapterAddresses.zoneIndices);
@@ -82,7 +82,7 @@ namespace System.Net.NetworkInformation
 
         public override IPv4InterfaceProperties GetIPv4Properties()
         {
-            if ((_adapterFlags & AdapterFlags.IPv4Enabled) == 0)
+            if ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.IPv4Enabled) == 0)
             {
                 throw new NetworkInformationException(SocketError.ProtocolNotSupported);
             }
@@ -91,7 +91,7 @@ namespace System.Net.NetworkInformation
 
         public override IPv6InterfaceProperties GetIPv6Properties()
         {
-            if ((_adapterFlags & AdapterFlags.IPv6Enabled) == 0)
+            if ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.IPv6Enabled) == 0)
             {
                 throw new NetworkInformationException(SocketError.ProtocolNotSupported);
             }

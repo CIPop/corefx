@@ -37,13 +37,13 @@ namespace System.Net.NetworkInformation
     /// <summary>Icmp statistics for Ipv6.</summary>
     internal class SystemIcmpV6Statistics : IcmpV6Statistics
     {
-        private MibIcmpInfoEx _stats;
+        private Interop.IpHlpApi.MibIcmpInfoEx _stats;
 
         internal SystemIcmpV6Statistics()
         {
-            uint result = UnsafeNetInfoNativeMethods.GetIcmpStatisticsEx(out _stats, AddressFamily.InterNetworkV6);
+            uint result = Interop.IpHlpApi.GetIcmpStatisticsEx(out _stats, AddressFamily.InterNetworkV6);
 
-            if (result != IpHelperErrors.Success)
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }

@@ -18,9 +18,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
-
   <ItemGroup>
-    <!-- NetworkInformation -->
+    
+    <Compile Include="System\Net\StartIPOptions.cs" />
     <Compile Include="System\Net\NetworkInformation\DuplicateAddressDetectionState.cs" />
     <Compile Include="System\Net\NetworkInformation\GatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\GatewayIPAddressInformationCollection.cs" />
@@ -70,7 +70,7 @@
     <Compile Include="System\Net\NetworkInformation\UdpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformationCollection.cs" />
-
+    
     <!-- System.Net common -->
     <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
       <Link>Common\System\Net\_ContextAwareResult.cs</Link>
@@ -84,7 +84,7 @@
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
     </Compile>
-
+    
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
       <Link>Common\System\Net\Shims\TraceSource.cs</Link>
@@ -101,38 +101,47 @@
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
       <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
-
+    
     <!-- Common -->
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs" >
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs" >
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
     </Compile>
     
     <!-- Interop -->
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs" >
+    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.ErrorCodes.cs">
+      <Link>Common\Interop\Windows\IpHlpApi\Interop.ErrorCodes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.FIXED_INFO.cs">
+      <Link>Common\Interop\Windows\IpHlpApi\Interop.FIXED_INFO.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.IP_ADDR_STRING.cs">
+      <Link>Common\Interop\Windows\IpHlpApi\Interop.IP_ADDR_STRING.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs">
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs" >
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs">
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
     </Compile>
-    
+    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.NetworkInformation.cs">
+      <Link>Common\Interop\Windows\IpHlpApi\Interop.NetworkInformation.cs</Link>
+    </Compile>
   </ItemGroup>
-
+  
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <!-- TODO -->
   </ItemGroup>
-  
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />    
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
-

@@ -19,7 +19,7 @@ namespace System.Net.NetworkInformation
         private IPEndPoint _remoteEndPoint;
         private TcpState _state;
 
-        internal SystemTcpConnectionInformation(MibTcpRow row)
+        internal SystemTcpConnectionInformation(Interop.IpHlpApi.MibTcpRow row)
         {
             _state = row.state;
 
@@ -34,7 +34,7 @@ namespace System.Net.NetworkInformation
         }
 
         // IPV6 version of the Tcp row 
-        internal SystemTcpConnectionInformation(MibTcp6RowOwnerPid row)
+        internal SystemTcpConnectionInformation(Interop.IpHlpApi.MibTcp6RowOwnerPid row)
         {
             _state = row.state;
 

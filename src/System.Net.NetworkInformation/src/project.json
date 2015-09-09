@@ -3,7 +3,8 @@
     "System.Diagnostics.Contracts": "4.0.0-*",
     "System.Threading": "4.0.0-*",
     "System.Net.Primitives": "4.0.10-beta-*",
-    "System.Net.Sockets": "4.0.10-beta-*"
+    "System.Net.Sockets": "4.0.10-beta-*",
+    "System.Net.Utilities": "4.0.0-beta-*"
   },
   "frameworks": {
     "dnxcore50": {}
