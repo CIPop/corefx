@@ -4,9 +4,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
-using System;
 
 #if SYSTEM_NET_PRIMITIVES_DLL
 namespace System.Net
@@ -20,7 +18,12 @@ namespace System.Net.Internals
     ///       on how to format the memory buffers that the platform uses for network addresses.
     ///    </para>
     /// </devdoc>
-    public class SocketAddress
+#if SYSTEM_NET_PRIMITIVES_DLL
+    public 
+#else       
+    internal
+#endif
+        class SocketAddress
     {
         internal const int IPv6AddressSize = SocketAddressPal.IPv6AddressSize;
         internal const int IPv4AddressSize = SocketAddressPal.IPv4AddressSize;

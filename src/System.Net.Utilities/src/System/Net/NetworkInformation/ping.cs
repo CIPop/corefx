@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Net;
+using System.Net.Internals;
 using System.Net.Sockets;
-using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,6 +38,8 @@ namespace System.Net.NetworkInformation
         private bool _cancelled = false;
         private bool _disposeRequested = false;
         private object _lockObject = new object();
+        private static bool s_socketInitialized;
+        private static readonly object s_socketInitializationLock = new object();
 
         //used for icmpsendecho apis
         internal ManualResetEvent pingEvent = null;
@@ -331,7 +332,7 @@ namespace System.Net.NetworkInformation
             {
                 try
                 {
-                    address = Dns.GetHostAddresses(hostNameOrAddress)[0];
+                    address = Dns.GetHostAddressesAsync(hostNameOrAddress).GetAwaiter().GetResult()[0];
                 }
                 catch (ArgumentException)
                 {
@@ -658,7 +659,7 @@ namespace System.Net.NetworkInformation
 
             try
             {
-                IPAddress addressSnapshot = Dns.GetHostAddresses(stateObject.hostName)[0];
+                IPAddress addressSnapshot = Dns.GetHostAddressesAsync(stateObject.hostName).GetAwaiter().GetResult()[0];
                 InternalSend(addressSnapshot, stateObject.buffer, stateObject.timeout, stateObject.options, true);
             }
 
@@ -730,26 +731,26 @@ namespace System.Net.NetworkInformation
                     if (async)
                     {
                         var pingEventSafeWaitHandle = pingEvent.GetSafeWaitHandle();
-                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, (uint)address.GetAddress(), _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                     else
                     {
-                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, (uint)address.GetAddress(), _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                 }
                 else
                 {
                     IPEndPoint ep = new IPEndPoint(address, 0);
-                    SocketAddress remoteAddr = ep.Serialize();
+                    Internals.SocketAddress remoteAddr = IPEndPointExtensions.Serialize(ep);
                     byte[] sourceAddr = new byte[28];
                     if (async)
                     {
                         var pingEventSafeWaitHandle = pingEvent.GetSafeWaitHandle();
-                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                     else
                     {
-                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                 }
             }
@@ -810,11 +811,13 @@ namespace System.Net.NetworkInformation
         // Tests if the current machine supports the given ip protocol family
         private void TestIsIpSupported(IPAddress ip)
         {
-            // Catches if IPv4 has been uninstalled on Vista+
-            if (ip.AddressFamily == AddressFamily.InterNetwork && !Socket.OSSupportsIPv4)
+            InitializeSockets();
+
+            // Catches if IPv4 has been uninstalled
+            if (ip.AddressFamily == AddressFamily.InterNetwork && !SocketProtocolSupportPal.OSSupportsIPv4)
                 throw new NotSupportedException(SR.net_ipv4_not_installed);
-            // Catches if IPv6 is not installed on XP
-            else if ((ip.AddressFamily == AddressFamily.InterNetworkV6 && !Socket.OSSupportsIPv6))
+            // Catches if IPv6 is not installed
+            else if ((ip.AddressFamily == AddressFamily.InterNetworkV6 && !SocketProtocolSupportPal.OSSupportsIPv6))
                 throw new NotSupportedException(SR.net_ipv6_not_installed);
         }
 
@@ -852,6 +855,27 @@ namespace System.Net.NetworkInformation
                         _defaultSendBuffer[i] = (byte)((int)'a' + i % 23);
                 }
                 return _defaultSendBuffer;
+            }
+        }
+
+        internal static void InitializeSockets()
+        {
+            if (!Volatile.Read(ref s_socketInitialized))
+            {
+                lock (s_socketInitializationLock)
+                {
+                    if (!s_socketInitialized)
+                    {
+                        // TODO: Note for PAL implementation: this call is not required for *NIX and should be avoided during PAL design.
+
+                        // Ensure that WSAStartup has been called once per process.  
+                        // The System.Net.NameResolution contract is responsible with the initialization.
+                        Dns.GetHostName();
+
+                        // Cache some settings locally.
+                        s_socketInitialized = true;
+                    }
+                }
             }
         }
     }
