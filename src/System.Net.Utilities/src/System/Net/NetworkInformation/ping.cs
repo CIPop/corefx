@@ -288,163 +288,37 @@ namespace System.Net.NetworkInformation
             asyncOp.PostOperationCompleted(onPingCompletedDelegate, eventArgs);
         }
 
-        public PingReply Send(string hostNameOrAddress)
-        {
-            return Send(hostNameOrAddress, DefaultTimeout, DefaultSendBuffer, null);
-        }
-
-
-        public PingReply Send(string hostNameOrAddress, int timeout)
-        {
-            return Send(hostNameOrAddress, timeout, DefaultSendBuffer, null);
-        }
-
-
-        public PingReply Send(IPAddress address)
-        {
-            return Send(address, DefaultTimeout, DefaultSendBuffer, null);
-        }
-
-        public PingReply Send(IPAddress address, int timeout)
-        {
-            return Send(address, timeout, DefaultSendBuffer, null);
-        }
-
-        public PingReply Send(string hostNameOrAddress, int timeout, byte[] buffer)
-        {
-            return Send(hostNameOrAddress, timeout, buffer, null);
-        }
-
-        public PingReply Send(IPAddress address, int timeout, byte[] buffer)
-        {
-            return Send(address, timeout, buffer, null);
-        }
-
-        public PingReply Send(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options)
-        {
-            if (String.IsNullOrEmpty(hostNameOrAddress))
-            {
-                throw new ArgumentNullException("hostNameOrAddress");
-            }
-
-            IPAddress address;
-            if (!IPAddress.TryParse(hostNameOrAddress, out address))
-            {
-                try
-                {
-                    address = Dns.GetHostAddressesAsync(hostNameOrAddress).GetAwaiter().GetResult()[0];
-                }
-                catch (ArgumentException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    throw new PingException(SR.net_ping, ex);
-                }
-            }
-            return Send(address, timeout, buffer, options);
-        }
-
-
-        public PingReply Send(IPAddress address, int timeout, byte[] buffer, PingOptions options)
-        {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException("buffer");
-            }
-
-            if (buffer.Length > MaxBufferSize)
-            {
-                throw new ArgumentException(SR.net_invalidPingBufferSize, "buffer");
-            }
-
-            if (timeout < 0)
-            {
-                throw new ArgumentOutOfRangeException("timeout");
-            }
-
-            if (address == null)
-            {
-                throw new ArgumentNullException("address");
-            }
-
-            TestIsIpSupported(address); // Address family is installed?
-
-            if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
-            {
-                throw new ArgumentException(SR.net_invalid_ip_addr, "address");
-            }
-
-            //
-            // FxCop: need to snapshot the address here, so we're sure that it's not changed between the permission
-            // and the operation, and to be sure that IPAddress.ToString() is called and not some override that
-            // always returns "localhost" or something.
-            //
-            IPAddress addressSnapshot;
-            if (address.AddressFamily == AddressFamily.InterNetwork)
-            {
-                addressSnapshot = new IPAddress(address.GetAddressBytes());
-            }
-            else
-            {
-                addressSnapshot = new IPAddress(address.GetAddressBytes(), address.ScopeId);
-            }
-
-            CheckStart(false);
-            try
-            {
-                return InternalSend(addressSnapshot, buffer, timeout, options, false);
-            }
-            catch (Exception e)
-            {
-                throw new PingException(SR.net_ping, e);
-            }
-            finally
-            {
-                Finish(false);
-            }
-        }
-
-
-
-        public void SendAsync(string hostNameOrAddress, object userToken)
+        private void SendAsync(string hostNameOrAddress, object userToken)
         {
             SendAsync(hostNameOrAddress, DefaultTimeout, DefaultSendBuffer, userToken);
         }
-
 
         public void SendAsync(string hostNameOrAddress, int timeout, object userToken)
         {
             SendAsync(hostNameOrAddress, timeout, DefaultSendBuffer, userToken);
         }
 
-
-        public void SendAsync(IPAddress address, object userToken)
+        private void SendAsync(IPAddress address, object userToken)
         {
             SendAsync(address, DefaultTimeout, DefaultSendBuffer, userToken);
         }
 
-
-        public void SendAsync(IPAddress address, int timeout, object userToken)
+        private void SendAsync(IPAddress address, int timeout, object userToken)
         {
             SendAsync(address, timeout, DefaultSendBuffer, userToken);
         }
 
-
-        public void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, object userToken)
+        private void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, object userToken)
         {
             SendAsync(hostNameOrAddress, timeout, buffer, null, userToken);
         }
 
-
-        public void SendAsync(IPAddress address, int timeout, byte[] buffer, object userToken)
+        private void SendAsync(IPAddress address, int timeout, byte[] buffer, object userToken)
         {
             SendAsync(address, timeout, buffer, null, userToken);
         }
 
-
-        public void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options, object userToken)
+        private void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options, object userToken)
         {
             if (String.IsNullOrEmpty(hostNameOrAddress))
             {
@@ -488,9 +362,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-
-
-        public void SendAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options, object userToken)
+        private void SendAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options, object userToken)
         {
             if (buffer == null)
             {
