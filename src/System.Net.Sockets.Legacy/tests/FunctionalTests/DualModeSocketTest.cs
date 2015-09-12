@@ -377,7 +377,7 @@ namespace System.Net.Sockets.Tests
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, TestPortBase + 6))
             {
-                socket.Connect("loopback", TestPortBase + 6);
+                socket.Connect("localhost", TestPortBase + 6);
                 Assert.True(socket.Connected);
             }
         }
@@ -409,7 +409,7 @@ namespace System.Net.Sockets.Tests
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, TestPortBase + 49))
             {
-                socket.Connect(new DnsEndPoint("loopback", TestPortBase + 49, addressFamily));
+                socket.Connect(new DnsEndPoint("localhost", TestPortBase + 49, addressFamily));
                 Assert.True(socket.Connected);
             }
         }
@@ -640,7 +640,7 @@ namespace System.Net.Sockets.Tests
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, TestPortBase + 11))
             {
-                IAsyncResult async = socket.BeginConnect("loopback", TestPortBase + 11, null, null);
+                IAsyncResult async = socket.BeginConnect("localhost", TestPortBase + 11, null, null);
                 socket.EndConnect(async);
                 Assert.True(socket.Connected);
             }
@@ -673,7 +673,7 @@ namespace System.Net.Sockets.Tests
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, TestPortBase + 50))
             {
-                IAsyncResult async = socket.BeginConnect(new DnsEndPoint("loopback", TestPortBase + 50), null, null);
+                IAsyncResult async = socket.BeginConnect(new DnsEndPoint("localhost", TestPortBase + 50), null, null);
                 socket.EndConnect(async);
                 Assert.True(socket.Connected);
             }
@@ -792,7 +792,7 @@ namespace System.Net.Sockets.Tests
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.Completed += new EventHandler<SocketAsyncEventArgs>(AsyncCompleted);
-                args.RemoteEndPoint = new DnsEndPoint("loopback", TestPortBase + 51);
+                args.RemoteEndPoint = new DnsEndPoint("localhost", TestPortBase + 51);
                 args.UserToken = waitHandle;
 
                 socket.ConnectAsync(args);
@@ -862,7 +862,7 @@ namespace System.Net.Sockets.Tests
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
             {
                 Assert.Throws<ArgumentException>( () => {
-                    socket.Bind(new DnsEndPoint("loopback", TestPortBase + 52));
+                    socket.Bind(new DnsEndPoint("localhost", TestPortBase + 52));
                 });
             }
         }

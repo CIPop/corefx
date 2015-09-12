@@ -114,6 +114,11 @@ namespace System.Net.Sockets
             _socketType = socketType;
             _protocolType = protocolType;
 
+            if (addressFamily == AddressFamily.InterNetworkV6)
+            {
+                DualMode = false;
+            }
+
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "Socket", null);
         }
 
