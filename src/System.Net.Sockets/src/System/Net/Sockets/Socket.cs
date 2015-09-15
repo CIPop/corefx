@@ -114,10 +114,10 @@ namespace System.Net.Sockets
             _socketType = socketType;
             _protocolType = protocolType;
 
-            if (addressFamily == AddressFamily.InterNetworkV6)
-            {
-                DualMode = false;
-            }
+//            if (addressFamily == AddressFamily.InterNetworkV6)
+//            {
+//                DualMode = false;
+//            }
 
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "Socket", null);
         }
@@ -5466,7 +5466,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = SocketExceptionFactory.CreateSocketException(endPointSnapshot);
+                SocketException socketException = SocketExceptionFactory.CreateSocketException((int)errorCode, endPointSnapshot);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "Connect", socketException);
                 throw socketException;
@@ -6352,6 +6352,7 @@ namespace System.Net.Sockets
             socket._protocolType = _protocolType;
             socket.m_RightEndPoint = m_RightEndPoint;
             socket.m_RemoteEndPoint = remoteEP;
+
             //
             // the socket is connected
             //
