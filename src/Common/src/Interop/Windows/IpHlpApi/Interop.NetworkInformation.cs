@@ -646,5 +646,8 @@ internal static partial class Interop
             [MarshalAs(UnmanagedType.FunctionPtr)][In] StableUnicastIpAddressTableDelegate callback,
             [In] IntPtr context,
             [Out] out SafeCancelMibChangeNotify notificationHandle);
+
+        [DllImport(Interop.Libraries.IpHlpApi, ExactSpelling = true)]
+        internal extern static uint GetNetworkParams(SafeLocalAllocHandle pFixedInfo, ref uint pOutBufLen);
     }
 }

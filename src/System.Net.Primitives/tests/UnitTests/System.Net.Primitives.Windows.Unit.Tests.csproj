@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <PropertyGroup>
     <TargetsWindows>true</TargetsWindows>
     <TargetsLinux>false</TargetsLinux>
@@ -9,13 +8,11 @@
     <TargetsFreeBSD>false</TargetsFreeBSD>
     <TargetsUnix>false</TargetsUnix>
     <UnsupportedPlatforms>Linux;OSX;FreeBSD</UnsupportedPlatforms>
+    <ProjectGuid>{06EFE826-B1E4-4D02-B160-B3C6F91DAFF5}</ProjectGuid>
   </PropertyGroup>
-
   <Import Project="$(MSBuildThisFileDirectory)\System.Net.Primitives.Unit.Tests.msbuild" />
-
   <ItemGroup>
     <Compile Include="@(CompileItem)" />
   </ItemGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

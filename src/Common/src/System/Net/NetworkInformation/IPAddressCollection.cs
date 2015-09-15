@@ -4,10 +4,18 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
+#if SYSTEM_NET_PRIMITIVES_DLL
 namespace System.Net.NetworkInformation
 {
     public class IPAddressCollection : ICollection<IPAddress>
     {
+#else
+namespace System.Net.Internals
+{
+    // TODO: 
+    public class IPAddressCollection : System.Net.NetworkInformation.IPAddressCollection
+    {
+#endif
         private Collection<IPAddress> _addresses = new Collection<IPAddress>();
 
         protected internal IPAddressCollection()

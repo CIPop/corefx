@@ -39,7 +39,7 @@ namespace System.Net.NetworkInformation
         private bool _runCallbackCalled;
 
         // We explicitly keep a copy of this to prevent it from getting GC'd.
-        private readonly StableUnicastIpAddressTableDelegate _onStabilizedDelegate;
+        private readonly Interop.IpHlpApi.StableUnicastIpAddressTableDelegate _onStabilizedDelegate;
 
         // Used to cancel notification after receiving the first callback, or when the AppDomain is going down.
         private SafeCancelMibChangeNotify _cancelHandle;

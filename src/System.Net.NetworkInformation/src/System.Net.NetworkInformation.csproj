@@ -40,6 +40,7 @@
     <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfaceComponent.cs" />
+    <Compile Include="System\Net\NetworkInformation\nodetype.cs" />
     <Compile Include="System\Net\NetworkInformation\OperationalStatus.cs" />
     <Compile Include="System\Net\NetworkInformation\PhysicalAddress.cs" />
     <Compile Include="System\Net\NetworkInformation\PrefixOrigin.cs" />
@@ -83,6 +84,17 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
+    </Compile>
+    
+
+    <!--<Compile Include="$(CommonPath)\System\Net\NetworkInformation\IPAddressCollection.cs" >
+      <Link>Common\System\Net\NetworkInformation\IPAddressCollection.cs</Link>
+    </Compile>-->
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformation.CoreCLR.cs" >
+      <Link>Common\System\Net\NetworkInformation\HostInformation.CoreCLR.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs" >
+      <Link>Common\System\Net\NetworkInformation\NetworkInformationException.cs</Link>
     </Compile>
     
     <!-- Logging -->
@@ -139,7 +151,19 @@
   
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <!-- TODO -->
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Windows.cs" >
+      <Link>Common\System\Net\NetworkInformation\HostInformationPal.Windows.cs</Link>
+    </Compile>
   </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <!-- TODO -->
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Unix.cs" >
+      <Link>Common\System\Net\NetworkInformation\HostInformationPal.Unix.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+  
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
