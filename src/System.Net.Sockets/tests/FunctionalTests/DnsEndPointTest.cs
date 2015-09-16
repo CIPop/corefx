@@ -8,8 +8,6 @@ namespace System.Net.Sockets.Tests
 {
     public class DnsEndPointTest
     {
-        private const int DummyIssue = 8000;
-
         private readonly ITestOutputHelper _log;
 
         public DnsEndPointTest(ITestOutputHelper output)
@@ -202,7 +200,6 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [ActiveIssue(DummyIssue, PlatformID.AnyUnix)]
         [Trait("IPv6", "true")]
         public void Socket_StaticConnectAsync_SyncFailure()
         {
