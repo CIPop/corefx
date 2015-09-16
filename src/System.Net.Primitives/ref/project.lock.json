@@ -5,17 +5,7 @@
     ".NETPlatform,Version=v5.0": {
       "System.Runtime/4.0.0": {
         "compile": {
-          "ref/dotnet/System.Runtime.dll": {},
-          "ref/dotnet/zh-hant/System.Runtime.xml": {},
-          "ref/dotnet/de/System.Runtime.xml": {},
-          "ref/dotnet/System.Runtime.xml": {},
-          "ref/dotnet/fr/System.Runtime.xml": {},
-          "ref/dotnet/it/System.Runtime.xml": {},
-          "ref/dotnet/ja/System.Runtime.xml": {},
-          "ref/dotnet/ko/System.Runtime.xml": {},
-          "ref/dotnet/ru/System.Runtime.xml": {},
-          "ref/dotnet/zh-hans/System.Runtime.xml": {},
-          "ref/dotnet/es/System.Runtime.xml": {}
+          "ref/dotnet/System.Runtime.dll": {}
         }
       },
       "System.Runtime.Handles/4.0.0": {
@@ -23,17 +13,7 @@
           "System.Runtime": "4.0.0"
         },
         "compile": {
-          "ref/dotnet/System.Runtime.Handles.dll": {},
-          "ref/dotnet/System.Runtime.Handles.xml": {},
-          "ref/dotnet/zh-hant/System.Runtime.Handles.xml": {},
-          "ref/dotnet/de/System.Runtime.Handles.xml": {},
-          "ref/dotnet/fr/System.Runtime.Handles.xml": {},
-          "ref/dotnet/it/System.Runtime.Handles.xml": {},
-          "ref/dotnet/ja/System.Runtime.Handles.xml": {},
-          "ref/dotnet/ko/System.Runtime.Handles.xml": {},
-          "ref/dotnet/ru/System.Runtime.Handles.xml": {},
-          "ref/dotnet/zh-hans/System.Runtime.Handles.xml": {},
-          "ref/dotnet/es/System.Runtime.Handles.xml": {}
+          "ref/dotnet/System.Runtime.Handles.dll": {}
         }
       }
     }
@@ -123,8 +103,8 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "System.Runtime [4.0.0, )",
-      "System.Runtime.Handles [4.0.0, )"
+      "System.Runtime >= 4.0.0",
+      "System.Runtime.Handles >= 4.0.0"
     ],
     ".NETPlatform,Version=v5.0": []
   }

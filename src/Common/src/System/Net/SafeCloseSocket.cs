@@ -22,7 +22,7 @@ namespace System.Net.Sockets
     // to block the user thread in case a graceful close has been
     // requested.  (It's not legal to block any other thread - such closes
     // are always abortive.)
-    internal sealed partial class SafeCloseSocket :
+    internal partial class SafeCloseSocket :
 #if DEBUG
         DebugSafeHandleMinusOneIsInvalid
 #else

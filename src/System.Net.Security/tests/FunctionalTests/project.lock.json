@@ -613,7 +613,7 @@
           "lib/portable-net45+aspnetcore50+win+wpa81+wp80/xunit.core.dll": {}
         }
       },
-      "xunit.netcore.extensions/1.0.0-prerelease-00085": {
+      "xunit.netcore.extensions/1.0.0-prerelease-00087": {
         "dependencies": {
           "System.Diagnostics.Debug": "4.0.10",
           "System.IO": "4.0.10",
@@ -1944,12 +1944,12 @@
         "lib/portable-net45+aspnetcore50+win+wpa81+wp80/xunit.runner.utility.xml"
       ]
     },
-    "xunit.netcore.extensions/1.0.0-prerelease-00085": {
+    "xunit.netcore.extensions/1.0.0-prerelease-00087": {
       "serviceable": true,
-      "sha512": "P3Q9YspdSUzoJQS6iT5mF3jt+s0u9u/G3K6s0Ns7NbAwQPktjwuO7CgJk38fop4yYDVdsVEwbZF2jfNMhJ7hkQ==",
+      "sha512": "zn7ZwF2Q9TPKht3VzK79IGBO/O7nxk+j01KmwnwbR2FmDcWEONaLBZFlymlDmpjX+KP+re+vvfXxzMABD9jRoQ==",
       "files": [
-        "xunit.netcore.extensions.1.0.0-prerelease-00085.nupkg",
-        "xunit.netcore.extensions.1.0.0-prerelease-00085.nupkg.sha512",
+        "xunit.netcore.extensions.1.0.0-prerelease-00087.nupkg",
+        "xunit.netcore.extensions.1.0.0-prerelease-00087.nupkg.sha512",
         "xunit.netcore.extensions.nuspec",
         "lib/dotnet/Xunit.NetCore.Extensions.dll"
       ]

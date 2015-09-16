@@ -233,7 +233,7 @@ namespace System.Net.NetworkInformation
                         {
                             blocking = -1;
                             s_ipv4Socket = SafeCloseSocketAndEvent.CreateWSASocketWithEvent(AddressFamily.InterNetwork, SocketType.Dgram, (ProtocolType)0, true, false);
-                            UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket(s_ipv4Socket, IoctlSocketConstants.FIONBIO, ref blocking);
+                            Interop.Winsock.ioctlsocket(s_ipv4Socket, IoctlSocketConstants.FIONBIO, ref blocking);
                             s_ipv4WaitHandle = s_ipv4Socket.GetEventHandle();
                         }
 
@@ -241,7 +241,7 @@ namespace System.Net.NetworkInformation
                         {
                             blocking = -1;
                             s_ipv6Socket = SafeCloseSocketAndEvent.CreateWSASocketWithEvent(AddressFamily.InterNetworkV6, SocketType.Dgram, (ProtocolType)0, true, false);
-                            UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket(s_ipv6Socket, IoctlSocketConstants.FIONBIO, ref blocking);
+                            Interop.Winsock.ioctlsocket(s_ipv6Socket, IoctlSocketConstants.FIONBIO, ref blocking);
                             s_ipv6WaitHandle = s_ipv6Socket.GetEventHandle();
                         }
                     }
@@ -271,7 +271,7 @@ namespace System.Net.NetworkInformation
                                 -1,
                                 true);
 
-                            errorCode = (SocketError)UnsafeSocketsNativeMethods.OSSOCK.WSAIoctl_Blocking(
+                            errorCode = (SocketError)Interop.Winsock.WSAIoctl_Blocking(
                                 s_ipv4Socket.DangerousGetHandle(),
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
@@ -289,7 +289,7 @@ namespace System.Net.NetworkInformation
 
 
                             var s_ipv4SocketGetEventHandleSafeWaitHandle = s_ipv4Socket.GetEventHandle().GetSafeWaitHandle();
-                            errorCode = (SocketError)UnsafeSocketsNativeMethods.OSSOCK.WSAEventSelect(s_ipv4Socket, s_ipv4SocketGetEventHandleSafeWaitHandle, AsyncEventBits.FdAddressListChange);
+                            errorCode = (SocketError)Interop.Winsock.WSAEventSelect(s_ipv4Socket, s_ipv4SocketGetEventHandleSafeWaitHandle, AsyncEventBits.FdAddressListChange);
                             if (errorCode != SocketError.Success)
                             {
                                 throw new NetworkInformationException();
@@ -305,7 +305,7 @@ namespace System.Net.NetworkInformation
                                 -1,
                                 true);
 
-                            errorCode = (SocketError)UnsafeSocketsNativeMethods.OSSOCK.WSAIoctl_Blocking(
+                            errorCode = (SocketError)Interop.Winsock.WSAIoctl_Blocking(
                                 s_ipv6Socket.DangerousGetHandle(),
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
@@ -322,7 +322,7 @@ namespace System.Net.NetworkInformation
                             }
 
                             var s_ipv6SocketGetEventHandleSafeWaitHandle = s_ipv6Socket.GetEventHandle().GetSafeWaitHandle();
-                            errorCode = (SocketError)UnsafeSocketsNativeMethods.OSSOCK.WSAEventSelect(s_ipv6Socket, s_ipv6SocketGetEventHandleSafeWaitHandle, AsyncEventBits.FdAddressListChange);
+                            errorCode = (SocketError)Interop.Winsock.WSAEventSelect(s_ipv6Socket, s_ipv6SocketGetEventHandleSafeWaitHandle, AsyncEventBits.FdAddressListChange);
                             if (errorCode != SocketError.Success)
                             {
                                 throw new NetworkInformationException();
