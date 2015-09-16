@@ -81,15 +81,15 @@ create_test_overlay()
 
   local packageName="Microsoft.DotNet.CoreFx.$OS.TemporaryTestHost.$TestHostVersion.nupkg"
   local packageDir="packages/Microsoft.DotNet.CoreFx.$OS.TemporaryTestHost.$TestHostVersion"
-  #rm -rf $packageDir
-  #mkdir -p $packageDir
-  #pushd $packageDir > /dev/null
+  rm -rf $packageDir
+  mkdir -p $packageDir
+  pushd $packageDir > /dev/null
   # Pull down the testhost package and unzip it.
-  #echo "Pulling down $packageName"
-  #wget -q https://www.myget.org/F/dotnet-buildtools/api/v2/package/Microsoft.DotNet.CoreFx.$OS.TemporaryTestHost/$TestHostVersion -O $packageName
-  #echo "Unzipping to $packageDir"
-  #unzip -q -o $packageName
-  #popd > /dev/null
+  echo "Pulling down $packageName"
+  wget -q https://www.myget.org/F/dotnet-buildtools/api/v2/package/Microsoft.DotNet.CoreFx.$OS.TemporaryTestHost/$TestHostVersion -O $packageName
+  echo "Unzipping to $packageDir"
+  unzip -q -o $packageName
+  popd > /dev/null
 
   # Make the overlay
 
