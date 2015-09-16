@@ -15,8 +15,6 @@ namespace System.Net.Sockets
 #else
     internal sealed class SafeOverlappedFree : SafeHandleZeroOrMinusOneIsInvalid {
 #endif
-        private const int LPTR = 0x0040;
-
         internal static readonly SafeOverlappedFree Zero = new SafeOverlappedFree(false);
 
         private SafeCloseSocket _socketHandle;
@@ -26,7 +24,10 @@ namespace System.Net.Sockets
 
         public static SafeOverlappedFree Alloc()
         {
-            SafeOverlappedFree result = Interop.mincore_obsolete.LocalAlloc(LPTR, (UIntPtr)Win32.OverlappedSize);
+            SafeOverlappedFree result = Interop.mincore_obsolete.LocalAlloc_SafeOverlappedFree(
+                                            Interop.mincore_obsolete.LPTR, 
+                                            (UIntPtr)Interop.mincore_obsolete.OverlappedSize);
+                                            
             if (result.IsInvalid)
             {
                 result.SetHandleAsInvalid();

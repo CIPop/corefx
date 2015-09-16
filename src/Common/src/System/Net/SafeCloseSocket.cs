@@ -29,7 +29,7 @@ namespace System.Net.Sockets
         SafeHandleMinusOneIsInvalid
 #endif
     {
-        private SafeCloseSocket() : base(true) { }
+        protected SafeCloseSocket() : base(true) { }
 
         private InnerSafeCloseSocket _innerSocket;
         private volatile bool _released;
@@ -98,7 +98,7 @@ namespace System.Net.Sockets
             return ret;
         }
 
-        private static void CreateSocket(InnerSafeCloseSocket socket, SafeCloseSocket target)
+        protected static void CreateSocket(InnerSafeCloseSocket socket, SafeCloseSocket target)
         {
             if (socket != null && socket.IsInvalid)
             {

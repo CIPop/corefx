@@ -100,9 +100,11 @@
     <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.Windows.cs">
       <Link>Common\System\Net\SafeCloseSocket.Windows.cs</Link>
     </Compile>    
-
     <Compile Include="$(CommonPath)\System\Net\SafeCloseSocketAndEvent.cs">
       <Link>Common\System\Net\SafeCloseSocketAndEvent.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
+      <Link>Common\System\Net\ExceptionCheck.cs</Link>
     </Compile>
 
     <!--<Compile Include="$(CommonPath)\System\Net\NetworkInformation\IPAddressCollection.cs" >
@@ -163,8 +165,17 @@
       <Link>Common\Interop\Windows\IpHlpApi\Interop.IP_ADDR_STRING.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs">
-      <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs</Link>
+      <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc_SafeOverlappedFree.cs">
+      <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc_SafeOverlappedFree.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs">
+      <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs</Link>
+    </Compile>  
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeOverlappedFree.cs">
+      <Link>Interop\Windows\Winsock\SafeOverlappedFree.cs</Link>
+    </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs">
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
     </Compile>

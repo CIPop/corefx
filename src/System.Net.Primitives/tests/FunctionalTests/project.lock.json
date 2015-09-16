@@ -56,7 +56,7 @@
           "lib/dotnet/System.ComponentModel.EventBasedAsync.dll": {}
         }
       },
-      "System.Console/4.0.0-beta-23311": {
+      "System.Console/4.0.0-beta-23316": {
         "dependencies": {
           "System.Runtime": "4.0.0",
           "System.IO": "4.0.0"
@@ -406,7 +406,7 @@
           "lib/dnxcore50/xunit.execution.dnx.dll": {}
         }
       },
-      "xunit.netcore.extensions/1.0.0-prerelease-00087": {
+      "xunit.netcore.extensions/1.0.0-prerelease-00088": {
         "dependencies": {
           "System.Diagnostics.Debug": "4.0.10",
           "System.IO": "4.0.10",
@@ -559,13 +559,13 @@
         "[Content_Types].xml"
       ]
     },
-    "System.Console/4.0.0-beta-23311": {
+    "System.Console/4.0.0-beta-23316": {
       "serviceable": true,
-      "sha512": "aCYId/+628/CuOEBKx7sGxQ9fpqvLDqkOMuc0rqWRUCAIgNLtLd5htaQo58aXjzrP8D4/X35xVC+PQoHHis4Mg==",
+      "sha512": "pYDflUHKD2oIllR+HsbgfkbwNsjivEgYsFjM3eZWS6KVqa5vYVMl93OvC+WfB0Va3Q9gAZYzxXQJUv6gWoJGLw==",
       "files": [
         "runtime.json",
-        "System.Console.4.0.0-beta-23311.nupkg",
-        "System.Console.4.0.0-beta-23311.nupkg.sha512",
+        "System.Console.4.0.0-beta-23316.nupkg",
+        "System.Console.4.0.0-beta-23316.nupkg.sha512",
         "System.Console.nuspec",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
@@ -1444,12 +1444,12 @@
         "[Content_Types].xml"
       ]
     },
-    "xunit.netcore.extensions/1.0.0-prerelease-00087": {
+    "xunit.netcore.extensions/1.0.0-prerelease-00088": {
       "serviceable": true,
-      "sha512": "zn7ZwF2Q9TPKht3VzK79IGBO/O7nxk+j01KmwnwbR2FmDcWEONaLBZFlymlDmpjX+KP+re+vvfXxzMABD9jRoQ==",
+      "sha512": "F98Mp8UUic4jYUja9EBIWBJNru+05cwwseju7m8ypnEonIR/9Q9lWWomGB4S8cCUfDgw5fvbNC3f22SpsnZYgg==",
       "files": [
-        "xunit.netcore.extensions.1.0.0-prerelease-00087.nupkg",
-        "xunit.netcore.extensions.1.0.0-prerelease-00087.nupkg.sha512",
+        "xunit.netcore.extensions.1.0.0-prerelease-00088.nupkg",
+        "xunit.netcore.extensions.1.0.0-prerelease-00088.nupkg.sha512",
         "xunit.netcore.extensions.nuspec",
         "lib/dotnet/Xunit.NetCore.Extensions.dll"
       ]

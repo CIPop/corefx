@@ -42,9 +42,6 @@
     <CompileItem Include="..\..\src\System\Net\IPEndPoint.cs" >
       <Link>ProductionCode\System\Net\IPEndPoint.cs</Link>
     </CompileItem>
-    <CompileItem Include="..\..\src\System\Net\NetworkInformation\NetworkInformationException.cs" >
-      <Link>ProductionCode\System\Net\NetworkInformation\NetworkInformationException.cs</Link>
-    </CompileItem>
     <CompileItem Include="..\..\src\System\Net\SocketException.cs" >
       <Link>ProductionCode\System\Net\SocketException.cs</Link>
     </CompileItem>
@@ -64,11 +61,14 @@
       <Link>ProductionCode\Common\System\Net\IPAddressParserStatics.cs</Link>
     </CompileItem>
     <CompileItem Include="$(CommonPath)\System\Net\SocketAddress.cs" >
-      <Link>Common\System\Net\SocketAddress.cs</Link>
+      <Link>ProductionCode\Common\System\Net\SocketAddress.cs</Link>
     </CompileItem>
     <CompileItem Include="$(CommonPath)\System\Net\TcpValidationHelpers.cs" >
       <Link>ProductionCode\Common\System\Net\TcpValidationHelpers.cs</Link>
     </CompileItem>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs" >
+      <Link>ProductionCode\Common\System\Net\NetworkInformation\NetworkInformationException.cs</Link>
+    </Compile>
     <CompileItem Include="$(CommonPath)\System\NotImplemented.cs" >
       <Link>ProductionCode\Common\System\NotImplemented.cs</Link>
     </CompileItem>
@@ -82,12 +82,13 @@
     <CompileItem Include="..\..\src\System\Net\IPAddressPal.Windows.cs" >
       <Link>ProductionCode\System\Net\IPAddressPal.Windows.cs</Link>
     </CompileItem>
-    <CompileItem Include="..\..\src\System\Net\HostInformationPal.Windows.cs" >
-      <Link>ProductionCode\System\Net\HostInformationPal.Windows.cs</Link>
-    </CompileItem>
     <CompileItem Include="..\..\src\System\Net\SocketException.Windows.cs" >
       <Link>ProductionCode\System\Net\SocketException.Windows.cs</Link>
     </CompileItem>
+
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Windows.cs" >
+      <Link>ProductionCode\Common\System\Net\NetworkInformation\HostInformationPal.Windows.cs</Link>
+    </Compile>
 
     <CompileItem Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs" >
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
@@ -114,6 +115,9 @@
     <CompileItem Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs" >
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs</Link>
     </CompileItem>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs">
+      <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs</Link>
+    </Compile>     
     <CompileItem Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs" >
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
     </CompileItem>
@@ -138,16 +142,16 @@
     <CompileItem Include="..\..\src\System\Net\IPAddressPal.Unix.cs" >
       <Link>ProductionCode\System\Net\IPAddressPal.Unix.cs</Link>
     </CompileItem>
-    <CompileItem Include="..\..\src\System\Net\HostInformationPal.Unix.cs" >
-      <Link>ProductionCode\System\Net\HostInformationPal.Unix.cs</Link>
-    </CompileItem>
     <CompileItem Include="..\..\src\System\Net\SocketException.Unix.cs" >
       <Link>ProductionCode\System\Net\SocketException.Unix.cs</Link>
     </CompileItem>
 
     <CompileItem Include="$(CommonPath)\System\Net\SocketAddressPal.Unix.cs" >
-      <Link>Common\System\Net\SocketAddressPal.Unix.cs</Link>
+      <Link>ProductionCode\Common\System\Net\SocketAddressPal.Unix.cs</Link>
     </CompileItem>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Unix.cs" >
+      <Link>ProductionCode\Common\System\Net\NetworkInformation\HostInformationPal.Unix.cs</Link>
+    </Compile>
 
     <CompileItem Include="$(CommonPath)\Interop\Interop.CheckedAccess.cs" >
       <Link>ProductionCode\Common\Interop\Interop.CheckedAccess.cs</Link>

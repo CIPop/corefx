@@ -135,10 +135,6 @@
       <Link>Common\System\Net\TcpValidationHelpers.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\System\Net\_Win32.cs">
-      <Link>Common\System\Net\_Win32.cs</Link>
-    </Compile>
-    
     <!-- System.Net.Internals -->
     <Compile Include="$(CommonPath)\System\Net\Internals\IPEndPointExtensions.cs">
       <Link>Common\System\Net\Internals\IPEndPointExtensions.cs</Link>
@@ -178,8 +174,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeOverlappedFree.cs">
       <Link>Interop\Windows\Winsock\SafeOverlappedFree.cs</Link>
     </Compile>    
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs">
-      <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc_SafeOverlappedFree.cs">
+      <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc_SafeOverlappedFree.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs">
+      <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs" >
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
