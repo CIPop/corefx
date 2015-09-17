@@ -767,7 +767,7 @@ namespace System.Net.Sockets
             };
 
             bool isStopped;
-            while (!TryBeginOperation(ref _receiveQueue, operation, SocketAsyncEvents.Write, out isStopped))
+            while (!TryBeginOperation(ref _receiveQueue, operation, SocketAsyncEvents.Read, out isStopped))
             {
                 if (isStopped)
                 {
