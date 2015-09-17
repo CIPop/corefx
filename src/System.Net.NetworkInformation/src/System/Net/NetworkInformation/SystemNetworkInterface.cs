@@ -56,8 +56,8 @@ namespace System.Net.NetworkInformation
         private static int GetBestInterfaceForAddress(IPAddress addr)
         {
             int index;
-            SocketAddress address = new SocketAddress(addr);
-            int error = (int)Interop.IpHlpApi.GetBestInterfaceEx(address.m_Buffer, out index);
+            Internals.SocketAddress address = new Internals.SocketAddress(addr);
+            int error = (int)Interop.IpHlpApi.GetBestInterfaceEx(address.Buffer, out index);
             if (error != 0)
             {
                 throw new NetworkInformationException(error);
@@ -94,7 +94,9 @@ namespace System.Net.NetworkInformation
             AddressFamily family = AddressFamily.Unspecified;
             uint bufferSize = 0;
             SafeLocalAllocHandle buffer = null;
-            Interop.IpHlpApi.FIXED_INFO fixedInfo = HostInformation.GetFixedInfo();
+
+            // TODO: #2485: This will probably require 
+            Interop.IpHlpApi.FIXED_INFO fixedInfo = HostInformationPal.GetFixedInfo();
             List<SystemNetworkInterface> interfaceList = new List<SystemNetworkInterface>();
 
             Interop.IpHlpApi.GetAdaptersAddressesFlags flags =

@@ -22,7 +22,8 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return HostInformation.GetFixedInfo();
+                // TODO: #2485: This will need to be moved to PAL.
+                return HostInformationPal.GetFixedInfo();
             }
         }
 

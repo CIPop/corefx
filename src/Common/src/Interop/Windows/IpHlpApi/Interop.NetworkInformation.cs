@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using Internals = System.Net.Internals;
 
 using Microsoft.Win32.SafeHandles;
 
@@ -74,10 +75,10 @@ internal static partial class Interop
             internal IPAddress MarshalIPAddress()
             {
                 // Determine the address family used to create the IPAddress
-                AddressFamily family = (addressLength > SocketAddress.IPv4AddressSize)
+                AddressFamily family = (addressLength > Internals.SocketAddress.IPv4AddressSize)
                     ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork;
-                SocketAddress sockAddress = new SocketAddress(family, addressLength);
-                Marshal.Copy(address, sockAddress.m_Buffer, 0, addressLength);
+                Internals.SocketAddress sockAddress = new Internals.SocketAddress(family, addressLength);
+                Marshal.Copy(address, sockAddress.Buffer, 0, addressLength);
 
                 return sockAddress.GetIPAddress();
             }

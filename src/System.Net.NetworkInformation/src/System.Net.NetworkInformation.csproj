@@ -107,6 +107,20 @@
       <Link>Common\System\Net\ExceptionCheck.cs</Link>
     </Compile>
 
+    <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
+      <Link>Common\System\Net\SocketAddress.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SocketAddressPal.Windows.cs">
+      <Link>Common\System\Net\SocketAddressPal.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\ByteOrder.cs">
+      <Link>Common\System\Net\ByteOrder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs" >
+      <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
+    </Compile>
+
+
     <!--<Compile Include="$(CommonPath)\System\Net\NetworkInformation\IPAddressCollection.cs" >
       <Link>Common\System\Net\NetworkInformation\IPAddressCollection.cs</Link>
     </Compile>-->
