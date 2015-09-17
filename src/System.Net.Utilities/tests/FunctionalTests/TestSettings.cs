@@ -1,11 +1,14 @@
-namespace NCLTest.Utilities
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+
+using Xunit;
+
+namespace System.Net.Utilities.Tests
 {
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Text;
-    using System.Threading.Tasks;
 
     internal static class TestSettings
     {
@@ -17,7 +20,7 @@ namespace NCLTest.Utilities
 
         public static Task<IPAddress> GetLocalIPAddress()
         {
-            return ResolveHost(TestSettings.LocalHost, TestSettings.AddressFamily);
+            return ResolveHost(LocalHost, AddressFamily);
         }
 
         public static AddressFamily AddressFamily
@@ -36,7 +39,6 @@ namespace NCLTest.Utilities
             {
                 if (address.AddressFamily == family)
                 {
-                    Logger.LogInformation("ResolveHost: {0} translated to {1}", host, address);
                     return address;
                 }
             }
