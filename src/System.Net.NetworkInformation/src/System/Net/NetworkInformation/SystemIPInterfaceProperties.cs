@@ -26,7 +26,7 @@ namespace System.Net.NetworkInformation
         //these are valid for all interfaces
         private bool _dnsEnabled = false;
         private bool _dynamicDnsEnabled = false;
-        private IPAddressCollection _dnsAddresses = null;
+        private InternalIPAddressCollection _dnsAddresses = null;
         private UnicastIPAddressInformationCollection _unicastAddresses = null;
         private MulticastIPAddressInformationCollection _multicastAddresses = null;
         private IPAddressInformationCollection _anycastAddresses = null;
@@ -34,11 +34,10 @@ namespace System.Net.NetworkInformation
         private string _dnsSuffix;
         private SystemIPv4InterfaceProperties _ipv4Properties;
         private SystemIPv6InterfaceProperties _ipv6Properties;
-        private IPAddressCollection _winsServersAddresses;
+        private InternalIPAddressCollection _winsServersAddresses;
         private GatewayIPAddressInformationCollection _gatewayAddresses;
-        private IPAddressCollection _dhcpServers;
+        private InternalIPAddressCollection _dhcpServers;
 
-        // This constructor is for Vista and newer
         internal SystemIPInterfaceProperties(Interop.IpHlpApi.FIXED_INFO fixedInfo, Interop.IpHlpApi.IpAdapterAddresses ipAdapterAddresses)
         {
             _adapterFlags = ipAdapterAddresses.flags;
@@ -58,7 +57,7 @@ namespace System.Net.NetworkInformation
             _gatewayAddresses = SystemGatewayIPAddressInformation.ToGatewayIpAddressInformationCollection(
                 Interop.IpHlpApi.IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstGatewayAddress));
 
-            _dhcpServers = new IPAddressCollection();
+            _dhcpServers = new InternalIPAddressCollection();
             if (ipAdapterAddresses.dhcpv4Server.address != IntPtr.Zero)
                 _dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv4Server.MarshalIPAddress());
             if (ipAdapterAddresses.dhcpv6Server.address != IntPtr.Zero)

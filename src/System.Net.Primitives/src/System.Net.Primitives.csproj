@@ -49,6 +49,7 @@
     <Compile Include="System\Net\Security\SslPolicyErrors.cs" />
     <Compile Include="System\Net\Sockets\AddressFamily.cs" />
     <Compile Include="System\Net\Sockets\SocketError.cs" />
+    <Compile Include="System\Net\NetworkInformation\IPAddressCollection.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBinding.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBindingKind.cs" />
 
@@ -69,9 +70,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
       <Link>Common\System\Net\SocketAddress.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\IPAddressCollection.cs" >
-      <Link>Common\System\Net\NetworkInformation\IPAddressCollection.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformation.CoreCLR.cs" >
       <Link>Common\System\Net\NetworkInformation\HostInformation.CoreCLR.cs</Link>

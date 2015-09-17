@@ -97,9 +97,9 @@ internal static partial class Interop
             internal IntPtr next;
             internal IpSocketAddress address;
 
-            internal static IPAddressCollection MarshalIpAddressCollection(IntPtr ptr)
+            internal static InternalIPAddressCollection MarshalIpAddressCollection(IntPtr ptr)
             {
-                IPAddressCollection addressList = new IPAddressCollection();
+                InternalIPAddressCollection addressList = new InternalIPAddressCollection();
 
                 while (ptr != IntPtr.Zero)
                 {

@@ -71,7 +71,8 @@
     <Compile Include="System\Net\NetworkInformation\UdpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformationCollection.cs" />
-    
+    <Compile Include="System\Net\NetworkInformation\InternalIPAddressCollection.cs" />
+
     <!-- Debug only --> 
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
@@ -120,10 +121,6 @@
       <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
     </Compile>
 
-
-    <!--<Compile Include="$(CommonPath)\System\Net\NetworkInformation\IPAddressCollection.cs" >
-      <Link>Common\System\Net\NetworkInformation\IPAddressCollection.cs</Link>
-    </Compile>-->
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformation.CoreCLR.cs" >
       <Link>Common\System\Net\NetworkInformation\HostInformation.CoreCLR.cs</Link>
     </Compile>
