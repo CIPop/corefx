@@ -11,12 +11,10 @@
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-
   <ItemGroup>
-    <Compile Include="PingTests.cs"  />
-    <Compile Include="TestSettings.cs"  />
+    <Compile Include="PingTests.cs" />
+    <Compile Include="TestSettings.cs" />
   </ItemGroup>
-
   <!-- TODO: Remove after the packages are not using System.Private.Networking. -->
   <ItemGroup>
     <ProjectReference Include="..\..\..\System.Net.NameResolution\src\System.Net.NameResolution.csproj">
@@ -28,7 +26,6 @@
       <Name>System.Net.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
-  
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

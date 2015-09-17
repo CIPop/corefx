@@ -9,12 +9,32 @@
           "System.Runtime.Handles": "4.0.0"
         },
         "compile": {
-          "ref/dotnet/System.Net.Primitives.dll": {}
+          "ref/dotnet/System.Net.Primitives.dll": {},
+          "ref/dotnet/System.Net.Primitives.xml": {},
+          "ref/dotnet/zh-hant/System.Net.Primitives.xml": {},
+          "ref/dotnet/de/System.Net.Primitives.xml": {},
+          "ref/dotnet/fr/System.Net.Primitives.xml": {},
+          "ref/dotnet/it/System.Net.Primitives.xml": {},
+          "ref/dotnet/ja/System.Net.Primitives.xml": {},
+          "ref/dotnet/ko/System.Net.Primitives.xml": {},
+          "ref/dotnet/ru/System.Net.Primitives.xml": {},
+          "ref/dotnet/zh-hans/System.Net.Primitives.xml": {},
+          "ref/dotnet/es/System.Net.Primitives.xml": {}
         }
       },
       "System.Runtime/4.0.0": {
         "compile": {
-          "ref/dotnet/System.Runtime.dll": {}
+          "ref/dotnet/System.Runtime.dll": {},
+          "ref/dotnet/zh-hant/System.Runtime.xml": {},
+          "ref/dotnet/de/System.Runtime.xml": {},
+          "ref/dotnet/System.Runtime.xml": {},
+          "ref/dotnet/fr/System.Runtime.xml": {},
+          "ref/dotnet/it/System.Runtime.xml": {},
+          "ref/dotnet/ja/System.Runtime.xml": {},
+          "ref/dotnet/ko/System.Runtime.xml": {},
+          "ref/dotnet/ru/System.Runtime.xml": {},
+          "ref/dotnet/zh-hans/System.Runtime.xml": {},
+          "ref/dotnet/es/System.Runtime.xml": {}
         }
       },
       "System.Runtime.Handles/4.0.0": {
@@ -22,7 +42,17 @@
           "System.Runtime": "4.0.0"
         },
         "compile": {
-          "ref/dotnet/System.Runtime.Handles.dll": {}
+          "ref/dotnet/System.Runtime.Handles.dll": {},
+          "ref/dotnet/System.Runtime.Handles.xml": {},
+          "ref/dotnet/zh-hant/System.Runtime.Handles.xml": {},
+          "ref/dotnet/de/System.Runtime.Handles.xml": {},
+          "ref/dotnet/fr/System.Runtime.Handles.xml": {},
+          "ref/dotnet/it/System.Runtime.Handles.xml": {},
+          "ref/dotnet/ja/System.Runtime.Handles.xml": {},
+          "ref/dotnet/ko/System.Runtime.Handles.xml": {},
+          "ref/dotnet/ru/System.Runtime.Handles.xml": {},
+          "ref/dotnet/zh-hans/System.Runtime.Handles.xml": {},
+          "ref/dotnet/es/System.Runtime.Handles.xml": {}
         }
       },
       "System.Threading.Tasks/4.0.0": {
@@ -30,7 +60,17 @@
           "System.Runtime": "4.0.0"
         },
         "compile": {
-          "ref/dotnet/System.Threading.Tasks.dll": {}
+          "ref/dotnet/System.Threading.Tasks.dll": {},
+          "ref/dotnet/zh-hant/System.Threading.Tasks.xml": {},
+          "ref/dotnet/de/System.Threading.Tasks.xml": {},
+          "ref/dotnet/System.Threading.Tasks.xml": {},
+          "ref/dotnet/fr/System.Threading.Tasks.xml": {},
+          "ref/dotnet/it/System.Threading.Tasks.xml": {},
+          "ref/dotnet/ja/System.Threading.Tasks.xml": {},
+          "ref/dotnet/ko/System.Threading.Tasks.xml": {},
+          "ref/dotnet/ru/System.Threading.Tasks.xml": {},
+          "ref/dotnet/zh-hans/System.Threading.Tasks.xml": {},
+          "ref/dotnet/es/System.Threading.Tasks.xml": {}
         }
       }
     }
@@ -200,9 +240,9 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "System.Net.Primitives >= 4.0.10",
-      "System.Runtime >= 4.0.0",
-      "System.Threading.Tasks >= 4.0.0"
+      "System.Net.Primitives [4.0.10, )",
+      "System.Runtime [4.0.0, )",
+      "System.Threading.Tasks [4.0.0, )"
     ],
     ".NETPlatform,Version=v5.0": []
   }
