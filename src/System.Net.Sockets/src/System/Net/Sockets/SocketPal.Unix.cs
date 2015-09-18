@@ -15,10 +15,8 @@ using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
-    internal static class SocketPal
+    internal static partial class SocketPal
     {
-        // TODO: properly adjust send/receive timeouts in the case of repeated calls to poll()
-
         // The API that uses this information is not supported on *nix, and will throw
         // PlatformNotSupportedException instead.
         public const int ProtocolInformationSize = 0;
@@ -550,7 +548,6 @@ namespace System.Net.Sockets
                     }
                 }
 
-
                 if ((int)cmsghdr->cmsg_len < sizeof(Interop.libc.in6_pktinfo))
                 {
                     return default(IPPacketInformation);
@@ -977,16 +974,15 @@ namespace System.Net.Sockets
 
             errorCode = GetSocketErrorForErrorCode(socketError);
 
-            // On Linux, a non-blocking socket that fails a connect() attempt needs to be kicked
-            // with another connect to AF_UNSPEC before further connect() attempts will return
-            // valid errors. Otherwise, further connect() attempts will return ECONNABORTED.
-            
-            var socketAddressBuffer = stackalloc byte[socketAddressLen];
-            var sockAddr = (Interop.libc.sockaddr*)socketAddressBuffer;
-            sockAddr->sa_family = Interop.libc.AF_UNSPEC;
-
-            err = Interop.libc.connect(fileDescriptor, sockAddr, (uint)socketAddressLen);
-            Debug.Assert(err == 0, "TryCompleteConnect: failed to disassociate socket after failed connect()");
+// Disable CS0162: Unreachable code detected
+//
+// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
+#pragma warning disable 162
+            if (SupportsMultipleConnectAttempts)
+            {
+                PrimeForNextConnectAttempt(fileDescriptor, socketAddressLen);
+            }
+#pragma warning restore 162
 
             return true;
         }

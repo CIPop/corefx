@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// Disable CS0162: Unreachable code detected
+//
+// There is unreachable code in this file due to the use of SocketPal.SupportsMultipleConnectAttempts.
+#pragma warning disable 162
+
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,11 +23,14 @@ namespace System.Net.Sockets
         protected IPAddress[] addressList;
         protected int nextAddress;
 
+        private Socket _lastAttemptSocket;
+
         private enum State
         {
             NotStarted,
             DnsQuery,
             ConnectAttempt,
+            UserConnectAttempt,
             Completed,
             Canceled,
         }
@@ -30,6 +38,10 @@ namespace System.Net.Sockets
         private State _state;
 
         private object _lockObject = new object();
+
+        protected abstract bool RequiresUserConnectAttempt { get; }
+
+        protected abstract Socket UserSocket { get; }
 
         // Called by Socket to kick off the ConnectAsync process.  We'll complete the user's SAEA
         // when it's done.  Returns true if the operation will be asynchronous, false if it has failed synchronously
@@ -114,7 +126,11 @@ namespace System.Net.Sockets
 
                     internalArgs = new SocketAsyncEventArgs();
                     internalArgs.Completed += InternalConnectCallback;
-                    internalArgs.SetBuffer(userArgs.Buffer, userArgs.Offset, userArgs.Count);
+
+                    if (!RequiresUserConnectAttempt)
+                    {
+                        internalArgs.SetBuffer(userArgs.Buffer, userArgs.Offset, userArgs.Count);
+                    }
 
                     exception = AttemptConnection();
 
@@ -152,14 +168,25 @@ namespace System.Net.Sockets
                     // closed Socket.
                     exception = new SocketException((int)SocketError.OperationAborted);
                 }
-                else
+                else if (_state == State.ConnectAttempt)
                 {
-                    GlobalLog.Assert(_state == State.ConnectAttempt, "MultipleConnectAsync.InternalConnectCallback(): Unexpected object state");
-
                     if (args.SocketError == SocketError.Success)
                     {
-                        // the connection attempt succeeded; go to the completed state.
-                        // the callback will be called outside the lock
+                        if (RequiresUserConnectAttempt)
+                        {
+                            exception = AttemptUserConnection();
+
+                            if (exception == null)
+                            {
+                                // Don't call the callback; we've started a connection attempt on the
+                                // user's socket.
+                                _state = State.UserConnectAttempt;
+                                return;
+                            }
+                        }
+
+                        // The connection attempt succeeded or the user connect attempt failed synchronously; go to the
+                        // completed state. The callback will be called outside the lock.
                         _state = State.Completed;
                     }
                     else if (args.SocketError == SocketError.OperationAborted)
@@ -172,6 +199,13 @@ namespace System.Net.Sockets
                     else
                     {
                         // Try again, if there are more IPAddresses to be had.
+
+                        // If the underlying OS does not support multiple connect attempts
+                        // on the same socket, dispose the socket used for the last attempt.
+                        if (!SocketPal.SupportsMultipleConnectAttempts)
+                        {
+                            _lastAttemptSocket.Dispose();
+                        }
 
                         // Keep track of this because it will be overwritten by AttemptConnection
                         SocketError currentFailure = args.SocketError;
@@ -200,6 +234,28 @@ namespace System.Net.Sockets
                         }
                     }
                 }
+                else
+                {
+                    GlobalLog.Assert(_state == State.UserConnectAttempt, "MultipleConnectAsync.InternalConnectCallback(): Unexpected object state");
+                    GlobalLog.Assert(RequiresUserConnectAttempt, "MultipleConnectAsync.InternalConnectCallback(): State.UserConnectAttempt without RequiresUserConnectAttempt");
+
+                    if (args.SocketError == SocketError.Success)
+                    {
+                        _state = State.Completed;
+                    }
+                    else if (args.SocketError == SocketError.OperationAborted)
+                    {
+                        // The socket was closed while the connect was in progress.  This can happen if the user
+                        // closes the socket, and is equivalent to a call to CancelConnectAsync
+                        exception = new SocketException((int)SocketError.OperationAborted);
+                        _state = State.Canceled;
+                    }
+                    else
+                    {
+                        // The connect attempt on the user's socket failed. Return the corresponding error.
+                        exception = new SocketException((int)args.SocketError);
+                    }
+                }
             }
 
             if (exception == null)
@@ -218,21 +274,56 @@ namespace System.Net.Sockets
         {
             try
             {
-                Socket attemptSocket = null;
-                IPAddress attemptAddress = GetNextAddress(out attemptSocket);
+                IPAddress attemptAddress = GetNextAddress(out _lastAttemptSocket);
 
                 if (attemptAddress == null)
                 {
                     return new SocketException((int)SocketError.NoData);
                 }
 
-                GlobalLog.Assert(attemptSocket != null, "MultipleConnectAsync.AttemptConnection: attemptSocket is null!");
+                GlobalLog.Assert(attemptAddress != null, "MultipleConnectAsync.AttemptConnection: attemptAddress is null!");
 
                 internalArgs.RemoteEndPoint = new IPEndPoint(attemptAddress, endPoint.Port);
 
-                if (!attemptSocket.ConnectAsync(internalArgs))
+                return AttemptConnection(_lastAttemptSocket, internalArgs);
+            }
+            catch (Exception e)
+            {
+                GlobalLog.Assert(!(e is ObjectDisposedException), "MultipleConnectAsync.AttemptConnection: unexpected ObjectDisposedException");
+                return e;
+            }
+        }
+
+        private Exception AttemptUserConnection()
+        {
+            Debug.Assert(!SocketPal.SupportsMultipleConnectAttempts);
+            Debug.Assert(_lastAttemptSocket != null);
+
+            try
+            {
+                _lastAttemptSocket.Dispose();
+
+                // Setup the internal args. RemoteEndpoint should already be correct.
+                internalArgs.SetBuffer(userArgs.Buffer, userArgs.Offset, userArgs.Count);
+
+                return AttemptConnection(UserSocket, internalArgs);
+            }
+            catch (Exception e)
+            {
+                GlobalLog.Assert(!(e is ObjectDisposedException), "MultipleConnectAsync.AttemptConnection: unexpected ObjectDisposedException");
+                return e;
+            }
+        }
+
+        private static Exception AttemptConnection(Socket attemptSocket, SocketAsyncEventArgs args)
+        {
+            try
+            {
+                GlobalLog.Assert(attemptSocket != null, "MultipleConnectAsync.AttemptConnection: attemptSocket is null!");
+
+                if (!attemptSocket.ConnectAsync(args))
                 {
-                    return new SocketException((int)internalArgs.SocketError);
+                    return new SocketException((int)args.SocketError);
                 }
             }
             catch (ObjectDisposedException)
@@ -251,7 +342,7 @@ namespace System.Net.Sockets
 
         protected abstract void OnSucceed();
 
-        protected void Succeed()
+        private void Succeed()
         {
             OnSucceed();
             userArgs.FinishWrapperConnectSuccess(internalArgs.ConnectSocket, internalArgs.BytesTransferred, internalArgs.SocketFlags);
@@ -277,6 +368,11 @@ namespace System.Net.Sockets
         private void SyncFail(Exception e)
         {
             OnFail(false);
+
+            if (!SocketPal.SupportsMultipleConnectAttempts && _lastAttemptSocket != null)
+            {
+                _lastAttemptSocket.Dispose();
+            }
             if (internalArgs != null)
             {
                 internalArgs.Dispose();
@@ -296,6 +392,11 @@ namespace System.Net.Sockets
         private void AsyncFail(Exception e)
         {
             OnFail(false);
+
+            if (!SocketPal.SupportsMultipleConnectAttempts && _lastAttemptSocket != null)
+            {
+                _lastAttemptSocket.Dispose();
+            }
             if (internalArgs != null)
             {
                 internalArgs.Dispose();
@@ -330,10 +431,11 @@ namespace System.Net.Sockets
                             TaskCreationOptions.DenyChildAttach,
                             TaskScheduler.Default);
 
-                    callOnFail = true;
+                        callOnFail = true;
                         break;
 
                     case State.ConnectAttempt:
+                    case State.UserConnectAttempt:
                         // Cancel was called after the Dns query completed, but before we had a connection result to give
                         // to the user.  Closing the sockets will cause any in-progress ConnectAsync call to fail immediately
                         // with OperationAborted, and will cause ObjectDisposedException from any new calls to ConnectAsync
@@ -358,6 +460,11 @@ namespace System.Net.Sockets
             if (callOnFail)
             {
                 OnFail(true);
+
+                if (!SocketPal.SupportsMultipleConnectAttempts && _lastAttemptSocket != null)
+                {
+                    _lastAttemptSocket.Dispose();
+                }
             }
         }
 
@@ -373,10 +480,21 @@ namespace System.Net.Sockets
     // Used when the instance ConnectAsync method is called, or when the DnsEndPoint specified
     // an AddressFamily.  There's only one Socket, and we only try addresses that match its
     // AddressFamily
-    internal class SingleSocketMultipleConnectAsync : MultipleConnectAsync
+    internal sealed class SingleSocketMultipleConnectAsync : MultipleConnectAsync
     {
         private Socket _socket;
         private bool _userSocket;
+
+        protected override bool RequiresUserConnectAttempt { get { return !SocketPal.SupportsMultipleConnectAttempts; } }
+
+        protected override Socket UserSocket
+        {
+            get
+            {
+                Debug.Assert(!SocketPal.SupportsMultipleConnectAttempts);
+                return _socket;
+            }
+        }
 
         public SingleSocketMultipleConnectAsync(Socket socket, bool userSocket)
         {
@@ -386,13 +504,12 @@ namespace System.Net.Sockets
 
         protected override IPAddress GetNextAddress(out Socket attemptSocket)
         {
-            attemptSocket = _socket;
-
             IPAddress rval = null;
             do
             {
                 if (nextAddress >= addressList.Length)
                 {
+                    attemptSocket = null;
                     return null;
                 }
 
@@ -400,6 +517,19 @@ namespace System.Net.Sockets
                 ++nextAddress;
             }
             while (!_socket.CanTryAddressFamily(rval.AddressFamily));
+
+            if (SocketPal.SupportsMultipleConnectAttempts)
+            {
+                attemptSocket = _socket;
+            }
+            else
+            {
+                attemptSocket = new Socket(_socket.AddressFamily, _socket.SocketType, _socket.ProtocolType);
+                if (_socket.AddressFamily == AddressFamily.InterNetworkV6 && _socket.DualMode)
+                {
+                    attemptSocket.DualMode = true;
+                }
+            }
 
             return rval;
         }
@@ -420,13 +550,26 @@ namespace System.Net.Sockets
 
     // This is used when the static ConnectAsync method is called.  We don't know the address family
     // ahead of time, so we create both IPv4 and IPv6 sockets.
-    internal class MultipleSocketMultipleConnectAsync : MultipleConnectAsync
+    internal sealed class DualSocketMultipleConnectAsync : MultipleConnectAsync
     {
         private Socket _socket4;
         private Socket _socket6;
 
-        public MultipleSocketMultipleConnectAsync(SocketType socketType, ProtocolType protocolType)
+        protected override bool RequiresUserConnectAttempt { get { return false; } }
+
+        protected override Socket UserSocket
         {
+            get
+            {
+                Debug.Fail("Should never get here");
+                throw new NotImplementedException();
+            }
+        }
+
+        public DualSocketMultipleConnectAsync(SocketType socketType, ProtocolType protocolType)
+        {
+            Debug.Assert(SocketPal.SupportsMultipleConnectAttempts);
+
             if (Socket.OSSupportsIPv4)
             {
                 _socket4 = new Socket(AddressFamily.InterNetwork, socketType, protocolType);
@@ -490,5 +633,66 @@ namespace System.Net.Sockets
                 _socket6.Dispose();
             }
         }
+    }
+
+    internal sealed class MultipleSocketMultipleConnectAsync : MultipleConnectAsync
+    {
+        private readonly SocketType _socketType;
+        private readonly ProtocolType _protocolType;
+        private readonly bool _supportsIPv4;
+        private readonly bool _supportsIPv6;
+
+        protected override bool RequiresUserConnectAttempt { get { return false; } }
+
+        protected override Socket UserSocket
+        {
+            get
+            {
+                Debug.Fail("Should never get here");
+                throw new NotImplementedException();
+            }
+        }
+
+        public MultipleSocketMultipleConnectAsync(SocketType socketType, ProtocolType protocolType)
+        {
+            Debug.Assert(!SocketPal.SupportsMultipleConnectAttempts);
+
+            _socketType = socketType;
+            _protocolType = protocolType;
+            _supportsIPv4 = Socket.OSSupportsIPv4;
+            _supportsIPv6 = Socket.OSSupportsIPv6;
+        }
+
+        protected override IPAddress GetNextAddress(out Socket attemptSocket)
+        {
+            if (_supportsIPv4 || _supportsIPv6)
+            {
+                while (nextAddress < addressList.Length)
+                {
+                    IPAddress rval = addressList[nextAddress];
+                    ++nextAddress;
+
+                    if (_supportsIPv6 && rval.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        attemptSocket = new Socket(AddressFamily.InterNetworkV6, _socketType, _protocolType);
+                        return rval;
+                    }
+                    else if (_supportsIPv4 && rval.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        attemptSocket = new Socket(AddressFamily.InterNetwork, _socketType, _protocolType);
+                        return rval;
+                    }
+                }
+            }
+
+            attemptSocket = null;
+            return null;
+        }
+
+        // nothing to do on failure
+        protected override void OnFail(bool abortive) { }
+
+        // nothing to do on success
+        protected override void OnSucceed() { }
     }
 }
