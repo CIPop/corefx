@@ -300,6 +300,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.listen.cs">
       <Link>Interop\Unix\libc\Interop.listen.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.poll.cs">
+      <Link>Interop\Unix\libc\Interop.poll.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.recv.cs">
       <Link>Interop\Unix\libc\Interop.recv.cs</Link>
     </Compile>
@@ -341,6 +344,7 @@
 
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
     <Compile Include="System\Net\Sockets\SocketAsyncEngineBackend.Linux.cs" />
+    <Compile Include="System\Net\Sockets\SocketPal.Linux.cs" />
 
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.Libraries.cs">
       <Link>Interop\Linux\Interop.Libraries.cs</Link>
@@ -403,6 +407,7 @@
 
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
     <Compile Include="System\Net\Sockets\SocketAsyncEngineBackend.OSX.cs" />
+    <Compile Include="System\Net\Sockets\SocketPal.OSX.cs" />
 
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
       <Link>Interop\OSX\Interop.Libraries.cs</Link>

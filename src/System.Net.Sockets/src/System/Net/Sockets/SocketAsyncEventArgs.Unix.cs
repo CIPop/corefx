@@ -255,7 +255,7 @@ namespace System.Net.Sockets
 
         private SocketError FinishOperationAccept(Internals.SocketAddress remoteSocketAddress)
         {
-            System.Buffer.BlockCopy(m_AcceptBuffer, 0, remoteSocketAddress.Buffer, 0, _socketAddressSize);
+            System.Buffer.BlockCopy(m_AcceptBuffer, 0, remoteSocketAddress.Buffer, 0, m_AcceptAddressBufferCount);
             m_AcceptSocket = _currentSocket.CreateAcceptSocket(
                 SafeCloseSocket.CreateSocket(_acceptedFileDescriptor),
                 _currentSocket.m_RightEndPoint.Create(remoteSocketAddress));
@@ -275,8 +275,7 @@ namespace System.Net.Sockets
 
         private unsafe void FinishOperationReceiveMessageFrom()
         {
-            // TODO: implement this.
-            throw new NotImplementedException();
+            // No-op for *nix.
         }
 
         private void FinishOperationSendPackets()

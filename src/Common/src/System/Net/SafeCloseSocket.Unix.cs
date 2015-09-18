@@ -16,6 +16,9 @@ namespace System.Net.Sockets
         SafeHandleMinusOneIsInvalid
 #endif
     {
+        private int _receiveTimeout = -1;
+        private int _sendTimeout = -1;
+
         public SocketAsyncContext AsyncContext
         {
             get
@@ -32,12 +35,31 @@ namespace System.Net.Sockets
             }
         }
 
-        public ThreadPoolBoundHandle IOCPBoundHandle
+        public bool IsNonBlocking { get; set; }
+
+        public int ReceiveTimeout
         {
             get
             {
-                // TODO: remove this once async sockets are PAL'd out
-                throw new PlatformNotSupportedException();
+                return _receiveTimeout;
+            }
+            set
+            {
+                Debug.Assert(value == -1 || value > 0);
+                _receiveTimeout = value;;
+            }
+        }
+
+        public int SendTimeout
+        {
+            get
+            {
+                return _sendTimeout;
+            }
+            set
+            {
+                Debug.Assert(value == -1 || value > 0);
+                _sendTimeout = value;
             }
         }
 
@@ -182,31 +204,56 @@ namespace System.Net.Sockets
                 return res;
             }
 
-            public static InnerSafeCloseSocket CreateSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
+            public static unsafe InnerSafeCloseSocket CreateSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
             {
                 int af = SocketPal.GetPlatformAddressFamily(addressFamily);
                 int sock = SocketPal.GetPlatformSocketType(socketType);
                 int pt = (int)protocolType;
 
                 int fd = Interop.libc.socket(af, sock, pt);
+                if (fd != -1)
+                {
+                    // The socket was created successfully; make it non-blocking and enable
+                    // IPV6_V6ONLY by default for AF_INET6 sockets.
+                    int err = Interop.Sys.Fcntl.SetIsNonBlocking(fd, 1);
+                    if (err != 0)
+                    {
+                        Interop.Sys.Close(fd);
+                        fd = -1;
+                    }
+
+                    if (addressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        int on = 1;
+                        err = Interop.libc.setsockopt(fd, Interop.libc.IPPROTO_IPV6, Interop.libc.IPV6_V6ONLY, &on, (uint)sizeof(int));
+                        if (err != 0)
+                        {
+                            Interop.Sys.Close(fd);
+                            fd = -1;
+                        }
+                    }
+                }
 
                 var res = new InnerSafeCloseSocket();
                 res.SetHandle((IntPtr)fd);
                 return res;
             }
 
-            public static unsafe InnerSafeCloseSocket Accept(SafeCloseSocket socketHandle, byte[] socketAddress, ref int socketAddressSize)
+            public static unsafe InnerSafeCloseSocket Accept(SafeCloseSocket socketHandle, byte[] socketAddress, ref int socketAddressLen)
             {
-                int fd;
-                uint addressLen = (uint)socketAddressSize;
-                fixed (byte* rawAddress = socketAddress)
+                int acceptedFd;
+                if (!socketHandle.IsNonBlocking)
                 {
-                    fd = Interop.libc.accept(socketHandle.FileDescriptor, (Interop.libc.sockaddr*)rawAddress, &addressLen);
+                    socketHandle.AsyncContext.Accept(socketAddress, ref socketAddressLen, -1, out acceptedFd);
                 }
-                socketAddressSize = (int)addressLen;
+                else
+                {
+                    SocketError unused;
+                    SocketPal.TryCompleteAccept(socketHandle.FileDescriptor, socketAddress, ref socketAddressLen, out acceptedFd, out unused);
+                }
 
                 var res = new InnerSafeCloseSocket();
-                res.SetHandle((IntPtr)fd);
+                res.SetHandle((IntPtr)acceptedFd);
                 return res;
             }
         }

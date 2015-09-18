@@ -114,6 +114,8 @@ namespace System.Net.Sockets
             _socketType = socketType;
             _protocolType = protocolType;
 
+            Debug.Assert(addressFamily != AddressFamily.InterNetworkV6 || !DualMode);
+
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "Socket", null);
         }
 
@@ -1053,16 +1055,71 @@ namespace System.Net.Sockets
                 throw new NotSupportedException(SR.net_invalidversion);
             }
 
+// Disable CS0162: Unreachable code detected
+//
+// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
+#pragma warning disable 162
             Exception lastex = null;
-            foreach (IPAddress address in addresses)
+            if (SocketPal.SupportsMultipleConnectAttempts)
             {
-                if (CanTryAddressFamily(address.AddressFamily))
+                foreach (IPAddress address in addresses)
+                {
+                    if (CanTryAddressFamily(address.AddressFamily))
+                    {
+                        try
+                        {
+                            Connect(new IPEndPoint(address, port));
+                            lastex = null;
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ExceptionCheck.IsFatal(ex)) throw;
+                            lastex = ex;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                EndPoint endpoint = null;
+                foreach (IPAddress address in addresses)
+                {
+                    if (CanTryAddressFamily(address.AddressFamily))
+                    {
+                        Socket attemptSocket = null;
+                        try
+                        {
+                            attemptSocket = new Socket(_addressFamily, _socketType, _protocolType);
+                            if (IsDualMode)
+                            {
+                                attemptSocket.DualMode = true;
+                            }
+
+                            var attemptEndpoint = new IPEndPoint(address, port);
+                            attemptSocket.Connect(attemptEndpoint);
+                            attemptSocket.Dispose();
+                            endpoint = attemptEndpoint;
+                            lastex = null;
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (attemptSocket != null)
+                            {
+                                attemptSocket.Dispose();
+                            }
+                            lastex = ex;
+                        }
+                    }
+                }
+
+                if (endpoint != null)
                 {
                     try
                     {
-                        Connect(new IPEndPoint(address, port));
+                        Connect(endpoint);
                         lastex = null;
-                        break;
                     }
                     catch (Exception ex)
                     {
@@ -1071,9 +1128,12 @@ namespace System.Net.Sockets
                     }
                 }
             }
+#pragma warning restore
 
             if (lastex != null)
+            {
                 throw lastex;
+            }
 
             //if we're not connected, then we didn't get a valid ipaddress in the list
             if (!Connected)
@@ -1280,8 +1340,6 @@ namespace System.Net.Sockets
             //make sure we don't let the app mess up the buffer array enough to cause
             //corruption.
 
-            errorCode = SocketError.Success;
-
             int bytesTransferred;
             errorCode = SocketPal.Send(_handle, buffers, socketFlags, out bytesTransferred);
 
@@ -1368,17 +1426,17 @@ namespace System.Net.Sockets
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " size:" + size);
 
             // This can throw ObjectDisposedException.
-            int bytesTransferred = SocketPal.Send(_handle, buffer, offset, size, socketFlags);
+            int bytesTransferred;
+            errorCode = SocketPal.Send(_handle, buffer, offset, size, socketFlags, out bytesTransferred);
 
             //
             // if the native call fails we'll throw a SocketException
             //
-            if ((SocketError)bytesTransferred == SocketError.SocketError)
+            if (errorCode != SocketError.Success)
             {
                 //
                 // update our internal state after this socket error and throw
                 //
-                errorCode = SocketPal.GetLastSocketError();
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
@@ -1448,17 +1506,18 @@ namespace System.Net.Sockets
             Internals.SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
 
             // This can throw ObjectDisposedException.
-            int bytesTransferred = SocketPal.SendTo(_handle, buffer, offset, size, socketFlags, socketAddress.Buffer, socketAddress.Size);
+            int bytesTransferred;
+            SocketError errorCode = SocketPal.SendTo(_handle, buffer, offset, size, socketFlags, socketAddress.Buffer, socketAddress.Size, out bytesTransferred);
 
             //
             // if the native call fails we'll throw a SocketException
             //
-            if ((SocketError)bytesTransferred == SocketError.SocketError)
+            if (errorCode != SocketError.Success)
             {
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException((int)SocketPal.GetLastSocketError());
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "SendTo", socketException);
                 throw socketException;
@@ -1584,17 +1643,14 @@ namespace System.Net.Sockets
             ValidateBlockingMode();
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " size:" + size);
 
-            // This can throw ObjectDisposedException.
-            errorCode = SocketError.Success;
+            int bytesTransferred;
+            errorCode = SocketPal.Receive(_handle, buffer, offset, size, socketFlags, out bytesTransferred);
 
-            int bytesTransferred = SocketPal.Receive(_handle, buffer, offset, size, socketFlags);
-
-            if ((SocketError)bytesTransferred == SocketError.SocketError)
+            if (errorCode != SocketError.Success)
             {
                 //
                 // update our internal state after this socket error and throw
                 //
-                errorCode = SocketPal.GetLastSocketError();
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
@@ -1879,14 +1935,15 @@ namespace System.Net.Sockets
             Internals.SocketAddress socketAddressOriginal = IPEndPointExtensions.Serialize(endPointSnapshot);
 
             // This can throw ObjectDisposedException.
-            int bytesTransferred = SocketPal.ReceiveFrom(_handle, buffer, offset, size, socketFlags, socketAddress.Buffer, ref socketAddress.InternalSize);
+            int bytesTransferred;
+            SocketError errorCode = SocketPal.ReceiveFrom(_handle, buffer, offset, size, socketFlags, socketAddress.Buffer, ref socketAddress.InternalSize, out bytesTransferred);
 
             // If the native call fails we'll throw a SocketException.
             // Must do this immediately after the native call so that the SocketException() constructor can pick up the error code.
             SocketException socketException = null;
-            if ((SocketError)bytesTransferred == SocketError.SocketError)
+            if (errorCode != SocketError.Success)
             {
-                socketException = new SocketException((int)SocketPal.GetLastSocketError());
+                socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "ReceiveFrom", socketException);
 
@@ -2208,35 +2265,33 @@ namespace System.Net.Sockets
             {
                 return getIPv6MulticastOpt(optionName);
             }
-            else
+
+            int optionValue = 0;
+
+            // This can throw ObjectDisposedException.
+            SocketError errorCode = SocketPal.GetSockOpt(
+                _handle,
+                optionLevel,
+                optionName,
+                out optionValue);
+
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+
+            //
+            // if the native call fails we'll throw a SocketException
+            //
+            if (errorCode != SocketError.Success)
             {
-                int optionValue = 0;
-
-                // This can throw ObjectDisposedException.
-                SocketError errorCode = SocketPal.GetSockOpt(
-                    _handle,
-                    optionLevel,
-                    optionName,
-                    out optionValue);
-
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
-
                 //
-                // if the native call fails we'll throw a SocketException
+                // update our internal state after this socket error and throw
                 //
-                if (errorCode != SocketError.Success)
-                {
-                    //
-                    // update our internal state after this socket error and throw
-                    //
-                    SocketException socketException = new SocketException((int)errorCode);
-                    UpdateStatusAfterSocketError(socketException);
-                    if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "GetSocketOption", socketException);
-                    throw socketException;
-                }
-
-                return optionValue;
+                SocketException socketException = new SocketException((int)errorCode);
+                UpdateStatusAfterSocketError(socketException);
+                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "GetSocketOption", socketException);
+                throw socketException;
             }
+
+            return optionValue;
         }
 
         /// <devdoc>
@@ -4755,7 +4810,9 @@ namespace System.Net.Sockets
                 MultipleConnectAsync multipleConnectAsync = null;
                 if (dnsEP.AddressFamily == AddressFamily.Unspecified)
                 {
-                    multipleConnectAsync = new MultipleSocketMultipleConnectAsync(socketType, protocolType);
+                    multipleConnectAsync = SocketPal.SupportsMultipleConnectAttempts ?
+                        (MultipleConnectAsync)(new DualSocketMultipleConnectAsync(socketType, protocolType)) :
+                        (MultipleConnectAsync)(new MultipleSocketMultipleConnectAsync(socketType, protocolType));
                 }
                 else
                 {
@@ -5466,7 +5523,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = SocketExceptionFactory.CreateSocketException(endPointSnapshot);
+                SocketException socketException = SocketExceptionFactory.CreateSocketException((int)errorCode, endPointSnapshot);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "Connect", socketException);
                 throw socketException;
@@ -5581,7 +5638,8 @@ namespace System.Net.Sockets
                         }
                         else
                         {
-                            errorCode = (SocketError)SocketPal.Receive(_handle, null, 0, 0, SocketFlags.None);
+                            int unused;
+                            errorCode = SocketPal.Receive(_handle, null, 0, 0, SocketFlags.None, out unused);
                             GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") recv():" + errorCode.ToString());
 
                             if (errorCode != (SocketError)0)
@@ -6083,7 +6141,7 @@ namespace System.Net.Sockets
             return DoMultipleAddressConnectCallback(PostOneBeginConnect(context), context);
         }
 
-        private class MultipleAddressConnectAsyncResult : ContextAwareResult
+        private sealed class MultipleAddressConnectAsyncResult : ContextAwareResult
         {
             internal MultipleAddressConnectAsyncResult(IPAddress[] addresses, int port, Socket socket, object myState, AsyncCallback myCallBack) :
                 base(socket, myState, myCallBack)
@@ -6097,6 +6155,8 @@ namespace System.Net.Sockets
             internal IPAddress[] addresses;
             internal int index;
             internal int port;
+            internal bool isUserConnectAttempt;
+            internal Socket lastAttemptSocket;
             internal Exception lastException;
 
             internal EndPoint RemoteEndPoint
@@ -6115,6 +6175,10 @@ namespace System.Net.Sockets
             }
         }
 
+// Disable CS0162: Unreachable code detected
+//
+// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
+#pragma warning disable 162
         private static object PostOneBeginConnect(MultipleAddressConnectAsyncResult context)
         {
             IPAddress currentAddressSnapshot = context.addresses[context.index];
@@ -6130,8 +6194,23 @@ namespace System.Net.Sockets
                 // MSRC 11081 - Do the necessary security demand
                 context.socket.CheckCacheRemote(ref endPoint, true);
 
-                IAsyncResult connectResult = context.socket.UnsafeBeginConnect(endPoint,
-                    new AsyncCallback(MultipleAddressConnectCallback), context);
+                var asyncCallback = new AsyncCallback(MultipleAddressConnectCallback);
+
+                IAsyncResult connectResult;
+                if (SocketPal.SupportsMultipleConnectAttempts || context.isUserConnectAttempt)
+                {
+                    connectResult = context.socket.UnsafeBeginConnect(endPoint, asyncCallback, context);
+                }
+                else
+                {
+                    context.lastAttemptSocket = new Socket(context.socket._addressFamily, context.socket._socketType, context.socket._protocolType);
+                    if (context.socket.IsDualMode)
+                    {
+                        context.lastAttemptSocket.DualMode = true;
+                    }
+
+                    connectResult = context.lastAttemptSocket.UnsafeBeginConnect(endPoint, asyncCallback, context);
+                }
 
                 if (connectResult.CompletedSynchronously)
                 {
@@ -6141,7 +6220,9 @@ namespace System.Net.Sockets
             catch (Exception exception)
             {
                 if (exception is OutOfMemoryException)
+                {
                     throw;
+                }
 
                 return exception;
             }
@@ -6152,7 +6233,9 @@ namespace System.Net.Sockets
         private static void MultipleAddressConnectCallback(IAsyncResult result)
         {
             if (result.CompletedSynchronously)
+            {
                 return;
+            }
 
             bool invokeCallback = false;
 
@@ -6184,7 +6267,15 @@ namespace System.Net.Sockets
                 {
                     try
                     {
-                        context.socket.EndConnect((IAsyncResult)result);
+                        if (SocketPal.SupportsMultipleConnectAttempts || context.isUserConnectAttempt)
+                        {
+                            context.socket.EndConnect((IAsyncResult)result);
+                        }
+                        else
+                        {
+                            Debug.Assert(context.lastAttemptSocket != null);
+                            context.lastAttemptSocket.EndConnect((IAsyncResult)result);
+                        }
                     }
                     catch (Exception exception)
                     {
@@ -6192,16 +6283,29 @@ namespace System.Net.Sockets
                     }
                 }
 
+                if (!SocketPal.SupportsMultipleConnectAttempts && !context.isUserConnectAttempt && context.lastAttemptSocket != null)
+                {
+                    context.lastAttemptSocket.Dispose();
+                }
+
                 if (ex == null)
                 {
-                    // Don't invoke the callback from here, because we're probably inside
-                    // a catch-all block that would eat exceptions from the callback.
-                    // Instead tell our caller to invoke the callback outside of its catchall.
-                    return true;
+                    if (!SocketPal.SupportsMultipleConnectAttempts && !context.isUserConnectAttempt)
+                    {
+                        context.isUserConnectAttempt = true;
+                        result = PostOneBeginConnect(context);
+                    }
+                    else
+                    {
+                        // Don't invoke the callback from here, because we're probably inside
+                        // a catch-all block that would eat exceptions from the callback.
+                        // Instead tell our caller to invoke the callback outside of its catchall.
+                        return true;
+                    }
                 }
                 else
                 {
-                    if (++context.index >= context.addresses.Length)
+                    if (++context.index >= context.addresses.Length || context.isUserConnectAttempt)
                         throw ex;
 
                     context.lastException = ex;
@@ -6212,6 +6316,7 @@ namespace System.Net.Sockets
             // Don't invoke the callback at all, because we've posted another async connection attempt
             return false;
         }
+#pragma warning restore
 
         internal IAsyncResult BeginMultipleSend(BufferOffsetSize[] buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
@@ -6351,6 +6456,7 @@ namespace System.Net.Sockets
             socket._protocolType = _protocolType;
             socket.m_RightEndPoint = m_RightEndPoint;
             socket.m_RemoteEndPoint = remoteEP;
+
             //
             // the socket is connected
             //
