@@ -274,18 +274,18 @@ namespace System.Net.Sockets
 
         //methods
 
-        public IAsyncResult BeginAcceptSocket(AsyncCallback callback, object state)
+        internal IAsyncResult InternalBeginAcceptSocket(AsyncCallback callback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginAcceptSocket", null);
             if (!_active)
                 throw new InvalidOperationException(SR.net_stopped);
 
-            IAsyncResult result = _serverSocket.BeginAccept(callback, state);
+            IAsyncResult result = _serverSocket.InternalBeginAccept(callback, state);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginAcceptSocket", null);
             return result;
         }
 
-        public Socket EndAcceptSocket(IAsyncResult asyncResult)
+        internal Socket InternalEndAcceptSocket(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "EndAcceptSocket", null);
 
@@ -302,23 +302,23 @@ namespace System.Net.Sockets
             }
 
             // This will throw ObjectDisposedException if Stop() has been called.
-            Socket socket = asyncSocket.EndAccept(asyncResult);
+            Socket socket = asyncSocket.InternalEndAccept(asyncResult);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "EndAcceptSocket", socket);
             return socket;
         }
 
-        public IAsyncResult BeginAcceptTcpClient(AsyncCallback callback, object state)
+        internal IAsyncResult InternalBeginAcceptTcpClient(AsyncCallback callback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginAcceptTcpClient", null);
             if (!_active)
                 throw new InvalidOperationException(SR.net_stopped);
-            IAsyncResult result = _serverSocket.BeginAccept(callback, state);
+            IAsyncResult result = _serverSocket.InternalBeginAccept(callback, state);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginAcceptTcpClient", null);
             return result;
         }
 
-        public TcpClient EndAcceptTcpClient(IAsyncResult asyncResult)
+        internal TcpClient InternalEndAcceptTcpClient(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "EndAcceptTcpClient", null);
 
@@ -335,7 +335,7 @@ namespace System.Net.Sockets
             }
 
             // This will throw ObjectDisposedException if Stop() has been called.
-            Socket socket = asyncSocket.EndAccept(asyncResult);
+            Socket socket = asyncSocket.InternalEndAccept(asyncResult);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "EndAcceptTcpClient", socket);
             return new TcpClient(socket);
@@ -344,12 +344,12 @@ namespace System.Net.Sockets
         //************* Task-based async public methods *************************
         public Task<Socket> AcceptSocketAsync()
         {
-            return Task<Socket>.Factory.FromAsync(BeginAcceptSocket, EndAcceptSocket, null);
+            return Task<Socket>.Factory.FromAsync(InternalBeginAcceptSocket, InternalEndAcceptSocket, null);
         }
 
         public Task<TcpClient> AcceptTcpClientAsync()
         {
-            return Task<TcpClient>.Factory.FromAsync(BeginAcceptTcpClient, EndAcceptTcpClient, null);
+            return Task<TcpClient>.Factory.FromAsync(InternalBeginAcceptTcpClient, InternalEndAcceptTcpClient, null);
         }
     }; // class TcpListener
 } // namespace System.Net.Sockets

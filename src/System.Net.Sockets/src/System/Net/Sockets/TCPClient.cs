@@ -404,34 +404,34 @@ namespace System.Net.Sockets
         }
 
 
-        public IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
+        internal IAsyncResult InternalBeginConnect(string host, int port, AsyncCallback requestCallback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginConnect", host);
-            IAsyncResult result = Client.BeginConnect(host, port, requestCallback, state);
+            IAsyncResult result = Client.InternalBeginConnect(host, port, requestCallback, state);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
             return result;
         }
 
-        public IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
+        internal IAsyncResult InternalBeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginConnect", address);
-            IAsyncResult result = Client.BeginConnect(address, port, requestCallback, state);
+            IAsyncResult result = Client.InternalBeginConnect(address, port, requestCallback, state);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
             return result;
         }
 
-        public IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
+        internal IAsyncResult InternalBeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginConnect", addresses);
-            IAsyncResult result = Client.BeginConnect(addresses, port, requestCallback, state);
+            IAsyncResult result = Client.InternalBeginConnect(addresses, port, requestCallback, state);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
             return result;
         }
 
-        public void EndConnect(IAsyncResult asyncResult)
+        internal void InternalEndConnect(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "EndConnect", asyncResult);
-            Client.EndConnect(asyncResult);
+            Client.InternalEndConnect(asyncResult);
             _active = true;
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "EndConnect", null);
         }
@@ -440,17 +440,17 @@ namespace System.Net.Sockets
         //************* Task-based async public methods *************************
         public Task ConnectAsync(IPAddress address, int port)
         {
-            return Task.Factory.FromAsync(BeginConnect, EndConnect, address, port, null);
+            return Task.Factory.FromAsync(InternalBeginConnect, InternalEndConnect, address, port, null);
         }
 
         public Task ConnectAsync(string host, int port)
         {
-            return Task.Factory.FromAsync(BeginConnect, EndConnect, host, port, null);
+            return Task.Factory.FromAsync(InternalBeginConnect, InternalEndConnect, host, port, null);
         }
 
         public Task ConnectAsync(IPAddress[] addresses, int port)
         {
-            return Task.Factory.FromAsync(BeginConnect, EndConnect, addresses, port, null);
+            return Task.Factory.FromAsync(InternalBeginConnect, InternalEndConnect, addresses, port, null);
         }
 
 

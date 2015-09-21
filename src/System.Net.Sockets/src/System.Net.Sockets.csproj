@@ -41,6 +41,7 @@
     <Compile Include="System\Net\Sockets\SocketAsyncOperation.cs" />
     <Compile Include="System\Net\Sockets\SocketFlags.cs" />
     <Compile Include="System\Net\Sockets\SocketInformation.cs" />
+	<Compile Include="System\Net\Sockets\SocketLegacyExtensions.cs" />
     <Compile Include="System\Net\Sockets\SocketInformationOptions.cs" />
     <Compile Include="System\Net\Sockets\SocketOptionLevel.cs" />
     <Compile Include="System\Net\Sockets\SocketOptionName.cs" />
@@ -468,4 +469,3 @@
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />  
 </Project>
-

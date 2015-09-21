@@ -692,7 +692,7 @@ namespace System.Net.Sockets
 
 
 
-        public IAsyncResult BeginSend(byte[] datagram, int bytes, IPEndPoint endPoint, AsyncCallback requestCallback, object state)
+        internal IAsyncResult InternalBeginSend(byte[] datagram, int bytes, IPEndPoint endPoint, AsyncCallback requestCallback, object state)
         {
             //
             // parameter validation
@@ -721,17 +721,17 @@ namespace System.Net.Sockets
 
             if (endPoint == null)
             {
-                return Client.BeginSend(datagram, 0, bytes, SocketFlags.None, requestCallback, state);
+                return Client.InternalBeginSend(datagram, 0, bytes, SocketFlags.None, requestCallback, state);
             }
 
             CheckForBroadcast(endPoint.Address);
 
-            return Client.BeginSendTo(datagram, 0, bytes, SocketFlags.None, endPoint, requestCallback, state);
+            return Client.InternalBeginSendTo(datagram, 0, bytes, SocketFlags.None, endPoint, requestCallback, state);
         }
 
 
 
-        public IAsyncResult BeginSend(byte[] datagram, int bytes, string hostname, int port, AsyncCallback requestCallback, object state)
+        internal IAsyncResult InternalBeginSend(byte[] datagram, int bytes, string hostname, int port, AsyncCallback requestCallback, object state)
         {
             if (_active && ((hostname != null) || (port != 0)))
             {
@@ -756,18 +756,18 @@ namespace System.Net.Sockets
                 CheckForBroadcast(addresses[i]);
                 ipEndPoint = new IPEndPoint(addresses[i], port);
             }
-            return BeginSend(datagram, bytes, ipEndPoint, requestCallback, state);
+            return InternalBeginSend(datagram, bytes, ipEndPoint, requestCallback, state);
         }
 
 
 
-        public IAsyncResult BeginSend(byte[] datagram, int bytes, AsyncCallback requestCallback, object state)
+        internal IAsyncResult InternalBeginSend(byte[] datagram, int bytes, AsyncCallback requestCallback, object state)
         {
-            return BeginSend(datagram, bytes, null, requestCallback, state);
+            return InternalBeginSend(datagram, bytes, null, requestCallback, state);
         }
 
 
-        public int EndSend(IAsyncResult asyncResult)
+        internal int InternalEndSend(IAsyncResult asyncResult)
         {
             if (_cleanedUp)
             {
@@ -776,11 +776,11 @@ namespace System.Net.Sockets
 
             if (_active)
             {
-                return Client.EndSend(asyncResult);
+                return Client.InternalEndSend(asyncResult);
             }
             else
             {
-                return Client.EndSendTo(asyncResult);
+                return Client.InternalEndSendTo(asyncResult);
             }
         }
 
@@ -832,7 +832,7 @@ namespace System.Net.Sockets
         }
 
 
-        public IAsyncResult BeginReceive(AsyncCallback requestCallback, object state)
+        internal IAsyncResult InternalBeginReceive(AsyncCallback requestCallback, object state)
         {
             //
             // parameter validation
@@ -857,11 +857,11 @@ namespace System.Net.Sockets
                 tempRemoteEP = IPEndPointStatics.IPv6Any;
             }
 
-            return Client.BeginReceiveFrom(_buffer, 0, MaxUDPSize, SocketFlags.None, ref tempRemoteEP, requestCallback, state);
+            return Client.InternalBeginReceiveFrom(_buffer, 0, MaxUDPSize, SocketFlags.None, ref tempRemoteEP, requestCallback, state);
         }
 
 
-        public byte[] EndReceive(IAsyncResult asyncResult, ref IPEndPoint remoteEP)
+        internal byte[] InternalEndReceive(IAsyncResult asyncResult, ref IPEndPoint remoteEP)
         {
             if (_cleanedUp)
             {
@@ -879,7 +879,7 @@ namespace System.Net.Sockets
                 tempRemoteEP = IPEndPointStatics.IPv6Any;
             }
 
-            int received = Client.EndReceiveFrom(asyncResult, ref tempRemoteEP);
+            int received = Client.InternalEndReceiveFrom(asyncResult, ref tempRemoteEP);
             remoteEP = (IPEndPoint)tempRemoteEP;
 
             // because we don't return the actual length, we need to ensure the returned buffer
@@ -1144,25 +1144,25 @@ namespace System.Net.Sockets
         //************* Task-based async public methods *************************
         public Task<int> SendAsync(byte[] datagram, int bytes)
         {
-            return Task<int>.Factory.FromAsync(BeginSend, EndSend, datagram, bytes, null);
+            return Task<int>.Factory.FromAsync(InternalBeginSend, InternalEndSend, datagram, bytes, null);
         }
 
         public Task<int> SendAsync(byte[] datagram, int bytes, IPEndPoint endPoint)
         {
-            return Task<int>.Factory.FromAsync(BeginSend, EndSend, datagram, bytes, endPoint, null);
+            return Task<int>.Factory.FromAsync(InternalBeginSend, InternalEndSend, datagram, bytes, endPoint, null);
         }
 
         public Task<int> SendAsync(byte[] datagram, int bytes, string hostname, int port)
         {
-            return Task<int>.Factory.FromAsync((callback, state) => BeginSend(datagram, bytes, hostname, port, callback, state), EndSend, null);
+            return Task<int>.Factory.FromAsync((callback, state) => InternalBeginSend(datagram, bytes, hostname, port, callback, state), InternalEndSend, null);
         }
 
         public Task<UdpReceiveResult> ReceiveAsync()
         {
-            return Task<UdpReceiveResult>.Factory.FromAsync((callback, state) => BeginReceive(callback, state), (ar) =>
+            return Task<UdpReceiveResult>.Factory.FromAsync((callback, state) => InternalBeginReceive(callback, state), (ar) =>
                 {
                     IPEndPoint remoteEP = null;
-                    Byte[] buffer = EndReceive(ar, ref remoteEP);
+                    Byte[] buffer = InternalEndReceive(ar, ref remoteEP);
                     return new UdpReceiveResult(buffer, remoteEP);
                 }, null);
         }

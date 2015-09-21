@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Sockets.AsyncSer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Sockets.APM.Performance.Tests", "tests\PerformanceTests\System.Net.Sockets.APM.Performance.Tests.csproj", "{7340F160-F482-468D-AA09-2B6882BCDAD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Sockets.Legacy", "ref\System.Net.Sockets.Legacy.csproj", "{794C05B4-C5C7-4300-A375-F273661C3665}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{F01DDE29-F6FF-4C59-87B8-ABD53086F6CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +35,10 @@ Global
 		{7340F160-F482-468D-AA09-2B6882BCDAD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7340F160-F482-468D-AA09-2B6882BCDAD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7340F160-F482-468D-AA09-2B6882BCDAD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{794C05B4-C5C7-4300-A375-F273661C3665}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{794C05B4-C5C7-4300-A375-F273661C3665}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{794C05B4-C5C7-4300-A375-F273661C3665}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{794C05B4-C5C7-4300-A375-F273661C3665}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

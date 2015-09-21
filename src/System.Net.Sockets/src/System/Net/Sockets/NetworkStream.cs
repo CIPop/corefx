@@ -785,7 +785,7 @@ namespace System.Net.Sockets
                 try
                 {
                     IAsyncResult asyncResult =
-                        chkStreamSocket.BeginReceive(
+                        chkStreamSocket.InternalBeginReceive(
                             buffer,
                             offset,
                             size,
@@ -904,7 +904,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    int bytesTransferred = chkStreamSocket.EndReceive(asyncResult);
+                    int bytesTransferred = chkStreamSocket.InternalEndReceive(asyncResult);
                     return bytesTransferred;
                 }
                 catch (Exception exception)
@@ -991,7 +991,7 @@ namespace System.Net.Sockets
                     // call BeginSend on the Socket.
                     //
                     IAsyncResult asyncResult =
-                        chkStreamSocket.BeginSend(
+                        chkStreamSocket.InternalBeginSend(
                             buffer,
                             offset,
                             size,
@@ -1115,7 +1115,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    chkStreamSocket.EndSend(asyncResult);
+                    chkStreamSocket.InternalEndSend(asyncResult);
                 }
                 catch (Exception exception)
                 {
