@@ -10,9 +10,7 @@ using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
-    //
-    //  AcceptOverlappedAsyncResult - used to take care of storage for async Socket BeginAccept call.
-    //
+    // AcceptOverlappedAsyncResult - used to take care of storage for async Socket BeginAccept call.
     internal partial class AcceptOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
         private Socket _acceptedSocket;
@@ -21,6 +19,8 @@ namespace System.Net.Sockets
         {
             set
             {
+                // *nix does not support the reuse of an existing socket as the accepted
+                // socket.
                 Debug.Assert(value == null);
             }
         }

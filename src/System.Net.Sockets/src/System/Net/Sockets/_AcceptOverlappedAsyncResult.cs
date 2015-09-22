@@ -9,22 +9,13 @@ using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
-    //
-    //  AcceptOverlappedAsyncResult - used to take care of storage for async Socket BeginAccept call.
-    //
+    // AcceptOverlappedAsyncResult - used to take care of storage for async Socket BeginAccept call.
     internal partial class AcceptOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
         private int _localBytesTransferred;
         private Socket _listenSocket;
-
         private byte[] _buffer;
 
-        //
-        // Constructor. We take in the socket that's creating us, the caller's
-        // state object, and the buffer on which the I/O will be performed.
-        // We save the socket and state, pin the callers's buffer, and allocate
-        // an event for the WaitHandle.
-        //
         internal AcceptOverlappedAsyncResult(Socket listenSocket, Object asyncState, AsyncCallback asyncCallback) :
             base(listenSocket, asyncState, asyncCallback)
         {
