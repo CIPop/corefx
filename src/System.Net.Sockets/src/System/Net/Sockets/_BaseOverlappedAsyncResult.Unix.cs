@@ -10,18 +10,12 @@ using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
+    // BaseOverlappedAsyncResult
     //
-    //  BaseOverlappedAsyncResult - used to enable async Socket operation
-    //  such as the BeginSend, BeginSendTo, BeginReceive, BeginReceiveFrom, BeginSendFile,
-    //  BeginAccept, calls.
-    //
+    // This class is used to track state for async Socket operations such as the BeginSend, BeginSendTo,
+    // BeginReceive, BeginReceiveFrom, BeginSendFile, and BeginAccept calls.
     internal partial class BaseOverlappedAsyncResult : ContextAwareResult
     {
-        //
-        // Constructor. We take in the socket that's creating us, the caller's
-        // state object, and callback. We save the socket and state, and allocate
-        // an event for the WaitHandle.
-        //
         public BaseOverlappedAsyncResult(Socket socket, Object asyncState, AsyncCallback asyncCallback)
             : base(socket, asyncState, asyncCallback)
         {
@@ -38,6 +32,8 @@ namespace System.Net.Sockets
 
         private void ReleaseUnmanagedStructures()
         {
+            // NOTE: this method needs to exist to conform to the contract expected by the
+            //       platform-independent code in BaseOverlappedAsyncResult.CheckAsyncCallOverlappedResult.
         }
     }
 }

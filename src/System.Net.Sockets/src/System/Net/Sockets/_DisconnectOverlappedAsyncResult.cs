@@ -9,9 +9,7 @@ using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
-    //
-    //  DisconnectOverlappedAsyncResult - used to take care of storage for async Socket BeginAccept call.
-    //
+    // DisconnectOverlappedAsyncResult - used to take care of storage for async Socket BeginDisconnect call.
     internal class DisconnectOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
         internal DisconnectOverlappedAsyncResult(Socket socket, Object asyncState, AsyncCallback asyncCallback) :
@@ -19,11 +17,8 @@ namespace System.Net.Sockets
         {
         }
 
-        //
         // This method will be called by us when the IO completes synchronously and
         // by the ThreadPool when the IO completes asynchronously. (only called on WinNT)
-        //
-
         internal override object PostCompletion(int numBytes)
         {
             if (ErrorCode == (int)SocketError.Success)
@@ -32,6 +27,7 @@ namespace System.Net.Sockets
                 socket.SetToDisconnected();
                 socket.m_RemoteEndPoint = null;
             }
+
             return base.PostCompletion(numBytes);
         }
     }

@@ -385,7 +385,7 @@ namespace System.Net.Sockets
                 // This can throw ObjectDisposedException (retrieving the delegate AND resolving the handle).
                 if (socket.WSARecvMsg_Blocking(
                     handle.DangerousGetHandle(),
-                    Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult.m_MessageBuffer, 0),
+                    Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult._messageBuffer, 0),
                     out bytesTransferred,
                     IntPtr.Zero,
                     IntPtr.Zero) == SocketError.SocketError)
@@ -819,7 +819,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = Interop.Winsock.WSASend(
                 handle,
-                ref asyncResult.m_SingleBuffer,
+                ref asyncResult._singleBuffer,
                 1, // only ever 1 buffer being sent
                 out bytesTransferred,
                 socketFlags,
@@ -844,8 +844,8 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = Interop.Winsock.WSASend(
                 handle,
-                asyncResult.m_WSABuffers,
-                asyncResult.m_WSABuffers.Length,
+                asyncResult._wsaBuffers,
+                asyncResult._wsaBuffers.Length,
                 out bytesTransferred,
                 socketFlags,
                 asyncResult.OverlappedHandle,
@@ -869,8 +869,8 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = Interop.Winsock.WSASend(
                 handle,
-                asyncResult.m_WSABuffers,
-                asyncResult.m_WSABuffers.Length,
+                asyncResult._wsaBuffers,
+                asyncResult._wsaBuffers.Length,
                 out bytesTransferred,
                 socketFlags,
                 asyncResult.OverlappedHandle,
@@ -893,7 +893,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = Interop.Winsock.WSASendTo(
                 handle,
-                ref asyncResult.m_SingleBuffer,
+                ref asyncResult._singleBuffer,
                 1, // only ever 1 buffer being sent
                 out bytesTransferred,
                 socketFlags,
@@ -920,7 +920,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = Interop.Winsock.WSARecv(
                 handle,
-                ref asyncResult.m_SingleBuffer,
+                ref asyncResult._singleBuffer,
                 1,
                 out bytesTransferred,
                 ref socketFlags,
@@ -945,8 +945,8 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = Interop.Winsock.WSARecv(
                 handle,
-                asyncResult.m_WSABuffers,
-                asyncResult.m_WSABuffers.Length,
+                asyncResult._wsaBuffers,
+                asyncResult._wsaBuffers.Length,
                 out bytesTransferred,
                 ref socketFlags,
                 asyncResult.OverlappedHandle,
@@ -969,7 +969,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = Interop.Winsock.WSARecvFrom(
                 handle,
-                ref asyncResult.m_SingleBuffer,
+                ref asyncResult._singleBuffer,
                 1,
                 out bytesTransferred,
                 ref socketFlags,
@@ -993,7 +993,7 @@ namespace System.Net.Sockets
             int bytesTransfered;
             SocketError errorCode = (SocketError)socket.WSARecvMsg(
                 handle,
-                Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult.m_MessageBuffer, 0),
+                Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult._messageBuffer, 0),
                 out bytesTransfered,
                 asyncResult.OverlappedHandle,
                 IntPtr.Zero);

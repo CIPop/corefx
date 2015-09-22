@@ -9,14 +9,10 @@ using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
-    //
-    //  ConnectOverlappedAsyncResult - used to take care of storage for async Socket BeginAccept call.
-    //
+    // ConnectOverlappedAsyncResult - used to take care of storage for async Socket BeginConnect call.
     internal partial class ConnectOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
-        //
         // This method is called by base.CompletionPortCallback base.OverlappedCallback as part of IO completion
-        //
         internal override object PostCompletion(int numBytes)
         {
             SocketError errorCode = (SocketError)ErrorCode;
@@ -24,7 +20,7 @@ namespace System.Net.Sockets
 
             if (errorCode == SocketError.Success)
             {
-                //set the socket context
+                // Set the socket context.
                 try
                 {
                     errorCode = Interop.Winsock.setsockopt(
@@ -33,7 +29,10 @@ namespace System.Net.Sockets
                         SocketOptionName.UpdateConnectContext,
                         null,
                         0);
-                    if (errorCode == SocketError.SocketError) errorCode = (SocketError)Marshal.GetLastWin32Error();
+                    if (errorCode == SocketError.SocketError)
+                    {
+                        errorCode = (SocketError)Marshal.GetLastWin32Error();
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -48,6 +47,7 @@ namespace System.Net.Sockets
                 socket.SetToConnected();
                 return socket;
             }
+
             return null;
         }
     }
