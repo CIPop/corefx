@@ -44,7 +44,7 @@ namespace System.Net.Sockets
             Initialize(filepath, null, offset, count, SendPacketsElementFlags.File, endOfPacket);
         }
 
-        // Constructors for buffer elements
+        // Constructors for buffer elements.
         public SendPacketsElement(byte[] buffer) :
             this(buffer, 0, (buffer != null ? buffer.Length : 0), false)
         { }

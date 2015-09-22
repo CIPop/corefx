@@ -7,14 +7,14 @@ namespace System.Net
     public enum TransportType
     {
         // Udp connections are allowed.
-        Udp = 0x1,
-        Connectionless = 1,
+        Udp = 1,
+        Connectionless = Udp,
 
         // TCP connections are allowed.
-        Tcp = 0x2,
-        ConnectionOriented = 2,
+        Tcp = 2,
+        ConnectionOriented = Tcp,
 
         // Any connection is allowed.
-        All = 0x3
+        All = 3
     }
 }
