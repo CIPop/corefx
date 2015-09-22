@@ -674,7 +674,7 @@ namespace System.Net.Sockets
 
         private static unsafe int Send(int fd, int flags, BufferList buffers, ref int bufferIndex, ref int offset, byte[] socketAddress, int socketAddressLen, out Interop.Error errno)
         {
-            // Pin buffers and set up iovecs
+            // Pin buffers and set up iovecs.
             int startIndex = bufferIndex, startOffset = offset;
 
             var pinnedSocketAddress = default(GCHandle);
@@ -718,7 +718,7 @@ namespace System.Net.Sockets
             }
             finally
             {
-                // Free GC handles
+                // Free GC handles.
                 for (int i = 0; i < iovCount; i++)
                 {
                     if (handles[i].IsAllocated)
@@ -738,7 +738,7 @@ namespace System.Net.Sockets
                 return -1;
             }
 
-            // Update position
+            // Update position.
             int endIndex = bufferIndex, endOffset = offset, unconsumed = sent;
             for (; endIndex < buffers.Count && unconsumed > 0; endIndex++, endOffset = 0)
             {
@@ -759,7 +759,7 @@ namespace System.Net.Sockets
 
         private static unsafe int Receive(int fd, int flags, int available, BufferList buffers, byte[] socketAddress, ref int socketAddressLen, out int receivedFlags, out Interop.Error errno)
         {
-            // Pin buffers and set up iovecs
+            // Pin buffers and set up iovecs.
             int maxBuffers = buffers.Count;
             var handles = new GCHandle[maxBuffers];
             var iovecs = new Interop.libc.iovec[maxBuffers];
@@ -798,7 +798,7 @@ namespace System.Net.Sockets
                     sockAddrLen = (uint)socketAddressLen;
                 }
 
-                // Make the call
+                // Make the call.
                 fixed (Interop.libc.iovec* iov = iovecs)
                 {
                     var msghdr = new Interop.libc.msghdr(sockAddr, sockAddrLen, iov, iovCount, null, 0, 0);
@@ -809,7 +809,7 @@ namespace System.Net.Sockets
             }
             finally
             {
-                // Free GC handles
+                // Free GC handles.
                 for (int i = 0; i < iovCount; i++)
                 {
                     if (handles[i].IsAllocated)
