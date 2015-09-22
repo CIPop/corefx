@@ -59,13 +59,8 @@ namespace System.Net.Sockets
         }
 
         // Initializes a new instance of the System.Net.Sockets.TcpClient class.
-#if COMNET_DISABLEIPV6
-        private TcpClient(AddressFamily family)
-        {
-#else
         public TcpClient(AddressFamily family)
         {
-#endif
             if (Logging.On)
             {
                  Logging.Enter(Logging.Sockets, this, "TcpClient", family);
