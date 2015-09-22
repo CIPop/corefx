@@ -5,24 +5,15 @@ using System.Net;
 
 namespace System.Net.Sockets
 {
-    /// <devdoc>
-    ///    <para>
-    ///       Contains option values
-    ///       for IP multicast packets.
-    ///    </para>
-    /// </devdoc>
+    // Contains option values for IP multicast packets.
     public class MulticastOption
     {
         private IPAddress _group;
         private IPAddress _localAddress;
         private int _ifIndex;
 
-        /// <devdoc>
-        ///    <para>
-        ///       Creates a new instance of the MulticaseOption class with the specified IP
-        ///       address group and local address.
-        ///    </para>
-        /// </devdoc>
+        // Creates a new instance of the MulticastOption class with the specified IP address
+        // group and local address.
         public MulticastOption(IPAddress group, IPAddress mcint)
         {
             if (group == null)
@@ -38,7 +29,6 @@ namespace System.Net.Sockets
             Group = group;
             LocalAddress = mcint;
         }
-
 
         public MulticastOption(IPAddress group, int interfaceIndex)
         {
@@ -56,13 +46,7 @@ namespace System.Net.Sockets
             _ifIndex = interfaceIndex;
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Creates a new version of the MulticastOption class for the specified
-        ///       group.
-        ///    </para>
-        /// </devdoc>
+        // Creates a new version of the MulticastOption class for the specified group.
         public MulticastOption(IPAddress group)
         {
             if (group == null)
@@ -75,11 +59,7 @@ namespace System.Net.Sockets
             LocalAddress = IPAddress.Any;
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Sets the IP address of a multicast group.
-        ///    </para>
-        /// </devdoc>
+        // Sets the IP address of a multicast group.
         public IPAddress Group
         {
             get
@@ -92,11 +72,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Sets the local address of a multicast group.
-        ///    </para>
-        /// </devdoc>
+        // Sets the local address of a multicast group.
         public IPAddress LocalAddress
         {
             get
@@ -109,7 +85,6 @@ namespace System.Net.Sockets
                 _localAddress = value;
             }
         }
-
 
         public int InterfaceIndex
         {
@@ -128,24 +103,16 @@ namespace System.Net.Sockets
                 _ifIndex = value;
             }
         }
-    } // class MulticastOption
+    }
 
-    /// <devdoc>
-    /// <para>
-    /// Contains option values for joining an IPv6 multicast group.
-    /// </para>
-    /// </devdoc>
+    // Contains option values for joining an IPv6 multicast group.
     public class IPv6MulticastOption
     {
         private IPAddress _group;
         private long _interface;
 
-        /// <devdoc>
-        /// <para>
-        /// Creates a new instance of the MulticaseOption class with the specified IP
-        /// address group and local address.
-        /// </para>
-        /// </devdoc>
+        // Creates a new instance of the MulticaseOption class with the specified IP
+        // address group and local address.
         public IPv6MulticastOption(IPAddress group, long ifindex)
         {
             if (group == null)
@@ -162,12 +129,8 @@ namespace System.Net.Sockets
             InterfaceIndex = ifindex;
         }
 
-        /// <devdoc>
-        /// <para>
-        /// Creates a new version of the MulticastOption class for the specified
-        /// group.
-        /// </para>
-        /// </devdoc>
+        // Creates a new version of the MulticastOption class for the specified
+        // group.
         public IPv6MulticastOption(IPAddress group)
         {
             if (group == null)
@@ -179,11 +142,7 @@ namespace System.Net.Sockets
             InterfaceIndex = 0;
         }
 
-        /// <devdoc>
-        /// <para>
-        /// Sets the IP address of a multicast group.
-        /// </para>
-        /// </devdoc>
+        // Sets the IP address of a multicast group.
         public IPAddress Group
         {
             get
@@ -201,11 +160,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        /// <para>
-        /// Sets the interface index.
-        /// </para>
-        /// </devdoc>
+        // Sets the interface index.
         public long InterfaceIndex
         {
             get
@@ -222,5 +177,5 @@ namespace System.Net.Sockets
                 _interface = value;
             }
         }
-    } // class MulticastOptionIPv6
-} // namespace System.Net.Sockets
+    }
+}

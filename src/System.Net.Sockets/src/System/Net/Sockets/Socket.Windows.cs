@@ -82,7 +82,7 @@ namespace System.Net.Sockets
         internal bool DisconnectEx_Blocking(IntPtr socketHandle, IntPtr overlapped, int flags, int reserved)
         {
             EnsureDynamicWinsockMethods();
-            DisconnectExDelegate_Blocking disconnectEx_Blocking = _dynamicWinsockMethods.GetDelegate<DisconnectExDelegate_Blocking>(_handle);
+            DisconnectExDelegateBlocking disconnectEx_Blocking = _dynamicWinsockMethods.GetDelegate<DisconnectExDelegateBlocking>(_handle);
 
             return disconnectEx_Blocking(socketHandle, overlapped, flags, reserved);
         }
@@ -112,7 +112,7 @@ namespace System.Net.Sockets
         internal SocketError WSARecvMsg_Blocking(IntPtr socketHandle, IntPtr msg, out int bytesTransferred, IntPtr overlapped, IntPtr completionRoutine)
         {
             EnsureDynamicWinsockMethods();
-            WSARecvMsgDelegate_Blocking recvMsg_Blocking = _dynamicWinsockMethods.GetDelegate<WSARecvMsgDelegate_Blocking>(_handle);
+            WSARecvMsgDelegateBlocking recvMsg_Blocking = _dynamicWinsockMethods.GetDelegate<WSARecvMsgDelegateBlocking>(_handle);
 
             return recvMsg_Blocking(socketHandle, msg, out bytesTransferred, overlapped, completionRoutine);
         }
