@@ -351,6 +351,17 @@ namespace System.Net.Sockets
 
         protected abstract void OnFail(bool abortive);
 
+        private void OnFailOuter(bool abortive)
+        {
+            OnFail(abortive);
+
+            if (!SocketPal.SupportsMultipleConnectAttempts && _lastAttemptSocket != null)
+            {
+                _lastAttemptSocket.Dispose();
+                _lastAttemptSocket = null;
+            }
+        }
+
         private bool Fail(bool sync, Exception e)
         {
             if (sync)
@@ -367,12 +378,8 @@ namespace System.Net.Sockets
 
         private void SyncFail(Exception e)
         {
-            OnFail(false);
+            OnFailOuter(false);
 
-            if (!SocketPal.SupportsMultipleConnectAttempts && _lastAttemptSocket != null)
-            {
-                _lastAttemptSocket.Dispose();
-            }
             if (internalArgs != null)
             {
                 internalArgs.Dispose();
@@ -391,12 +398,8 @@ namespace System.Net.Sockets
 
         private void AsyncFail(Exception e)
         {
-            OnFail(false);
+            OnFailOuter(false);
 
-            if (!SocketPal.SupportsMultipleConnectAttempts && _lastAttemptSocket != null)
-            {
-                _lastAttemptSocket.Dispose();
-            }
             if (internalArgs != null)
             {
                 internalArgs.Dispose();
@@ -459,12 +462,7 @@ namespace System.Net.Sockets
             // Call this outside the lock because Socket.Close may block
             if (callOnFail)
             {
-                OnFail(true);
-
-                if (!SocketPal.SupportsMultipleConnectAttempts && _lastAttemptSocket != null)
-                {
-                    _lastAttemptSocket.Dispose();
-                }
+                OnFailOuter(true);
             }
         }
 
@@ -562,7 +560,7 @@ namespace System.Net.Sockets
             get
             {
                 Debug.Fail("Should never get here");
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 
@@ -649,7 +647,7 @@ namespace System.Net.Sockets
             get
             {
                 Debug.Fail("Should never get here");
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 

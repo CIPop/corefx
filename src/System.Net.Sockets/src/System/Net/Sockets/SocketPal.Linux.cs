@@ -9,7 +9,7 @@ namespace System.Net.Sockets
     {
         public const bool SupportsMultipleConnectAttempts = true;
 
-        public static unsafe void PrimeForNextConnectAttempt(int fileDescriptor, int socketAddressLen)
+        static unsafe partial void PrimeForNextConnectAttempt(int fileDescriptor, int socketAddressLen)
         {
             // On Linux, a non-blocking socket that fails a connect() attempt needs to be kicked
             // with another connect to AF_UNSPEC before further connect() attempts will return

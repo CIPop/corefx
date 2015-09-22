@@ -946,6 +946,10 @@ namespace System.Net.Sockets
             return false;
         }
 
+        // This method is used by systems that may need to reset some socket state before
+        // reusing it for another connect attempt (e.g. Linux).
+        static unsafe partial void PrimeForNextConnectAttempt(int fileDescriptor, int socketAddressLen);
+
         public static unsafe bool TryCompleteConnect(int fileDescriptor, int socketAddressLen, out SocketError errorCode)
         {
             int socketErrno;
@@ -973,17 +977,7 @@ namespace System.Net.Sockets
             }
 
             errorCode = GetSocketErrorForErrorCode(socketError);
-
-// Disable CS0162: Unreachable code detected
-//
-// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
-#pragma warning disable 162
-            if (SupportsMultipleConnectAttempts)
-            {
-                PrimeForNextConnectAttempt(fileDescriptor, socketAddressLen);
-            }
-#pragma warning restore 162
-
+            PrimeForNextConnectAttempt(fileDescriptor, socketAddressLen);
             return true;
         }
 

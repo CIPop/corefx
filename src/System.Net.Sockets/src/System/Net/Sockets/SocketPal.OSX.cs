@@ -8,10 +8,5 @@ namespace System.Net.Sockets
     internal static partial class SocketPal
     {
         public const bool SupportsMultipleConnectAttempts = false;
-
-        public static void PrimeForNextConnectAttempt(int fileDescriptor, int socketAddressLen)
-        {
-            Debug.Fail("This should never be called!");
-        }
     }
 }

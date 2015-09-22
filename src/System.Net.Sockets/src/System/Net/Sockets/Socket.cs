@@ -1098,18 +1098,20 @@ namespace System.Net.Sockets
 
                             var attemptEndpoint = new IPEndPoint(address, port);
                             attemptSocket.Connect(attemptEndpoint);
-                            attemptSocket.Dispose();
                             endpoint = attemptEndpoint;
                             lastex = null;
                             break;
                         }
                         catch (Exception ex)
                         {
+                            lastex = ex;
+                        }
+                        finally
+                        {
                             if (attemptSocket != null)
                             {
                                 attemptSocket.Dispose();
                             }
-                            lastex = ex;
                         }
                     }
                 }
@@ -6175,6 +6177,19 @@ namespace System.Net.Sockets
             }
         }
 
+        private static AsyncCallback s_multipleAddressConnectCallback;
+        private static AsyncCallback CachedMultipleAddressConnectCallback
+        {
+            get
+            {
+                if (s_multipleAddressConnectCallback == null)
+                {
+                    s_multipleAddressConnectCallback = new AsyncCallback(MultipleAddressConnectCallback);
+                }
+                return s_multipleAddressConnectCallback;
+            }
+        }
+
 // Disable CS0162: Unreachable code detected
 //
 // SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
@@ -6194,14 +6209,8 @@ namespace System.Net.Sockets
                 // MSRC 11081 - Do the necessary security demand
                 context.socket.CheckCacheRemote(ref endPoint, true);
 
-                var asyncCallback = new AsyncCallback(MultipleAddressConnectCallback);
-
-                IAsyncResult connectResult;
-                if (SocketPal.SupportsMultipleConnectAttempts || context.isUserConnectAttempt)
-                {
-                    connectResult = context.socket.UnsafeBeginConnect(endPoint, asyncCallback, context);
-                }
-                else
+                Socket connectSocket = context.socket;
+                if (!SocketPal.SupportsMultipleConnectAttempts && !context.isUserConnectAttempt)
                 {
                     context.lastAttemptSocket = new Socket(context.socket._addressFamily, context.socket._socketType, context.socket._protocolType);
                     if (context.socket.IsDualMode)
@@ -6209,9 +6218,10 @@ namespace System.Net.Sockets
                         context.lastAttemptSocket.DualMode = true;
                     }
 
-                    connectResult = context.lastAttemptSocket.UnsafeBeginConnect(endPoint, asyncCallback, context);
+                    connectSocket = context.lastAttemptSocket;
                 }
 
+                IAsyncResult connectResult = connectSocket.UnsafeBeginConnect(endPoint, CachedMultipleAddressConnectCallback, context);
                 if (connectResult.CompletedSynchronously)
                 {
                     return connectResult;
