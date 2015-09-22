@@ -8,49 +8,27 @@ using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
-    /// <devdoc>
-    ///    <para>
-    ///       Provides the underlying stream of data for network access.
-    ///    </para>
-    /// </devdoc>
+    // Provides the underlying stream of data for network access.
     public class NetworkStream : Stream
     {
-        /// <devdoc>
-        ///    <para>
-        ///       Used by the class to hold the underlying socket the stream uses.
-        ///    </para>
-        /// </devdoc>
+        // Used by the class to hold the underlying socket the stream uses.
         private Socket _streamSocket;
 
-        /// <devdoc>
-        ///    <para>
-        ///       Used by the class to indicate that the stream is m_Readable.
-        ///    </para>
-        /// </devdoc>
+        // Used by the class to indicate that the stream is m_Readable.
         private bool _readable;
 
-        /// <devdoc>
-        ///    <para>
-        ///       Used by the class to indicate that the stream is writable.
-        ///    </para>
-        /// </devdoc>
+        // Used by the class to indicate that the stream is writable.
         private bool _writeable;
 
         private bool _ownsSocket;
 
-        /// <devdoc>
-        /// <para>Creates a new instance of the <see cref='System.Net.Sockets.NetworkStream'/> without initalization.</para>
-        /// </devdoc>
+        // Creates a new instance of the System.Net.Sockets.NetworkStream without initalization.
         internal NetworkStream()
         {
             _ownsSocket = true;
         }
 
-
-        // Can be constructed directly out of a socket
-        /// <devdoc>
-        /// <para>Creates a new instance of the <see cref='System.Net.Sockets.NetworkStream'/> class for the specified <see cref='System.Net.Sockets.Socket'/>.</para>
-        /// </devdoc>
+        // Creates a new instance of the System.Net.Sockets.NetworkStream class for the specified System.Net.Sockets.Socket.
         public NetworkStream(Socket socket)
         {
 #if DEBUG
@@ -67,8 +45,6 @@ namespace System.Net.Sockets
 #endif
         }
 
-        //UEUE (see FileStream)
-        // ownsHandle: true if the file handle will be owned by this NetworkStream instance; otherwise, false.
         public NetworkStream(Socket socket, bool ownsSocket)
         {
 #if DEBUG
@@ -97,9 +73,7 @@ namespace System.Net.Sockets
             _ownsSocket = ownsSocket;
         }
 
-        //
         // Socket - provides access to socket for stream closing
-        //
         protected Socket Socket
         {
             get
@@ -151,11 +125,7 @@ namespace System.Net.Sockets
             GC.SuppressFinalize(this);
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Used by the class to indicate that the stream is m_Readable.
-        ///    </para>
-        /// </devdoc>
+        // Used by the class to indicate that the stream is m_Readable.
         protected bool Readable
         {
             get
@@ -168,11 +138,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Used by the class to indicate that the stream is writable.
-        ///    </para>
-        /// </devdoc>
+        // Used by the class to indicate that the stream is writable.
         protected bool Writeable
         {
             get
@@ -185,13 +151,8 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Indicates that data can be read from the stream.
-        ///         We return the readability of this stream. This is a read only property.
-        ///    </para>
-        /// </devdoc>
+        // Indicates that data can be read from the stream.
+        // We return the readability of this stream. This is a read only property.
         public override bool CanRead
         {
             get
@@ -200,14 +161,8 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Indicates that the stream can seek a specific location
-        ///       in the stream. This property always returns <see langword='false'/>
-        ///       .
-        ///    </para>
-        /// </devdoc>
+        // Indicates that the stream can seek a specific location
+        // in the stream. This property always returns false.
         public override bool CanSeek
         {
             get
@@ -216,12 +171,7 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Indicates that data can be written to the stream.
-        ///    </para>
-        /// </devdoc>
+        // Indicates that data can be written to the stream.
         public override bool CanWrite
         {
             get
@@ -230,10 +180,7 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>Indicates whether we can timeout</para>
-        /// </devdoc>
+        // Indicates whether we can timeout
         public override bool CanTimeout
         {
             get
@@ -242,11 +189,8 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>Set/Get ReadTimeout, note of a strange behavior, 0 timeout == infinite for sockets,
-        ///         so we map this to -1, and if you set 0, we cannot support it</para>
-        /// </devdoc>
+        // Set/Get ReadTimeout, note of a strange behavior, 0 timeout == infinite for sockets,
+        // so we map this to -1, and if you set 0, we cannot support it
         public override int ReadTimeout
         {
             get
@@ -282,10 +226,8 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>Set/Get WriteTimeout, note of a strange behavior, 0 timeout == infinite for sockets,
-        ///         so we map this to -1, and if you set 0, we cannot support it</para>
-        /// </devdoc>
+        // Set/Get WriteTimeout, note of a strange behavior, 0 timeout == infinite for sockets,
+        // so we map this to -1, and if you set 0, we cannot support it
 	    public override int WriteTimeout
         {
             get
@@ -321,12 +263,8 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Indicates data is available on the stream to be read.
-        ///         This property checks to see if at least one byte of data is currently available            
-        ///    </para>
-        /// </devdoc>
+        // Indicates data is available on the stream to be read.
+        // This property checks to see if at least one byte of data is currently available            
         public virtual bool DataAvailable
         {
             get
@@ -348,7 +286,6 @@ namespace System.Net.Sockets
 
                     // Ask the socket how many bytes are available. If it's
                     // not zero, return true.
-
                     return chkStreamSocket.Available != 0;
 #if DEBUG
                 }
@@ -356,12 +293,7 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       The length of data available on the stream. Always throws <see cref='NotSupportedException'/>.
-        ///    </para>
-        /// </devdoc>
+        // The length of data available on the stream. Always throws NotSupportedException.
         public override long Length
         {
             get
@@ -370,11 +302,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets the position in the stream. Always throws <see cref='NotSupportedException'/>.
-        ///    </para>
-        /// </devdoc>
+        // Gets or sets the position in the stream. Always throws NotSupportedException.
         public override long Position
         {
             get
@@ -388,13 +316,8 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Seeks a specific position in the stream. This method is not supported by the
-        ///    <see cref='NetworkStream'/> class.
-        ///    </para>
-        /// </devdoc>
+        // Seeks a specific position in the stream. This method is not supported by the
+        // NetworkStream class.
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException(SR.net_noseek);
@@ -426,6 +349,7 @@ namespace System.Net.Sockets
             {
                 return false;
             }
+
             Socket chkStreamSocket = _streamSocket;
             if (chkStreamSocket == null)
             {
@@ -450,31 +374,20 @@ namespace System.Net.Sockets
             return chkStreamSocket.Poll(microSeconds, mode);
         }
 
-
-        /*++
-            Read - provide core Read functionality.
-
-            Provide core read functionality. All we do is call through to the
-            socket Receive functionality.
-
-            Input:
-
-                Buffer  - Buffer to read into.
-                Offset  - Offset into the buffer where we're to read.
-                Count   - Number of bytes to read.
-
-            Returns:
-
-                Number of bytes we read, or 0 if the socket is closed.
-
-        --*/
-
-        /// <devdoc>
-        ///    <para>
-        ///       Reads data from the stream.
-        ///    </para>
-        /// </devdoc>
-        //UEUE
+        // Read - provide core Read functionality.
+        // 
+        // Provide core read functionality. All we do is call through to the
+        // socket Receive functionality.
+        // 
+        // Input:
+        // 
+        //     Buffer  - Buffer to read into.
+        //     Offset  - Offset into the buffer where we're to read.
+        //     Count   - Number of bytes to read.
+        // 
+        // Returns:
+        // 
+        //     Number of bytes we read, or 0 if the socket is closed.
         public override int Read([In, Out] byte[] buffer, int offset, int size)
         {
 #if DEBUG
@@ -490,9 +403,8 @@ namespace System.Net.Sockets
                 {
                     throw new InvalidOperationException(SR.net_writeonlystream);
                 }
-                //
-                // parameter validation
-                //
+
+                // Validate input parameters.
                 if (buffer == null)
                 {
                     throw new ArgumentNullException("buffer");
@@ -505,7 +417,6 @@ namespace System.Net.Sockets
                 {
                     throw new ArgumentOutOfRangeException("size");
                 }
-
 
                 Socket chkStreamSocket = _streamSocket;
                 if (chkStreamSocket == null)
@@ -525,10 +436,8 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
                 }
 #if DEBUG
@@ -536,30 +445,22 @@ namespace System.Net.Sockets
 #endif
         }
 
-        /*++
-            Write - provide core Write functionality.
-
-            Provide core write functionality. All we do is call through to the
-            socket Send method..
-
-            Input:
-
-                Buffer  - Buffer to write from.
-                Offset  - Offset into the buffer from where we'll start writing.
-                Count   - Number of bytes to write.
-
-            Returns:
-
-                Number of bytes written. We'll throw an exception if we
-                can't write everything. It's brutal, but there's no other
-                way to indicate an error.
-        --*/
-
-        /// <devdoc>
-        ///    <para>
-        ///       Writes data to the stream..
-        ///    </para>
-        /// </devdoc>
+        // Write - provide core Write functionality.
+        // 
+        // Provide core write functionality. All we do is call through to the
+        // socket Send method..
+        // 
+        // Input:
+        // 
+        //     Buffer  - Buffer to write from.
+        //     Offset  - Offset into the buffer from where we'll start writing.
+        //     Count   - Number of bytes to write.
+        // 
+        // Returns:
+        // 
+        //     Number of bytes written. We'll throw an exception if we
+        //     can't write everything. It's brutal, but there's no other
+        //     way to indicate an error.
         public override void Write(byte[] buffer, int offset, int size)
         {
 #if DEBUG
@@ -575,9 +476,8 @@ namespace System.Net.Sockets
                 {
                     throw new InvalidOperationException(SR.net_readonlystream);
                 }
-                //
-                // parameter validation
-                //
+
+                // Validate input parameters.
                 if (buffer == null)
                 {
                     throw new ArgumentNullException("buffer");
@@ -591,7 +491,6 @@ namespace System.Net.Sockets
                     throw new ArgumentOutOfRangeException("size");
                 }
 
-
                 Socket chkStreamSocket = _streamSocket;
                 if (chkStreamSocket == null)
                 {
@@ -600,10 +499,8 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    //
-                    // since the socket is in blocking mode this will always complete
-                    // after ALL the requested number of bytes was transferred
-                    //
+                    // Since the socket is in blocking mode this will always complete
+                    // after ALL the requested number of bytes was transferred.
                     chkStreamSocket.Send(buffer, offset, size, SocketFlags.None);
                 }
                 catch (Exception exception)
@@ -613,10 +510,8 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
 #if DEBUG
@@ -655,24 +550,20 @@ namespace System.Net.Sockets
                 _cleanedUp = true;
                 if (!cleanedUp && disposing)
                 {
-                    //
-                    // only resource we need to free is the network stream, since this
+                    // The only resource we need to free is the network stream, since this
                     // is based on the client socket, closing the stream will cause us
                     // to flush the data to the network, close the stream and (in the
                     // NetoworkStream code) close the socket as well.
-                    //
                     if (_streamSocket != null)
                     {
                         _readable = false;
                         _writeable = false;
                         if (_ownsSocket)
                         {
-                            //
-                            // if we own the Socket (false by default), close it
+                            // If we own the Socket (false by default), close it
                             // ignoring possible exceptions (eg: the user told us
                             // that we own the Socket but it closed at some point of time,
                             // here we would get an ObjectDisposedException)
-                            //
                             Socket chkStreamSocket = _streamSocket;
                             if (chkStreamSocket != null)
                             {
@@ -692,19 +583,11 @@ namespace System.Net.Sockets
         {
 #if DEBUG
             GlobalLog.SetThreadSource(ThreadKinds.Finalization);
-            // using (GlobalLog.SetThreadKind(ThreadKinds.System | ThreadKinds.Async)) {
 #endif
             Dispose(false);
-#if DEBUG
-            // }
-#endif
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Indicates whether the stream is still connected
-        ///    </para>
-        /// </devdoc>
+        // Indicates whether the stream is still connected
         internal bool Connected
         {
             get
@@ -721,30 +604,20 @@ namespace System.Net.Sockets
             }
         }
 
-
-        /*++
-            BeginRead - provide async read functionality.
-
-            This method provides async read functionality. All we do is
-            call through to the underlying socket async read.
-
-            Input:
-
-                buffer  - Buffer to read into.
-                offset  - Offset into the buffer where we're to read.
-                size   - Number of bytes to read.
-
-            Returns:
-
-                An IASyncResult, representing the read.
-
-        --*/
-
-        /// <devdoc>
-        ///    <para>
-        ///       Begins an asychronous read from a stream.
-        ///    </para>
-        /// </devdoc>
+        // BeginRead - provide async read functionality.
+        // 
+        // This method provides async read functionality. All we do is
+        // call through to the underlying socket async read.
+        // 
+        // Input:
+        // 
+        //     buffer  - Buffer to read into.
+        //     offset  - Offset into the buffer where we're to read.
+        //     size   - Number of bytes to read.
+        // 
+        // Returns:
+        // 
+        //     An IASyncResult, representing the read.
         public IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
         {
 #if DEBUG
@@ -760,9 +633,8 @@ namespace System.Net.Sockets
                 {
                     throw new InvalidOperationException(SR.net_writeonlystream);
                 }
-                //
-                // parameter validation
-                //
+
+                // Validate input parameters.
                 if (buffer == null)
                 {
                     throw new ArgumentNullException("buffer");
@@ -802,10 +674,8 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
                 }
 #if DEBUG
@@ -847,36 +717,20 @@ namespace System.Net.Sockets
             {
                 if (ExceptionCheck.IsFatal(exception)) throw;
 
-                //
-                // some sort of error occured on the socket call,
-                // set the SocketException as InnerException and throw
-                //
+                // Some sort of error occured on the socket call,
+                // set the SocketException as InnerException and throw.
                 throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
             }
         }
 
-        /*++
-            EndRead - handle the end of an async read.
-
-            This method is called when an async read is completed. All we
-            do is call through to the core socket EndReceive functionality.
-            Input:
-
-                buffer  - Buffer to read into.
-                offset  - Offset into the buffer where we're to read.
-                size   - Number of bytes to read.
-
-            Returns:
-
-                The number of bytes read. May throw an exception.
-
-        --*/
-
-        /// <devdoc>
-        ///    <para>
-        ///       Handle the end of an asynchronous read.
-        ///    </para>
-        /// </devdoc>
+        // EndRead - handle the end of an async read.
+        // 
+        // This method is called when an async read is completed. All we
+        // do is call through to the core socket EndReceive functionality.
+        // 
+        // Returns:
+        // 
+        //     The number of bytes read. May throw an exception.
         public int EndRead(IAsyncResult asyncResult)
         {
 #if DEBUG
@@ -888,9 +742,7 @@ namespace System.Net.Sockets
                     throw new ObjectDisposedException(this.GetType().FullName);
                 }
 
-                //
-                // parameter validation
-                //
+                // Validate input parameters.
                 if (asyncResult == null)
                 {
                     throw new ArgumentNullException("asyncResult");
@@ -914,10 +766,8 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
                 }
 #if DEBUG
@@ -925,29 +775,20 @@ namespace System.Net.Sockets
 #endif
         }
 
-        /*++
-            BeginWrite - provide async write functionality.
-
-            This method provides async write functionality. All we do is
-            call through to the underlying socket async send.
-
-            Input:
-
-                buffer  - Buffer to write into.
-                offset  - Offset into the buffer where we're to write.
-                size   - Number of bytes to written.
-
-            Returns:
-
-                An IASyncResult, representing the write.
-
-        --*/
-
-        /// <devdoc>
-        ///    <para>
-        ///       Begins an asynchronous write to a stream.
-        ///    </para>
-        /// </devdoc>
+        // BeginWrite - provide async write functionality.
+        // 
+        // This method provides async write functionality. All we do is
+        // call through to the underlying socket async send.
+        // 
+        // Input:
+        // 
+        //     buffer  - Buffer to write into.
+        //     offset  - Offset into the buffer where we're to write.
+        //     size   - Number of bytes to written.
+        // 
+        // Returns:
+        // 
+        //     An IASyncResult, representing the write.
         public IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
         {
 #if DEBUG
@@ -963,9 +804,8 @@ namespace System.Net.Sockets
                 {
                     throw new InvalidOperationException(SR.net_readonlystream);
                 }
-                //
-                // parameter validation
-                //
+
+                // Validate input parameters.
                 if (buffer == null)
                 {
                     throw new ArgumentNullException("buffer");
@@ -987,9 +827,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    //
-                    // call BeginSend on the Socket.
-                    //
+                    // Call BeginSend on the Socket.
                     IAsyncResult asyncResult =
                         chkStreamSocket.BeginSend(
                             buffer,
@@ -1008,18 +846,14 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
 #if DEBUG
             }
 #endif
         }
-
-
 
         internal virtual IAsyncResult UnsafeBeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
         {
@@ -1046,9 +880,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    //
-                    // call BeginSend on the Socket.
-                    //
+                    // Call BeginSend on the Socket.
                     IAsyncResult asyncResult =
                         chkStreamSocket.UnsafeBeginSend(
                             buffer,
@@ -1067,10 +899,8 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
 #if DEBUG
@@ -1078,16 +908,10 @@ namespace System.Net.Sockets
 #endif
         }
 
-
-
-        /// <devdoc>
-        ///    <para>
-        ///       Handle the end of an asynchronous write.
-        ///       This method is called when an async write is completed. All we
-        ///       do is call through to the core socket EndSend functionality.
-        ///       Returns:  The number of bytes read. May throw an exception.
-        ///    </para>
-        /// </devdoc>
+        // Handle the end of an asynchronous write.
+        // This method is called when an async write is completed. All we
+        // do is call through to the core socket EndSend functionality.
+        // Returns:  The number of bytes read. May throw an exception.
         public void EndWrite(IAsyncResult asyncResult)
         {
 #if DEBUG
@@ -1099,9 +923,7 @@ namespace System.Net.Sockets
                     throw new ObjectDisposedException(this.GetType().FullName);
                 }
 
-                //
-                // parameter validation
-                //
+                // Validate input parameters.
                 if (asyncResult == null)
                 {
                     throw new ArgumentNullException("asyncResult");
@@ -1124,10 +946,8 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
 #if DEBUG
@@ -1135,19 +955,12 @@ namespace System.Net.Sockets
 #endif
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Performs a sync Write of an array of buffers.
-        ///    </para>
-        /// </devdoc>
+        // Performs a sync Write of an array of buffers.
         internal virtual void MultipleWrite(BufferOffsetSize[] buffers)
         {
             GlobalLog.ThreadContract(ThreadKinds.Sync, "NetworkStream#" + Logging.HashString(this) + "::MultipleWrite");
 
-            //
-            // parameter validation
-            //
+            // Validate input parameters.
             if (buffers == null)
             {
                 throw new ArgumentNullException("buffers");
@@ -1172,20 +985,13 @@ namespace System.Net.Sockets
                     throw;
                 }
 
-                //
-                // some sort of error occured on the socket call,
-                // set the SocketException as InnerException and throw
-                //
+                // Some sort of error occured on the socket call,
+                // set the SocketException as InnerException and throw.
                 throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Starts off an async Write of an array of buffers.
-        ///    </para>
-        /// </devdoc>
+        // Starts off an async Write of an array of buffers.
         internal virtual IAsyncResult BeginMultipleWrite(
             BufferOffsetSize[] buffers,
             AsyncCallback callback,
@@ -1196,10 +1002,7 @@ namespace System.Net.Sockets
             using (GlobalLog.SetThreadKind(ThreadKinds.Async))
             {
 #endif
-
-                //
-                // parameter validation
-                //
+                // Validate input parameters.
                 if (buffers == null)
                 {
                     throw new ArgumentNullException("buffers");
@@ -1213,9 +1016,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    //
-                    // call BeginMultipleSend on the Socket.
-                    //
+                    // Call BeginMultipleSend on the Socket.
                     IAsyncResult asyncResult =
                         chkStreamSocket.BeginMultipleSend(
                             buffers,
@@ -1232,17 +1033,14 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
 #if DEBUG
             }
 #endif
         }
-
 
         internal virtual IAsyncResult UnsafeBeginMultipleWrite(
             BufferOffsetSize[] buffers,
@@ -1254,10 +1052,7 @@ namespace System.Net.Sockets
             using (GlobalLog.SetThreadKind(ThreadKinds.Async))
             {
 #endif
-
-                //
-                // parameter validation
-                //
+                // Validate input parameters.
                 if (buffers == null)
                 {
                     throw new ArgumentNullException("buffers");
@@ -1271,9 +1066,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    //
-                    // call BeginMultipleSend on the Socket.
-                    //
+                    // Call BeginMultipleSend on the Socket.
                     IAsyncResult asyncResult =
                         chkStreamSocket.UnsafeBeginMultipleSend(
                             buffers,
@@ -1290,10 +1083,8 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    //
-                    // some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw
-                    //
+                    // Some sort of error occured on the socket call,
+                    // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
 #if DEBUG
@@ -1301,14 +1092,11 @@ namespace System.Net.Sockets
 #endif
         }
 
-
         internal virtual void EndMultipleWrite(IAsyncResult asyncResult)
         {
             GlobalLog.ThreadContract(ThreadKinds.Unknown, "NetworkStream#" + Logging.HashString(this) + "::EndMultipleWrite");
 
-            //
-            // parameter validation
-            //
+            // Validate input parameters.
             if (asyncResult == null)
             {
                 throw new ArgumentNullException("asyncResult");
@@ -1331,19 +1119,13 @@ namespace System.Net.Sockets
                     throw;
                 }
 
-                //
-                // some sort of error occured on the socket call,
-                // set the SocketException as InnerException and throw
-                //
+                // Some sort of error occured on the socket call,
+                // set the SocketException as InnerException and throw.
                 throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Flushes data from the stream.  This is meaningless for us, so it does nothing.
-        ///    </para>
-        /// </devdoc>
+        // Flushes data from the stream.  This is meaningless for us, so it does nothing.
         public override void Flush()
         {
         }
@@ -1353,11 +1135,7 @@ namespace System.Net.Sockets
             return Task.CompletedTask;
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Sets the length of the stream. Always throws <see cref='NotSupportedException'/>
-        ///    </para>
-        /// </devdoc>
+        // Sets the length of the stream. Always throws NotSupportedException
         public override void SetLength(long value)
         {
             throw new NotSupportedException(SR.net_noseek);

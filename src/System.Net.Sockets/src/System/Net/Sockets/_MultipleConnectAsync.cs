@@ -16,12 +16,12 @@ namespace System.Net.Sockets
     // on behalf of a single user call to ConnectAsync with a DnsEndPoint
     internal abstract class MultipleConnectAsync
     {
-        protected SocketAsyncEventArgs userArgs;
-        protected SocketAsyncEventArgs internalArgs;
+        protected SocketAsyncEventArgs _userArgs;
+        protected SocketAsyncEventArgs _internalArgs;
 
-        protected DnsEndPoint endPoint;
-        protected IPAddress[] addressList;
-        protected int nextAddress;
+        protected DnsEndPoint _endPoint;
+        protected IPAddress[] _addressList;
+        protected int _nextAddress;
 
         private Socket _lastAttemptSocket;
 
@@ -54,8 +54,8 @@ namespace System.Net.Sockets
                      endPoint.AddressFamily == AddressFamily.InterNetworkV6,
                      "MultipleConnectAsync.StartConnectAsync(): Unexpected endpoint address family - " + endPoint.AddressFamily.ToString());
 
-                this.userArgs = args;
-                this.endPoint = endPoint;
+                _userArgs = args;
+                _endPoint = endPoint;
 
                 // If Cancel() was called before we got the lock, it only set the state to Canceled: we need to
                 // fail synchronously from here.  Once State.DnsQuery is set, the Cancel() call will handle calling AsyncFail.
@@ -110,8 +110,8 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    addressList = DnsAPMExtensions.EndGetHostAddresses(result);
-                    GlobalLog.Assert(addressList != null, "MultipleConnectAsync.DoDnsCallback(): EndGetHostAddresses returned null!");
+                    _addressList = DnsAPMExtensions.EndGetHostAddresses(result);
+                    GlobalLog.Assert(_addressList != null, "MultipleConnectAsync.DoDnsCallback(): EndGetHostAddresses returned null!");
                 }
                 catch (Exception e)
                 {
@@ -124,12 +124,12 @@ namespace System.Net.Sockets
                 {
                     _state = State.ConnectAttempt;
 
-                    internalArgs = new SocketAsyncEventArgs();
-                    internalArgs.Completed += InternalConnectCallback;
+                    _internalArgs = new SocketAsyncEventArgs();
+                    _internalArgs.Completed += InternalConnectCallback;
 
                     if (!RequiresUserConnectAttempt)
                     {
-                        internalArgs.SetBuffer(userArgs.Buffer, userArgs.Offset, userArgs.Count);
+                        _internalArgs.SetBuffer(_userArgs.Buffer, _userArgs.Offset, _userArgs.Count);
                     }
 
                     exception = AttemptConnection();
@@ -283,9 +283,9 @@ namespace System.Net.Sockets
 
                 GlobalLog.Assert(attemptAddress != null, "MultipleConnectAsync.AttemptConnection: attemptAddress is null!");
 
-                internalArgs.RemoteEndPoint = new IPEndPoint(attemptAddress, endPoint.Port);
+                _internalArgs.RemoteEndPoint = new IPEndPoint(attemptAddress, _endPoint.Port);
 
-                return AttemptConnection(_lastAttemptSocket, internalArgs);
+                return AttemptConnection(_lastAttemptSocket, _internalArgs);
             }
             catch (Exception e)
             {
@@ -304,9 +304,9 @@ namespace System.Net.Sockets
                 _lastAttemptSocket.Dispose();
 
                 // Setup the internal args. RemoteEndpoint should already be correct.
-                internalArgs.SetBuffer(userArgs.Buffer, userArgs.Offset, userArgs.Count);
+                _internalArgs.SetBuffer(_userArgs.Buffer, _userArgs.Offset, _userArgs.Count);
 
-                return AttemptConnection(UserSocket, internalArgs);
+                return AttemptConnection(UserSocket, _internalArgs);
             }
             catch (Exception e)
             {
@@ -345,8 +345,8 @@ namespace System.Net.Sockets
         private void Succeed()
         {
             OnSucceed();
-            userArgs.FinishWrapperConnectSuccess(internalArgs.ConnectSocket, internalArgs.BytesTransferred, internalArgs.SocketFlags);
-            internalArgs.Dispose();
+            _userArgs.FinishWrapperConnectSuccess(_internalArgs.ConnectSocket, _internalArgs.BytesTransferred, _internalArgs.SocketFlags);
+            _internalArgs.Dispose();
         }
 
         protected abstract void OnFail(bool abortive);
@@ -380,15 +380,15 @@ namespace System.Net.Sockets
         {
             OnFailOuter(false);
 
-            if (internalArgs != null)
+            if (_internalArgs != null)
             {
-                internalArgs.Dispose();
+                _internalArgs.Dispose();
             }
 
             SocketException socketException = e as SocketException;
             if (socketException != null)
             {
-                userArgs.FinishConnectByNameSyncFailure(socketException, 0, SocketFlags.None);
+                _userArgs.FinishConnectByNameSyncFailure(socketException, 0, SocketFlags.None);
             }
             else
             {
@@ -400,12 +400,12 @@ namespace System.Net.Sockets
         {
             OnFailOuter(false);
 
-            if (internalArgs != null)
+            if (_internalArgs != null)
             {
-                internalArgs.Dispose();
+                _internalArgs.Dispose();
             }
 
-            userArgs.FinishOperationAsyncFailure(e, 0, SocketFlags.None);
+            _userArgs.FinishOperationAsyncFailure(e, 0, SocketFlags.None);
         }
 
         public void Cancel()
@@ -505,14 +505,14 @@ namespace System.Net.Sockets
             IPAddress rval = null;
             do
             {
-                if (nextAddress >= addressList.Length)
+                if (_nextAddress >= _addressList.Length)
                 {
                     attemptSocket = null;
                     return null;
                 }
 
-                rval = addressList[nextAddress];
-                ++nextAddress;
+                rval = _addressList[_nextAddress];
+                ++_nextAddress;
             }
             while (!_socket.CanTryAddressFamily(rval.AddressFamily));
 
@@ -585,13 +585,13 @@ namespace System.Net.Sockets
 
             while (attemptSocket == null)
             {
-                if (nextAddress >= addressList.Length)
+                if (_nextAddress >= _addressList.Length)
                 {
                     return null;
                 }
 
-                rval = addressList[nextAddress];
-                ++nextAddress;
+                rval = _addressList[_nextAddress];
+                ++_nextAddress;
 
                 if (rval.AddressFamily == AddressFamily.InterNetworkV6)
                 {
@@ -665,10 +665,10 @@ namespace System.Net.Sockets
         {
             if (_supportsIPv4 || _supportsIPv6)
             {
-                while (nextAddress < addressList.Length)
+                while (_nextAddress < _addressList.Length)
                 {
-                    IPAddress rval = addressList[nextAddress];
-                    ++nextAddress;
+                    IPAddress rval = _addressList[_nextAddress];
+                    ++_nextAddress;
 
                     if (_supportsIPv6 && rval.AddressFamily == AddressFamily.InterNetworkV6)
                     {
