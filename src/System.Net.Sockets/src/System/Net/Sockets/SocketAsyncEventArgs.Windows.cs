@@ -556,11 +556,11 @@ namespace System.Net.Sockets
             {
                 if (spe != null)
                 {
-                    if (spe.m_FilePath != null)
+                    if (spe._filePath != null)
                     {
                         m_SendPacketsElementsFileCount++;
                     }
-                    if (spe.m_Buffer != null && spe.m_Count > 0)
+                    if (spe._buffer != null && spe._count > 0)
                     {
                         m_SendPacketsElementsBufferCount++;
                     }
@@ -578,14 +578,14 @@ namespace System.Net.Sockets
                 int index = 0;
                 foreach (SendPacketsElement spe in _sendPacketsElementsInternal)
                 {
-                    if (spe != null && spe.m_FilePath != null)
+                    if (spe != null && spe._filePath != null)
                     {
                         Exception fileStreamException = null;
                         try
                         {
                             // Create a FileStream to open the file
                             m_SendPacketsFileStreams[index] =
-                                new FileStream(spe.m_FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                                new FileStream(spe._filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                         }
                         catch (Exception ex)
                         {
@@ -980,9 +980,9 @@ namespace System.Net.Sockets
             index = 1;
             foreach (SendPacketsElement spe in _sendPacketsElementsInternal)
             {
-                if (spe != null && spe.m_Buffer != null && spe.m_Count > 0)
+                if (spe != null && spe._buffer != null && spe._count > 0)
                 {
-                    _objectsToPin[index] = spe.m_Buffer;
+                    _objectsToPin[index] = spe._buffer;
                     index++;
                 }
             }
@@ -1003,21 +1003,21 @@ namespace System.Net.Sockets
             {
                 if (spe != null)
                 {
-                    if (spe.m_Buffer != null && spe.m_Count > 0)
+                    if (spe._buffer != null && spe._count > 0)
                     {
                         // a buffer
-                        m_SendPacketsDescriptor[descriptorIndex].buffer = Marshal.UnsafeAddrOfPinnedArrayElement(spe.m_Buffer, spe.m_Offset);
-                        m_SendPacketsDescriptor[descriptorIndex].length = (uint)spe.m_Count;
-                        m_SendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe.m_Flags;
+                        m_SendPacketsDescriptor[descriptorIndex].buffer = Marshal.UnsafeAddrOfPinnedArrayElement(spe._buffer, spe._offset);
+                        m_SendPacketsDescriptor[descriptorIndex].length = (uint)spe._count;
+                        m_SendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe._flags;
                         descriptorIndex++;
                     }
-                    else if (spe.m_FilePath != null)
+                    else if (spe._filePath != null)
                     {
                         // a file
                         m_SendPacketsDescriptor[descriptorIndex].fileHandle = m_SendPacketsFileHandles[fileIndex].DangerousGetHandle();
-                        m_SendPacketsDescriptor[descriptorIndex].fileOffset = spe.m_Offset;
-                        m_SendPacketsDescriptor[descriptorIndex].length = (uint)spe.m_Count;
-                        m_SendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe.m_Flags;
+                        m_SendPacketsDescriptor[descriptorIndex].fileOffset = spe._offset;
+                        m_SendPacketsDescriptor[descriptorIndex].length = (uint)spe._count;
+                        m_SendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe._flags;
                         fileIndex++;
                         descriptorIndex++;
                     }
@@ -1056,15 +1056,15 @@ namespace System.Net.Sockets
             {
                 if (spe != null)
                 {
-                    if (spe.m_Buffer != null && spe.m_Count > 0)
+                    if (spe._buffer != null && spe._count > 0)
                     {
                         // a buffer
-                        Logging.Dump(Logging.Sockets, _currentSocket, "FinishOperation(" + _completedOperation + "Async)Buffer", spe.m_Buffer, spe.m_Offset, Math.Min(spe.m_Count, size));
+                        Logging.Dump(Logging.Sockets, _currentSocket, "FinishOperation(" + _completedOperation + "Async)Buffer", spe._buffer, spe._offset, Math.Min(spe._count, size));
                     }
-                    else if (spe.m_FilePath != null)
+                    else if (spe._filePath != null)
                     {
                         // a file
-                        Logging.PrintInfo(Logging.Sockets, _currentSocket, "FinishOperation(" + _completedOperation + "Async)", SR.Format(SR.net_log_socket_not_logged_file, spe.m_FilePath));
+                        Logging.PrintInfo(Logging.Sockets, _currentSocket, "FinishOperation(" + _completedOperation + "Async)", SR.Format(SR.net_log_socket_not_logged_file, spe._filePath));
                     }
                 }
             }
