@@ -4477,7 +4477,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("e");
             }
-            if (e.m_BufferList != null)
+            if (e._bufferList != null)
             {
                 throw new ArgumentException(SR.net_multibuffernotsupported, "BufferList");
             }
@@ -4550,7 +4550,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("e");
             }
-            if (e.m_BufferList != null)
+            if (e._bufferList != null)
             {
                 throw new ArgumentException(SR.net_multibuffernotsupported, "BufferList");
             }
@@ -4594,7 +4594,7 @@ namespace System.Net.Sockets
                     throw new NotSupportedException(SR.net_invalidversion);
                 }
 
-                e.m_SocketAddress = CheckCacheRemote(ref endPointSnapshot, false);
+                e._socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
 
                 // Do wildcard bind if socket not bound.
                 if (_rightEndPoint == null)
@@ -4668,7 +4668,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("e");
             }
-            if (e.m_BufferList != null)
+            if (e._bufferList != null)
             {
                 throw new ArgumentException(SR.net_multibuffernotsupported, "BufferList");
             }
@@ -4872,7 +4872,7 @@ namespace System.Net.Sockets
             // WSARecvFrom; all that matters is that we generate a unique-to-this-call SocketAddress
             // with the right address family.
             EndPoint endPointSnapshot = e.RemoteEndPoint;
-            e.m_SocketAddress = SnapshotAndSerialize(ref endPointSnapshot);
+            e._socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
 
             // DualMode sockets may have updated the endPointSnapshot, and it has to have the same AddressFamily as 
             // e.m_SocketAddres for Create to work later.
@@ -4947,7 +4947,7 @@ namespace System.Net.Sockets
             // WSARecvMsg; all that matters is that we generate a unique-to-this-call SocketAddress
             // with the right address family.
             EndPoint endPointSnapshot = e.RemoteEndPoint;
-            e.m_SocketAddress = SnapshotAndSerialize(ref endPointSnapshot);
+            e._socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
 
             // DualMode may have updated the endPointSnapshot, and it has to have the same AddressFamily as 
             // e.m_SocketAddres for Create to work later.
@@ -5152,7 +5152,7 @@ namespace System.Net.Sockets
 
             // Check permissions for connect and prepare SocketAddress
             EndPoint endPointSnapshot = e.RemoteEndPoint;
-            e.m_SocketAddress = CheckCacheRemote(ref endPointSnapshot, false);
+            e._socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
 
             // Prepare for the native call.
             e.StartOperationCommon(this);
