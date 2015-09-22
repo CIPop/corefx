@@ -5,32 +5,20 @@ using System;
 
 namespace System.Net.Sockets
 {
-    /// <devdoc>
-    ///    <para>Contains information for a socket's linger time, the amount of time it will
-    ///       remain after closing if data remains to be sent.</para>
-    /// </devdoc>
+    // Contains information for a socket's linger time, the amount of time it will
+    // remain after closing if data remains to be sent.
     public class LingerOption
     {
         private bool _enabled;
         private int _lingerTime;
 
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='Sockets.LingerOption'/> class.
-        ///    </para>
-        /// </devdoc>
         public LingerOption(bool enable, int seconds)
         {
             Enabled = enable;
             LingerTime = seconds;
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Enables or disables lingering after
-        ///       close.
-        ///    </para>
-        /// </devdoc>
+        // Enables or disables lingering after close.
         public bool Enabled
         {
             get
@@ -43,11 +31,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       The amount of time, in seconds, to remain connected after a close.
-        ///    </para>
-        /// </devdoc>
+        // The amount of time, in seconds, to remain connected after a close.
         public int LingerTime
         {
             get
@@ -59,5 +43,5 @@ namespace System.Net.Sockets
                 _lingerTime = value;
             }
         }
-    } // class LingerOption
-} // namespace System.Net.Sockets
+    }
+}

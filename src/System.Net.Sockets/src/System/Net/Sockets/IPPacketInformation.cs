@@ -32,44 +32,30 @@ namespace System.Net.Sockets
             }
         }
 
-        public static bool operator ==(IPPacketInformation packetInformation1,
-                                        IPPacketInformation packetInformation2)
+        public static bool operator ==(IPPacketInformation packetInformation1, IPPacketInformation packetInformation2)
         {
             return packetInformation1.Equals(packetInformation2);
         }
 
-        public static bool operator !=(IPPacketInformation packetInformation1,
-                                        IPPacketInformation packetInformation2)
+        public static bool operator !=(IPPacketInformation packetInformation1, IPPacketInformation packetInformation2)
         {
             return !packetInformation1.Equals(packetInformation2);
         }
 
         public override bool Equals(object comparand)
         {
-            if ((object)comparand == null)
+            if ((object)comparand == null || !(comparand is IPPacketInformation))
             {
                 return false;
             }
 
-            if (!(comparand is IPPacketInformation))
-                return false;
-
             IPPacketInformation obj = (IPPacketInformation)comparand;
-
-            if (_address.Equals(obj._address) && _networkInterface == obj._networkInterface)
-                return (true);
-
-            return false;
+            return _address.Equals(obj._address) && _networkInterface == obj._networkInterface;
         }
 
         public override int GetHashCode()
         {
             return _address.GetHashCode() + _networkInterface.GetHashCode();
         }
-    }; // enum SocketFlags
+    }
 }
-
-
-
-
-

@@ -1,34 +1,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.Sockets
 {
-    /// <devdoc>
-    ///    <para>
-    ///       Specifies the mode for polling the status of a socket.
-    ///    </para>
-    /// </devdoc>
+    // Specifies the mode for polling the status of a socket.
     public enum SelectMode
     {
-        /// <devdoc>
-        ///    <para>
-        ///       Poll the read status of a socket.
-        ///    </para>
-        /// </devdoc>
+        // Poll the read status of a socket.
         SelectRead = 0,
-        /// <devdoc>
-        ///    <para>
-        ///       Poll the write status of a socket.
-        ///    </para>
-        /// </devdoc>
+
+        // Poll the write status of a socket.
         SelectWrite = 1,
-        /// <devdoc>
-        ///    <para>
-        ///       Poll the error status of a socket.
-        ///    </para>
-        /// </devdoc>
+
+        // Poll the error status of a socket.
         SelectError = 2
-    } // enum SelectMode
-} // namespace System.Net.Sockets
+    }
+}
