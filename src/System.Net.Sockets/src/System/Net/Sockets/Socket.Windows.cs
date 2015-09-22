@@ -196,7 +196,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                if (acceptSocket.m_RightEndPoint != null && (!checkDisconnected || !acceptSocket._isDisconnected))
+                if (acceptSocket._rightEndPoint != null && (!checkDisconnected || !acceptSocket._isDisconnected))
                 {
                     throw new InvalidOperationException(SR.Format(SR.net_sockets_namedmustnotbebound, propertyName));
                 }
