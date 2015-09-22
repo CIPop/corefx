@@ -4,9 +4,13 @@ namespace System.Net.Sockets.Tests
 {
     public class ReceiveMessageFrom
     {
+        // This is a stand-in for an issue to be filed when this code is merged into corefx.
+        private const int DummyOSXPacketInfoIssue = 123456;
+
         private const int TestPortBase = 8060;
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void Success()
         {
             if (Socket.OSSupportsIPv4)

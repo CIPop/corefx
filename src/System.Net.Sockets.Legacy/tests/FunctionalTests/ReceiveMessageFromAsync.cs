@@ -7,6 +7,9 @@ namespace System.Net.Sockets.Tests
 {
     public class ReceiveMessageFromAsync
     {
+        // This is a stand-in for an issue to be filed when this code is merged into corefx.
+        private const int DummyOSXPacketInfoIssue = 123456;
+
         private const int TestPortBase = 8090;
 
         public void OnCompleted(object sender, SocketAsyncEventArgs args)
@@ -16,6 +19,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void Success()
         {
             ManualResetEvent completed = new ManualResetEvent(false);

@@ -12,6 +12,8 @@ namespace System.Net.Sockets.Tests
         //       once this code is merged into corefx/master.
         private const int DummyDualModeV6Issue = 123456;
         private const int DummyErrorMismatchIssue = 123457;
+        private const int DummyOSXPacketInfoIssue = 123458;
+        private const int DummyOSXDualModePacketInfoIssue = 123459;
 
         private const int TestPortBase = 8200;  // to 8300
         private readonly ITestOutputHelper _log;
@@ -1443,12 +1445,14 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveFromV4BoundToSpecificV4_Success()
         {
             ReceiveFrom_Helper(IPAddress.Loopback, IPAddress.Loopback, TestPortBase + 202);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveFromV4BoundToAnyV4_Success()
         {
             ReceiveFrom_Helper(IPAddress.Any, IPAddress.Loopback, TestPortBase + 203);
@@ -1677,6 +1681,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveFromAsyncV4BoundToAnyV4_Success()
         {
             ReceiveFromAsync_Helper(IPAddress.Any, IPAddress.Loopback, TestPortBase + 223);
@@ -1801,36 +1806,42 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact] // Base case
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromV4BoundToSpecificMappedV4_Success()
         {
             ReceiveMessageFrom_Helper(IPAddress.Loopback.MapToIPv6(), IPAddress.Loopback, TestPortBase + 232);
         }
 
         [Fact] // Base case
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromV4BoundToAnyMappedV4_Success()
         {
             ReceiveMessageFrom_Helper(IPAddress.Any.MapToIPv6(), IPAddress.Loopback, TestPortBase + 233);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromV4BoundToSpecificV4_Success()
         {
             ReceiveMessageFrom_Helper(IPAddress.Loopback, IPAddress.Loopback, TestPortBase + 234);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromV4BoundToAnyV4_Success()
         {
             ReceiveMessageFrom_Helper(IPAddress.Any, IPAddress.Loopback, TestPortBase + 235);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromV6BoundToSpecificV6_Success()
         {
             ReceiveMessageFrom_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, TestPortBase + 236);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromV6BoundToAnyV6_Success()
         {
             ReceiveMessageFrom_Helper(IPAddress.IPv6Any, IPAddress.IPv6Loopback, TestPortBase + 237);
@@ -1862,6 +1873,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void ReceiveMessageFromV4BoundToAnyV6_Success()
         {
             ReceiveMessageFrom_Helper(IPAddress.IPv6Any, IPAddress.Loopback, TestPortBase + 241);
@@ -1949,36 +1961,42 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact] // Base case
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToSpecificMappedV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Loopback.MapToIPv6(), IPAddress.Loopback, TestPortBase + 252);
         }
 
         [Fact] // Base case
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToAnyMappedV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Any.MapToIPv6(), IPAddress.Loopback, TestPortBase + 253);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToSpecificV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Loopback, IPAddress.Loopback, TestPortBase + 254);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToAnyV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Any, IPAddress.Loopback, TestPortBase + 255);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void BeginReceiveMessageFromV6BoundToSpecificV6_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, TestPortBase + 256);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void BeginReceiveMessageFromV6BoundToAnyV6_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.IPv6Any, IPAddress.IPv6Loopback, TestPortBase + 257);
@@ -2010,6 +2028,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToAnyV6_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.IPv6Any, IPAddress.Loopback, TestPortBase + 261);
@@ -2090,36 +2109,42 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact] // Base case
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToSpecificMappedV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Loopback.MapToIPv6(), IPAddress.Loopback, TestPortBase + 272);
         }
 
         [Fact] // Base case
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToAnyMappedV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Any.MapToIPv6(), IPAddress.Loopback, TestPortBase + 273);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToSpecificV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Loopback, IPAddress.Loopback, TestPortBase + 274);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToAnyV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Any, IPAddress.Loopback, TestPortBase + 275);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromAsyncV6BoundToSpecificV6_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, TestPortBase + 276);
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveMessageFromAsyncV6BoundToAnyV6_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.IPv6Any, IPAddress.IPv6Loopback, TestPortBase + 277);
@@ -2151,6 +2176,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXDualModePacketInfoIssue, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToAnyV6_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.IPv6Any, IPAddress.Loopback, TestPortBase + 281);
