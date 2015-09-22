@@ -4812,9 +4812,14 @@ namespace System.Net.Sockets
                 MultipleConnectAsync multipleConnectAsync = null;
                 if (dnsEP.AddressFamily == AddressFamily.Unspecified)
                 {
+// Disable CS0162 and CS0429: Unreachable code detected
+//
+// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162 or CS0429.
+#pragma warning disable 162, 429
                     multipleConnectAsync = SocketPal.SupportsMultipleConnectAttempts ?
                         (MultipleConnectAsync)(new DualSocketMultipleConnectAsync(socketType, protocolType)) :
                         (MultipleConnectAsync)(new MultipleSocketMultipleConnectAsync(socketType, protocolType));
+#pragma warning restore
                 }
                 else
                 {
@@ -6193,7 +6198,7 @@ namespace System.Net.Sockets
 // Disable CS0162: Unreachable code detected
 //
 // SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
-#pragma warning disable 162
+#pragma warning disable 162, 429
         private static object PostOneBeginConnect(MultipleAddressConnectAsyncResult context)
         {
             IPAddress currentAddressSnapshot = context.addresses[context.index];
