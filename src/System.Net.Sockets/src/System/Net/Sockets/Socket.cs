@@ -5621,11 +5621,14 @@ namespace System.Net.Sockets
                 IPEndPoint ipEndPoint = _rightEndPoint as IPEndPoint;
                 IPAddress boundAddress = (ipEndPoint != null ? ipEndPoint.Address : null);
                 Debug.Assert(boundAddress != null, "Not Bound");
-                if (_addressFamily == AddressFamily.InterNetwork
-                    || (boundAddress != null && IsDualMode
-                        && (boundAddress.IsIPv4MappedToIPv6 || boundAddress.Equals(IPAddress.IPv6Any))))
+                if (_addressFamily == AddressFamily.InterNetwork)
                 {
                     SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
+                }
+
+                if ((boundAddress != null && IsDualMode && (boundAddress.IsIPv4MappedToIPv6 || boundAddress.Equals(IPAddress.IPv6Any))))
+                {
+                    SocketPal.SetReceivingDualModeIPv4PacketInformation(this);
                 }
 
                 if (_addressFamily == AddressFamily.InterNetworkV6

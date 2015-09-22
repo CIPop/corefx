@@ -506,6 +506,35 @@ namespace System.Net.Sockets
             return cmsg;
         }
 
+        private static unsafe IPPacketInformation GetIPv4PacketInformation(Interop.libc.cmsghdr* cmsghdr)
+        {
+            if ((int)cmsghdr->cmsg_len < sizeof(Interop.libc.in_pktinfo))
+            {
+                return default(IPPacketInformation);
+            }
+
+            var in_pktinfo = (Interop.libc.in_pktinfo*)&cmsghdr[1];
+            return new IPPacketInformation(new IPAddress((long)in_pktinfo->ipi_addr.s_addr), in_pktinfo->ipi_ifindex);
+        }
+
+        private static unsafe IPPacketInformation GetIPv6PacketInformation(Interop.libc.cmsghdr* cmsghdr)
+        {
+            if ((int)cmsghdr->cmsg_len < sizeof(Interop.libc.in6_pktinfo))
+            {
+                return default(IPPacketInformation);
+            }
+
+            var in6_pktinfo = (Interop.libc.in6_pktinfo*)&cmsghdr[1];
+
+            var address = new byte[sizeof(Interop.libc.in6_addr)];
+            for (int i = 0; i < address.Length; i++)
+            {
+                address[i] = in6_pktinfo->ipi6_addr.s6_addr[i];
+            }
+
+            return new IPPacketInformation(new IPAddress(address), in6_pktinfo->ipi6_ifindex);
+        }
+
         public static unsafe IPPacketInformation GetIPPacketInformation(byte* cmsgBuffer, int cmsgBufferLen, bool isIPv4, bool isIPv6)
         {
             if ((!isIPv4 && !isIPv6) || cmsgBufferLen < sizeof(Interop.libc.cmsghdr))
@@ -526,13 +555,7 @@ namespace System.Net.Sockets
                     }
                 }
 
-                if ((int)cmsghdr->cmsg_len < sizeof(Interop.libc.in_pktinfo))
-                {
-                    return default(IPPacketInformation);
-                }
-
-                var in_pktinfo = (Interop.libc.in_pktinfo*)&cmsghdr[1];
-                return new IPPacketInformation(new IPAddress((long)in_pktinfo->ipi_addr.s_addr), in_pktinfo->ipi_ifindex);
+                return GetIPv4PacketInformation(cmsghdr);
             }
             else
             {
@@ -548,20 +571,7 @@ namespace System.Net.Sockets
                     }
                 }
 
-                if ((int)cmsghdr->cmsg_len < sizeof(Interop.libc.in6_pktinfo))
-                {
-                    return default(IPPacketInformation);
-                }
-
-                var in6_pktinfo = (Interop.libc.in6_pktinfo*)&cmsghdr[1];
-
-                var address = new byte[sizeof(Interop.libc.in6_addr)];
-                for (int i = 0; i < address.Length; i++)
-                {
-                    address[i] = in6_pktinfo->ipi6_addr.s6_addr[i];
-                }
-
-                return new IPPacketInformation(new IPAddress(address), in6_pktinfo->ipi6_ifindex);
+                return GetIPv6PacketInformation(cmsghdr);
             }
         }
 
@@ -864,7 +874,7 @@ namespace System.Net.Sockets
                 cmsgBufferLen = (int)msghdr.msg_controllen;
             }
 
-            ipPacketInformation = SocketPal.GetIPPacketInformation(cmsgBuffer, cmsgBufferLen, isIPv4, isIPv6);
+            ipPacketInformation = GetIPPacketInformation(cmsgBuffer, cmsgBufferLen, isIPv4, isIPv6);
 
             if (received == -1)
             {
@@ -1209,7 +1219,7 @@ namespace System.Net.Sockets
             }
 
             SocketError errorCode;
-            bool completed = SocketPal.TryStartConnect(handle.FileDescriptor, socketAddress, socketAddressLen, out errorCode);
+            bool completed = TryStartConnect(handle.FileDescriptor, socketAddress, socketAddressLen, out errorCode);
             return completed ? errorCode : SocketError.WouldBlock;
         }
 
