@@ -15,10 +15,8 @@ using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
-    internal static class SocketPal
+    internal static partial class SocketPal
     {
-        // TODO: properly adjust send/receive timeouts in the case of repeated calls to poll()
-
         // The API that uses this information is not supported on *nix, and will throw
         // PlatformNotSupportedException instead.
         public const int ProtocolInformationSize = 0;
@@ -550,7 +548,6 @@ namespace System.Net.Sockets
                     }
                 }
 
-
                 if ((int)cmsghdr->cmsg_len < sizeof(Interop.libc.in6_pktinfo))
                 {
                     return default(IPPacketInformation);
@@ -949,6 +946,10 @@ namespace System.Net.Sockets
             return false;
         }
 
+        // This method is used by systems that may need to reset some socket state before
+        // reusing it for another connect attempt (e.g. Linux).
+        static unsafe partial void PrimeForNextConnectAttempt(int fileDescriptor, int socketAddressLen);
+
         public static unsafe bool TryCompleteConnect(int fileDescriptor, int socketAddressLen, out SocketError errorCode)
         {
             int socketErrno;
@@ -976,18 +977,7 @@ namespace System.Net.Sockets
             }
 
             errorCode = GetSocketErrorForErrorCode(socketError);
-
-            // On Linux, a non-blocking socket that fails a connect() attempt needs to be kicked
-            // with another connect to AF_UNSPEC before further connect() attempts will return
-            // valid errors. Otherwise, further connect() attempts will return ECONNABORTED.
-            
-            var socketAddressBuffer = stackalloc byte[socketAddressLen];
-            var sockAddr = (Interop.libc.sockaddr*)socketAddressBuffer;
-            sockAddr->sa_family = Interop.libc.AF_UNSPEC;
-
-            err = Interop.libc.connect(fileDescriptor, sockAddr, (uint)socketAddressLen);
-            Debug.Assert(err == 0, "TryCompleteConnect: failed to disassociate socket after failed connect()");
-
+            PrimeForNextConnectAttempt(fileDescriptor, socketAddressLen);
             return true;
         }
 

@@ -1055,16 +1055,73 @@ namespace System.Net.Sockets
                 throw new NotSupportedException(SR.net_invalidversion);
             }
 
+// Disable CS0162: Unreachable code detected
+//
+// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
+#pragma warning disable 162
             Exception lastex = null;
-            foreach (IPAddress address in addresses)
+            if (SocketPal.SupportsMultipleConnectAttempts)
             {
-                if (CanTryAddressFamily(address.AddressFamily))
+                foreach (IPAddress address in addresses)
+                {
+                    if (CanTryAddressFamily(address.AddressFamily))
+                    {
+                        try
+                        {
+                            Connect(new IPEndPoint(address, port));
+                            lastex = null;
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ExceptionCheck.IsFatal(ex)) throw;
+                            lastex = ex;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                EndPoint endpoint = null;
+                foreach (IPAddress address in addresses)
+                {
+                    if (CanTryAddressFamily(address.AddressFamily))
+                    {
+                        Socket attemptSocket = null;
+                        try
+                        {
+                            attemptSocket = new Socket(_addressFamily, _socketType, _protocolType);
+                            if (IsDualMode)
+                            {
+                                attemptSocket.DualMode = true;
+                            }
+
+                            var attemptEndpoint = new IPEndPoint(address, port);
+                            attemptSocket.Connect(attemptEndpoint);
+                            endpoint = attemptEndpoint;
+                            lastex = null;
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            lastex = ex;
+                        }
+                        finally
+                        {
+                            if (attemptSocket != null)
+                            {
+                                attemptSocket.Dispose();
+                            }
+                        }
+                    }
+                }
+
+                if (endpoint != null)
                 {
                     try
                     {
-                        Connect(new IPEndPoint(address, port));
+                        Connect(endpoint);
                         lastex = null;
-                        break;
                     }
                     catch (Exception ex)
                     {
@@ -1073,9 +1130,12 @@ namespace System.Net.Sockets
                     }
                 }
             }
+#pragma warning restore
 
             if (lastex != null)
+            {
                 throw lastex;
+            }
 
             //if we're not connected, then we didn't get a valid ipaddress in the list
             if (!Connected)
@@ -4752,7 +4812,14 @@ namespace System.Net.Sockets
                 MultipleConnectAsync multipleConnectAsync = null;
                 if (dnsEP.AddressFamily == AddressFamily.Unspecified)
                 {
-                    multipleConnectAsync = new MultipleSocketMultipleConnectAsync(socketType, protocolType);
+// Disable CS0162 and CS0429: Unreachable code detected
+//
+// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162 or CS0429.
+#pragma warning disable 162, 429
+                    multipleConnectAsync = SocketPal.SupportsMultipleConnectAttempts ?
+                        (MultipleConnectAsync)(new DualSocketMultipleConnectAsync(socketType, protocolType)) :
+                        (MultipleConnectAsync)(new MultipleSocketMultipleConnectAsync(socketType, protocolType));
+#pragma warning restore
                 }
                 else
                 {
@@ -6081,7 +6148,7 @@ namespace System.Net.Sockets
             return DoMultipleAddressConnectCallback(PostOneBeginConnect(context), context);
         }
 
-        private class MultipleAddressConnectAsyncResult : ContextAwareResult
+        private sealed class MultipleAddressConnectAsyncResult : ContextAwareResult
         {
             internal MultipleAddressConnectAsyncResult(IPAddress[] addresses, int port, Socket socket, object myState, AsyncCallback myCallBack) :
                 base(socket, myState, myCallBack)
@@ -6095,6 +6162,8 @@ namespace System.Net.Sockets
             internal IPAddress[] addresses;
             internal int index;
             internal int port;
+            internal bool isUserConnectAttempt;
+            internal Socket lastAttemptSocket;
             internal Exception lastException;
 
             internal EndPoint RemoteEndPoint
@@ -6113,6 +6182,23 @@ namespace System.Net.Sockets
             }
         }
 
+        private static AsyncCallback s_multipleAddressConnectCallback;
+        private static AsyncCallback CachedMultipleAddressConnectCallback
+        {
+            get
+            {
+                if (s_multipleAddressConnectCallback == null)
+                {
+                    s_multipleAddressConnectCallback = new AsyncCallback(MultipleAddressConnectCallback);
+                }
+                return s_multipleAddressConnectCallback;
+            }
+        }
+
+// Disable CS0162: Unreachable code detected
+//
+// SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
+#pragma warning disable 162, 429
         private static object PostOneBeginConnect(MultipleAddressConnectAsyncResult context)
         {
             IPAddress currentAddressSnapshot = context.addresses[context.index];
@@ -6128,9 +6214,19 @@ namespace System.Net.Sockets
                 // MSRC 11081 - Do the necessary security demand
                 context.socket.CheckCacheRemote(ref endPoint, true);
 
-                IAsyncResult connectResult = context.socket.UnsafeBeginConnect(endPoint,
-                    new AsyncCallback(MultipleAddressConnectCallback), context);
+                Socket connectSocket = context.socket;
+                if (!SocketPal.SupportsMultipleConnectAttempts && !context.isUserConnectAttempt)
+                {
+                    context.lastAttemptSocket = new Socket(context.socket._addressFamily, context.socket._socketType, context.socket._protocolType);
+                    if (context.socket.IsDualMode)
+                    {
+                        context.lastAttemptSocket.DualMode = true;
+                    }
 
+                    connectSocket = context.lastAttemptSocket;
+                }
+
+                IAsyncResult connectResult = connectSocket.UnsafeBeginConnect(endPoint, CachedMultipleAddressConnectCallback, context);
                 if (connectResult.CompletedSynchronously)
                 {
                     return connectResult;
@@ -6139,7 +6235,9 @@ namespace System.Net.Sockets
             catch (Exception exception)
             {
                 if (exception is OutOfMemoryException)
+                {
                     throw;
+                }
 
                 return exception;
             }
@@ -6150,7 +6248,9 @@ namespace System.Net.Sockets
         private static void MultipleAddressConnectCallback(IAsyncResult result)
         {
             if (result.CompletedSynchronously)
+            {
                 return;
+            }
 
             bool invokeCallback = false;
 
@@ -6182,7 +6282,15 @@ namespace System.Net.Sockets
                 {
                     try
                     {
-                        context.socket.EndConnect((IAsyncResult)result);
+                        if (SocketPal.SupportsMultipleConnectAttempts || context.isUserConnectAttempt)
+                        {
+                            context.socket.EndConnect((IAsyncResult)result);
+                        }
+                        else
+                        {
+                            Debug.Assert(context.lastAttemptSocket != null);
+                            context.lastAttemptSocket.EndConnect((IAsyncResult)result);
+                        }
                     }
                     catch (Exception exception)
                     {
@@ -6190,16 +6298,29 @@ namespace System.Net.Sockets
                     }
                 }
 
+                if (!SocketPal.SupportsMultipleConnectAttempts && !context.isUserConnectAttempt && context.lastAttemptSocket != null)
+                {
+                    context.lastAttemptSocket.Dispose();
+                }
+
                 if (ex == null)
                 {
-                    // Don't invoke the callback from here, because we're probably inside
-                    // a catch-all block that would eat exceptions from the callback.
-                    // Instead tell our caller to invoke the callback outside of its catchall.
-                    return true;
+                    if (!SocketPal.SupportsMultipleConnectAttempts && !context.isUserConnectAttempt)
+                    {
+                        context.isUserConnectAttempt = true;
+                        result = PostOneBeginConnect(context);
+                    }
+                    else
+                    {
+                        // Don't invoke the callback from here, because we're probably inside
+                        // a catch-all block that would eat exceptions from the callback.
+                        // Instead tell our caller to invoke the callback outside of its catchall.
+                        return true;
+                    }
                 }
                 else
                 {
-                    if (++context.index >= context.addresses.Length)
+                    if (++context.index >= context.addresses.Length || context.isUserConnectAttempt)
                         throw ex;
 
                     context.lastException = ex;
@@ -6210,6 +6331,7 @@ namespace System.Net.Sockets
             // Don't invoke the callback at all, because we've posted another async connection attempt
             return false;
         }
+#pragma warning restore
 
         internal IAsyncResult BeginMultipleSend(BufferOffsetSize[] buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
