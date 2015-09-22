@@ -5,6 +5,10 @@ using System.Diagnostics;
 
 namespace System.Net.Sockets
 {
+    // OverlappedAsyncResult
+    //
+    // This class is used to take care of storage for async Socket operation
+    // from the BeginSend, BeginSendTo, BeginReceive, BeginReceiveFrom calls.
     internal partial class OverlappedAsyncResult : BaseOverlappedAsyncResult
     {
         private int _socketAddressSize;

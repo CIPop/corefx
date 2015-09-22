@@ -10,30 +10,19 @@ using System.Collections.Generic;
 
 namespace System.Net.Sockets
 {
+    // OverlappedAsyncResult
     //
-    //  OverlappedAsyncResult - used to take care of storage for async Socket operation
-    //   from the BeginSend, BeginSendTo, BeginReceive, BeginReceiveFrom calls.
-    //
+    // This class is used to take care of storage for async Socket operation
+    // from the BeginSend, BeginSendTo, BeginReceive, BeginReceiveFrom calls.
     internal partial class OverlappedAsyncResult : BaseOverlappedAsyncResult
     {
-        //
-        // internal class members
-        //
-
         private Internals.SocketAddress _socketAddress;
-        private Internals.SocketAddress _socketAddressOriginal; // needed for partial BeginReceiveFrom/EndReceiveFrom completion
+        private Internals.SocketAddress _socketAddressOriginal; // Needed for partial BeginReceiveFrom/EndReceiveFrom completion.
 
-        //
-        // Constructor. We take in the socket that's creating us, the caller's
-        // state object, and the buffer on which the I/O will be performed.
-        // We save the socket and state, pin the callers's buffer, and allocate
-        // an event for the WaitHandle.
-        //
         internal OverlappedAsyncResult(Socket socket, Object asyncState, AsyncCallback asyncCallback) :
             base(socket, asyncState, asyncCallback)
         { }
 
-        //
         internal Internals.SocketAddress SocketAddress
         {
             get
@@ -46,7 +35,6 @@ namespace System.Net.Sockets
             }
         }
 
-        //
         internal Internals.SocketAddress SocketAddressOriginal
         {
             get
@@ -58,5 +46,5 @@ namespace System.Net.Sockets
                 _socketAddressOriginal = value;
             }
         }
-    }; // class OverlappedAsyncResult
-} // namespace System.Net.Sockets
+    }
+}
