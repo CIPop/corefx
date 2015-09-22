@@ -459,7 +459,7 @@ namespace System.Net.Sockets
             while (!acceptOrConnectQueue.IsEmpty)
             {
                 AcceptOrConnectOperation op = acceptOrConnectQueue.Head;
-                bool completed = op.TryCompleteAsync(_fileDescriptor, true);
+                bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: true);
                 Debug.Assert(completed);
                 acceptOrConnectQueue.Dequeue();
             }
@@ -468,7 +468,7 @@ namespace System.Net.Sockets
             while (!sendQueue.IsEmpty)
             {
                 SendReceiveOperation op = sendQueue.Head;
-                bool completed = op.TryCompleteAsync(_fileDescriptor, true);
+                bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: true);
                 Debug.Assert(completed);
                 sendQueue.Dequeue();
             }
@@ -477,7 +477,7 @@ namespace System.Net.Sockets
             while (!receiveQueue.IsEmpty)
             {
                 TransferOperation op = receiveQueue.Head;
-                bool completed = op.TryCompleteAsync(_fileDescriptor, true);
+                bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: true);
                 Debug.Assert(completed);
                 receiveQueue.Dequeue();
             }
@@ -1316,7 +1316,7 @@ namespace System.Net.Sockets
                     while (!receiveQueue.IsEmpty)
                     {
                         TransferOperation op = receiveQueue.Head;
-                        bool completed = op.TryCompleteAsync(_fileDescriptor, false);
+                        bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: false);
                         Debug.Assert(completed);
                         receiveQueue.Dequeue();
                     }
@@ -1353,7 +1353,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _acceptOrConnectQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor, false))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
@@ -1367,7 +1367,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _receiveQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor, false))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
@@ -1395,7 +1395,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _acceptOrConnectQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor, false))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
@@ -1409,7 +1409,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _sendQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor, false))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
