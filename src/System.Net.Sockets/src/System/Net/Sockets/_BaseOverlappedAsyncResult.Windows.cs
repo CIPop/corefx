@@ -10,30 +10,18 @@ using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
+    // BaseOverlappedAsyncResult
     //
-    //  BaseOverlappedAsyncResult - used to enable async Socket operation
-    //  such as the BeginSend, BeginSendTo, BeginReceive, BeginReceiveFrom, BeginSendFile,
-    //  BeginAccept, calls.
-    //
-
+    // This class is used to track state for async Socket operations such as the BeginSend, BeginSendTo,
+    // BeginReceive, BeginReceiveFrom, BeginSendFile, and BeginAccept calls.
     internal partial class BaseOverlappedAsyncResult : ContextAwareResult
     {
-        //
-        // internal class members
-        //
         private int _cleanupCount;
         private SafeNativeOverlapped _nativeOverlapped;
 
-        //
         // The WinNT Completion Port callback.
-        //
-        private unsafe static readonly IOCompletionCallback s_IOCallback = new IOCompletionCallback(CompletionPortCallback);
+        private unsafe static readonly IOCompletionCallback s_ioCallback = new IOCompletionCallback(CompletionPortCallback);
 
-        //
-        // Constructor. We take in the socket that's creating us, the caller's
-        // state object, and callback. We save the socket and state, and allocate
-        // an event for the WaitHandle.
-        //
         internal BaseOverlappedAsyncResult(Socket socket, Object asyncState, AsyncCallback asyncCallback)
             : base(socket, asyncState, asyncCallback)
         {
@@ -51,22 +39,19 @@ namespace System.Net.Sockets
             }
         }
 
+        // SetUnmanagedStructures
         //
-        // SetUnmanagedStructures -
+        // This needs to be called for overlapped IO to function properly.
         //
-        //  This needs to be called for overlapped IO to function properly.
-        //
-        //  Fills in Overlapped Structures used in an Async Overlapped Winsock call
-        //  these calls are outside the runtime and are unmanaged code, so we need
-        //  to prepare specific structures and ints that lie in unmanaged memory
-        //  since the Overlapped calls can be Async
-        //
+        // Fills in overlapped Structures used in an async overlapped Winsock call.
+        // These calls are outside the runtime and are unmanaged code, so we need
+        // to prepare specific structures and ints that lie in unmanaged memory
+        // since the overlapped calls may complete asynchronously.
         internal void SetUnmanagedStructures(object objectsToPin)
         {
             Socket s = (Socket)AsyncObject;
-            //
+
             // Bind the Win32 Socket Handle to the ThreadPool
-            //
             Debug.Assert(s != null, "m_CurrentSocket is null");
             Debug.Assert(s.SafeHandle != null, "m_CurrentSocket.SafeHandle is null");
 
@@ -79,7 +64,7 @@ namespace System.Net.Sockets
 
             unsafe
             {
-                NativeOverlapped* overlapped = boundHandle.AllocateNativeOverlapped(s_IOCallback, this, objectsToPin);
+                NativeOverlapped* overlapped = boundHandle.AllocateNativeOverlapped(s_ioCallback, this, objectsToPin);
                 _nativeOverlapped = new SafeNativeOverlapped(s.SafeHandle, overlapped);
                 GlobalLog.Print(
                     "BaseOverlappedAsyncResult#" + Logging.HashString(this) +
@@ -108,9 +93,7 @@ namespace System.Net.Sockets
                     " numBytes:" + numBytes.ToString() +
                     " pOverlapped:" + ((int)nativeOverlapped).ToString());
 
-                //
-                // complete the IO and invoke the user's callback
-                //
+                // Complete the IO and invoke the user's callback.
                 SocketError socketError = (SocketError)errorCode;
 
                 if (socketError != SocketError.Success && socketError != SocketError.OperationAborted)
@@ -134,17 +117,15 @@ namespace System.Net.Sockets
                     {
                         try
                         {
-                            //
-                            // The Async IO completed with a failure.
-                            // here we need to call WSAGetOverlappedResult() just so Marshal.GetLastWin32Error() will return the correct error.
-                            //
+                            // The async IO completed with a failure.
+                            // Here we need to call WSAGetOverlappedResult() just so Marshal.GetLastWin32Error() will return the correct error.
                             SocketFlags ignore;
                             bool success = Interop.Winsock.WSAGetOverlappedResult(
-                                    socket.SafeHandle,
-                                    asyncResult.NativeOverlapped,
-                                    out numBytes,
-                                    false,
-                                    out ignore);
+                                socket.SafeHandle,
+                                asyncResult.NativeOverlapped,
+                                out numBytes,
+                                false,
+                                out ignore);
                             if (!success)
                             {
                                 socketError = (SocketError)Marshal.GetLastWin32Error();
@@ -153,9 +134,9 @@ namespace System.Net.Sockets
 
                             GlobalLog.Assert(!success, "BaseOverlappedAsyncResult#{0}::CompletionPortCallback()|Unexpectedly succeeded. errorCode:{1} numBytes:{2}", Logging.HashString(asyncResult), errorCode, numBytes);
                         }
-                        // CleanedUp check above does not always work since this code is subject to race conditions
                         catch (ObjectDisposedException)
                         {
+                            // CleanedUp check above does not always work since this code is subject to race conditions
                             socketError = SocketError.OperationAborted;
                         }
                     }
@@ -169,23 +150,18 @@ namespace System.Net.Sockets
 #endif
         }
 
-        //
         // The following property returns the Win32 unsafe pointer to
         // whichever Overlapped structure we're using for IO.
-        //
         internal SafeHandle OverlappedHandle
         {
             get
             {
-                //
-                // on WinNT we need to use (due to the current implementation)
+                // On WinNT we need to use (due to the current implementation)
                 // an Overlapped object in order to bind the socket to the
                 // ThreadPool's completion port, so return the native handle
-                //
                 return _nativeOverlapped == null ? SafeNativeOverlapped.Zero : _nativeOverlapped;
             }
-        } // OverlappedHandle
-
+        }
 
         private void ReleaseUnmanagedStructures()
         {
@@ -211,10 +187,7 @@ namespace System.Net.Sockets
         // It needs to also be invoked from the subclass.
         protected virtual void ForceReleaseUnmanagedStructures()
         {
-            //
-            // free the unmanaged memory if allocated.
-            //
-
+            // Free the unmanaged memory if allocated.
             GlobalLog.Print(
                 "BaseOverlappedAsyncResult#" + Logging.HashString(this) +
                 "::ForceReleaseUnmanagedStructures");
