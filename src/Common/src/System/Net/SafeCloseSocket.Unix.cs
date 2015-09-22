@@ -78,12 +78,6 @@ namespace System.Net.Sockets
             return CreateSocket(InnerSafeCloseSocket.Accept(socketHandle, socketAddress, ref socketAddressSize));
         }
 
-        public ThreadPoolBoundHandle GetOrAllocateThreadPoolBoundHandle()
-        {
-            // TODO: remove this once async sockets are PAL'd out
-            throw new PlatformNotSupportedException();
-        }
-
         private void InnerReleaseHandle()
         {
             // No-op for Unix.
@@ -114,7 +108,7 @@ namespace System.Net.Sockets
                     _asyncContext.Close();
                 }
 
-                // If m_Blockable was set in BlockingRelease, it's safe to block here, which means
+                // If _blockable was set in BlockingRelease, it's safe to block here, which means
                 // we can honor the linger options set on the socket.  It also means closesocket() might return WSAEWOULDBLOCK, in which
                 // case we need to do some recovery.
                 if (_blockable)

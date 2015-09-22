@@ -34,12 +34,12 @@ namespace System.Net.Sockets
 
 			if (errorCode == SocketError.Success)
 			{
-				Internals.SocketAddress remoteSocketAddress = IPEndPointExtensions.Serialize(_listenSocket.m_RightEndPoint);
+				Internals.SocketAddress remoteSocketAddress = IPEndPointExtensions.Serialize(_listenSocket._rightEndPoint);
 				System.Buffer.BlockCopy(socketAddress, 0, remoteSocketAddress.Buffer, 0, socketAddressLen);
 
 				_acceptedSocket = _listenSocket.CreateAcceptSocket(
 					SafeCloseSocket.CreateSocket(acceptedFileDescriptor),
-					_listenSocket.m_RightEndPoint.Create(remoteSocketAddress));
+					_listenSocket._rightEndPoint.Create(remoteSocketAddress));
 			}
 
             base.CompletionCallback(0, errorCode);
