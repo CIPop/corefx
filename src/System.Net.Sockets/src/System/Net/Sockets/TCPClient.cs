@@ -6,66 +6,59 @@ using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
-    /// <devdoc>
-    /// <para>The <see cref='System.Net.Sockets.TcpClient'/> class provide TCP services at a higher level
-    ///    of abstraction than the <see cref='System.Net.Sockets.Socket'/> class. <see cref='System.Net.Sockets.TcpClient'/>
-    ///    is used to create a Client connection to a remote host.</para>
-    /// </devdoc>
+    // The System.Net.Sockets.TcpClient class provide TCP services at a higher level
+    // of abstraction than the System.Net.Sockets.Socket class. System.Net.Sockets.TcpClient
+    // is used to create a Client connection to a remote host.
     public class TcpClient : IDisposable
     {
         private Socket _clientSocket;
         private bool _active;
         private NetworkStream _dataStream;
 
-        //
-        // IPv6: Maintain address family for the client
-        //
+        // IPv6: Maintain address family for the client.
         private AddressFamily _family = AddressFamily.InterNetwork;
 
-        // specify local IP and port
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Net.Sockets.TcpClient'/>
-        ///       class with the specified end point.
-        ///    </para>
-        /// </devdoc>
+        // Initializes a new instance of the System.Net.Sockets.TcpClient
+        // class with the specified end point.
         public TcpClient(IPEndPoint localEP)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "TcpClient", localEP);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "TcpClient", localEP);
+            }
+
             if (localEP == null)
             {
                 throw new ArgumentNullException("localEP");
             }
-            //
+
             // IPv6: Establish address family before creating a socket
-            //
             _family = localEP.AddressFamily;
 
             initialize();
             Client.Bind(localEP);
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpClient", "");
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "TcpClient", "");
+            }
         }
 
-        // TcpClient(IPaddress localaddr); // port is arbitrary
-        // TcpClient(int outgoingPort); // local IP is arbitrary
-
-        // address+port is arbitrary
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Net.Sockets.TcpClient'/> class.
-        ///    </para>
-        /// </devdoc>
-        public TcpClient() : this(AddressFamily.InterNetwork)
+        // Initializes a new instance of the System.Net.Sockets.TcpClient class.
+        public TcpClient()
+            : this(AddressFamily.InterNetwork)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "TcpClient", null);
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "TcpClient", null);
+            }
+
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Net.Sockets.TcpClient'/> class.
-        ///    </para>
-        /// </devdoc>
+        // Initializes a new instance of the System.Net.Sockets.TcpClient class.
 #if COMNET_DISABLEIPV6
         private TcpClient(AddressFamily family)
         {
@@ -73,10 +66,12 @@ namespace System.Net.Sockets
         public TcpClient(AddressFamily family)
         {
 #endif
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "TcpClient", family);
-            //
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "TcpClient", family);
+            }
+
             // Validate parameter
-            //
             if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
             {
                 throw new ArgumentException(SR.Format(SR.net_protocol_invalid_family, "TCP"), "family");
@@ -85,17 +80,21 @@ namespace System.Net.Sockets
             _family = family;
 
             initialize();
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            }
         }
 
-        // bind and connect
-        /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.Net.Sockets.TcpClient'/> class and connects to the
-        ///    specified port on the specified host.</para>
-        /// </devdoc>
+        // Initializes a new instance of the System.Net.Sockets.TcpClient class and connects to the
+        // specified port on the specified host.
         public TcpClient(string hostname, int port)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "TcpClient", hostname);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "TcpClient", hostname);
+            }
+
             if (hostname == null)
             {
                 throw new ArgumentNullException("hostname");
@@ -104,18 +103,14 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException("port");
             }
-            //
+
             // IPv6: Delay creating the client socket until we have
             //       performed DNS resolution and know which address
             //       families we can use.
-            //
-            //initialize();
-
             try
             {
                 Connect(hostname, port);
             }
-
             catch (Exception e)
             {
                 if (e is OutOfMemoryException)
@@ -130,26 +125,29 @@ namespace System.Net.Sockets
                 throw e;
             }
 
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            }
         }
 
-        //
-        // used by TcpListener.Accept()
-        //
+        // Used by TcpListener.Accept().
         internal TcpClient(Socket acceptedSocket)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "TcpClient", acceptedSocket);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "TcpClient", acceptedSocket);
+            }
+
             Client = acceptedSocket;
             _active = true;
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+            }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Used by the class to provide
-        ///       the underlying network socket.
-        ///    </para>
-        /// </devdoc>
+        // Used by the class to provide the underlying network socket.
         public Socket Client
         {
             get
@@ -162,11 +160,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Used by the class to indicate that a connection has been made.
-        ///    </para>
-        /// </devdoc>
+        // Used by the class to indicate that a connection has been made.
         protected bool Active
         {
             get
@@ -191,18 +185,16 @@ namespace System.Net.Sockets
             {
                 _clientSocket.ExclusiveAddressUse = value;
             }
-        }    //new
+        }
 
-
-
-        /// <devdoc>
-        ///    <para>
-        ///       Connects the Client to the specified port on the specified host.
-        ///    </para>
-        /// </devdoc>
+        // Connects the Client to the specified port on the specified host.
         public void Connect(string hostname, int port)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", hostname);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "Connect", hostname);
+            }
+
             if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
@@ -215,30 +207,24 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException("port");
             }
-            //
+
             // Check for already connected and throw here. This check
             // is not required in the other connect methods as they
             // will throw from WinSock. Here, the situation is more
             // complex since we have to resolve a hostname so it's
             // easier to simply block the request up front.
-            //
             if (_active)
             {
                 throw new SocketException((int)SocketError.IsConnected);
             }
 
-            //
             // IPv6: We need to process each of the addresses return from
             //       DNS when trying to connect. Use of AddressList[0] is
             //       bad form.
-            //
-
-
             IPAddress[] addresses = Dns.GetHostAddressesAsync(hostname).GetAwaiter().GetResult();
             Exception lastex = null;
             Socket ipv6Socket = null;
             Socket ipv4Socket = null;
-
             try
             {
                 if (_clientSocket == null)
@@ -259,24 +245,26 @@ namespace System.Net.Sockets
                     {
                         if (_clientSocket == null)
                         {
-                            //
                             // We came via the <hostname,port> constructor. Set the
                             // address family appropriately, create the socket and
                             // try to connect.
-                            //
                             if (address.AddressFamily == AddressFamily.InterNetwork && ipv4Socket != null)
                             {
                                 ipv4Socket.Connect(address, port);
                                 _clientSocket = ipv4Socket;
                                 if (ipv6Socket != null)
+                                {
                                     ipv6Socket.Dispose();
+                                }
                             }
                             else if (ipv6Socket != null)
                             {
                                 ipv6Socket.Connect(address, port);
                                 _clientSocket = ipv6Socket;
                                 if (ipv4Socket != null)
+                                {
                                     ipv4Socket.Dispose();
+                                }
                             }
 
                             _family = address.AddressFamily;
@@ -285,15 +273,12 @@ namespace System.Net.Sockets
                         }
                         else if (address.AddressFamily == _family)
                         {
-                            //
-                            // Only use addresses with a matching family
-                            //
+                            // Only use addresses with a matching family.
                             Connect(new IPEndPoint(address, port));
                             _active = true;
                             break;
                         }
                     }
-
                     catch (Exception ex)
                     {
                         if (ex is OutOfMemoryException)
@@ -304,7 +289,6 @@ namespace System.Net.Sockets
                     }
                 }
             }
-
             catch (Exception ex)
             {
                 if (ex is OutOfMemoryException)
@@ -313,13 +297,11 @@ namespace System.Net.Sockets
                 }
                 lastex = ex;
             }
-
             finally
             {
-                //cleanup temp sockets if failed
-                //main socket gets closed when tcpclient gets closed
+                // Cleanup temp sockets if failed. Main socket gets closed when TCPClient gets closed.
 
-                //did we connect?
+                // Did we connect?
                 if (!_active)
                 {
                     if (ipv6Socket != null)
@@ -332,28 +314,32 @@ namespace System.Net.Sockets
                         ipv4Socket.Dispose();
                     }
 
-
-                    //
-                    // The connect failed - rethrow the last error we had
-                    //
+                    // The connect failed - rethrow the last error we had.
                     if (lastex != null)
+                    {
                         throw lastex;
+                    }
                     else
+                    {
                         throw new SocketException((int)SocketError.NotConnected);
+                    }
                 }
             }
 
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "Connect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "Connect", null);
+            }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Connects the Client to the specified port on the specified host.
-        ///    </para>
-        /// </devdoc>
+        // Connects the Client to the specified port on the specified host.
         public void Connect(IPAddress address, int port)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", address);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "Connect", address);
+            }
+
             if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
@@ -366,19 +352,23 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException("port");
             }
+
             IPEndPoint remoteEP = new IPEndPoint(address, port);
             Connect(remoteEP);
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "Connect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "Connect", null);
+            }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Connect the Client to the specified end point.
-        ///    </para>
-        /// </devdoc>
+        // Connect the Client to the specified end point.
         public void Connect(IPEndPoint remoteEP)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", remoteEP);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "Connect", remoteEP);
+            }
+
             if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
@@ -387,57 +377,94 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("remoteEP");
             }
+
             Client.Connect(remoteEP);
             _active = true;
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "Connect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "Connect", null);
+            }
         }
 
-
-
-        //methods
         public void Connect(IPAddress[] ipAddresses, int port)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", ipAddresses);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "Connect", ipAddresses);
+            }
+
             Client.Connect(ipAddresses, port);
             _active = true;
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "Connect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "Connect", null);
+            }
         }
-
 
         public IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginConnect", host);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "BeginConnect", host);
+            }
+
             IAsyncResult result = Client.BeginConnect(host, port, requestCallback, state);
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
+            }
+
             return result;
         }
 
         public IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginConnect", address);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "BeginConnect", address);
+            }
+
             IAsyncResult result = Client.BeginConnect(address, port, requestCallback, state);
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
+            }
+
             return result;
         }
 
         public IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginConnect", addresses);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "BeginConnect", addresses);
+            }
+
             IAsyncResult result = Client.BeginConnect(addresses, port, requestCallback, state);
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
+            }
+
             return result;
         }
 
         public void EndConnect(IAsyncResult asyncResult)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "EndConnect", asyncResult);
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "EndConnect", asyncResult);
+            }
+
             Client.EndConnect(asyncResult);
             _active = true;
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "EndConnect", null);
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "EndConnect", null);
+            }
+
         }
 
-
-        //************* Task-based async public methods *************************
         public Task ConnectAsync(IPAddress address, int port)
         {
             return Task.Factory.FromAsync(BeginConnect, EndConnect, address, port, null);
@@ -453,16 +480,14 @@ namespace System.Net.Sockets
             return Task.Factory.FromAsync(BeginConnect, EndConnect, addresses, port, null);
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Returns the stream used to read and write data to the
-        ///       remote host.
-        ///    </para>
-        /// </devdoc>
+        // Returns the stream used to read and write data to the remote host.
         public NetworkStream GetStream()
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "GetStream", "");
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "GetStream", "");
+            }
+
             if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
@@ -471,28 +496,37 @@ namespace System.Net.Sockets
             {
                 throw new InvalidOperationException(SR.net_notconnected);
             }
+
             if (_dataStream == null)
             {
                 _dataStream = new NetworkStream(Client, true);
             }
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "GetStream", _dataStream);
+
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "GetStream", _dataStream);
+            }
+
             return _dataStream;
         }
 
         private bool _cleanedUp = false;
 
-        /// <devdoc>
-        ///    <para>
-        ///       Disposes the Tcp connection.
-        ///    </para>
-        /// </devdoc>
-        //UEUE
+        // Disposes the Tcp connection.
         protected virtual void Dispose(bool disposing)
         {
-            if (Logging.On) Logging.Enter(Logging.Sockets, this, "Dispose", "");
+            if (Logging.On)
+            {
+                 Logging.Enter(Logging.Sockets, this, "Dispose", "");
+            }
+
             if (_cleanedUp)
             {
-                if (Logging.On) Logging.Exit(Logging.Sockets, this, "Dispose", "");
+                if (Logging.On)
+                {
+                     Logging.Exit(Logging.Sockets, this, "Dispose", "");
+                }
+
                 return;
             }
 
@@ -505,12 +539,10 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    //
-                    // if the NetworkStream wasn't created, the Socket might
+                    // If the NetworkStream wasn't created, the Socket might
                     // still be there and needs to be closed. In the case in which
                     // we are bound to a local IPEndPoint this will remove the
                     // binding and free up the IPEndPoint for later uses.
-                    //
                     Socket chkClientSocket = Client;
                     if (chkClientSocket != null)
                     {
@@ -530,7 +562,10 @@ namespace System.Net.Sockets
             }
 
             _cleanedUp = true;
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "Dispose", "");
+            if (Logging.On)
+            {
+                 Logging.Exit(Logging.Sockets, this, "Dispose", "");
+            }
         }
 
         public void Dispose()
@@ -551,38 +586,25 @@ namespace System.Net.Sockets
 #endif
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets the size of the receive buffer in bytes.
-        ///    </para>
-        /// </devdoc>
+        // Gets or sets the size of the receive buffer in bytes.
         public int ReceiveBufferSize
         {
             get
             {
-                return numericOption(SocketOptionLevel.Socket,
-                                     SocketOptionName.ReceiveBuffer);
+                return numericOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer);
             }
             set
             {
-                Client.SetSocketOption(SocketOptionLevel.Socket,
-                                  SocketOptionName.ReceiveBuffer, value);
+                Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, value);
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or
-        ///       sets the size of the send buffer in bytes.
-        ///    </para>
-        /// </devdoc>
+        // Gets or sets the size of the send buffer in bytes.
         public int SendBufferSize
         {
             get
             {
-                return numericOption(SocketOptionLevel.Socket,
-                                     SocketOptionName.SendBuffer);
+                return numericOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer);
             }
 
             set
@@ -592,11 +614,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets the receive time out value of the connection in seconds.
-        ///    </para>
-        /// </devdoc>
+        // Gets or sets the receive time out value of the connection in seconds.
         public int ReceiveTimeout
         {
             get
@@ -611,11 +629,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets the send time out value of the connection in seconds.
-        ///    </para>
-        /// </devdoc>
+        // Gets or sets the send time out value of the connection in seconds.
         public int SendTimeout
         {
             get
@@ -629,11 +643,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Gets or sets the value of the connection's linger option.
-        ///    </para>
-        /// </devdoc>
+        // Gets or sets the value of the connection's linger option.
         public LingerOption LingerState
         {
             get
@@ -646,11 +656,7 @@ namespace System.Net.Sockets
             }
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Enables or disables delay when send or receive buffers are full.
-        ///    </para>
-        /// </devdoc>
+        // Enables or disables delay when send or receive buffers are full.
         public bool NoDelay
         {
             get
@@ -665,9 +671,7 @@ namespace System.Net.Sockets
 
         private void initialize()
         {
-            //
-            // IPv6: Use the address family from the constructor (or Connect method)
-            //
+            // IPv6: Use the address family from the constructor (or Connect method).
             Client = new Socket(_family, SocketType.Stream, ProtocolType.Tcp);
             _active = false;
         }
@@ -676,5 +680,5 @@ namespace System.Net.Sockets
         {
             return (int)Client.GetSocketOption(optionLevel, optionName);
         }
-    }; // class TCPClient
-} // namespace System.Net.Sockets
+    }
+}
