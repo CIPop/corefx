@@ -10,25 +10,18 @@ using System.Collections.Generic;
 
 namespace System.Net.Sockets
 {
-    //
-    //  OverlappedAsyncResult - used to take care of storage for async Socket operation
-    //   from the BeginSend, BeginSendTo, BeginReceive, BeginReceiveFrom calls.
-    //
     unsafe internal partial class ReceiveMessageOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
-        //
-        // internal class members
-        //
         private Interop.Winsock.WSAMsg* _message;
-        private WSABuffer* _WSABuffer;
-        private byte[] _WSABufferArray;
+        private WSABuffer* _wsaBuffer;
+        private byte[] _wsaBufferArray;
         private byte[] _controlBuffer;
-        internal byte[] m_MessageBuffer;
+        internal byte[] _messageBuffer;
 
-        private static readonly int s_ControlDataSize = Marshal.SizeOf<Interop.Winsock.ControlData>();
-        private static readonly int s_ControlDataIPv6Size = Marshal.SizeOf<Interop.Winsock.ControlDataIPv6>();
-        private static readonly int s_WSABufferSize = Marshal.SizeOf<WSABuffer>();
-        private static readonly int s_WSAMsgSize = Marshal.SizeOf<Interop.Winsock.WSAMsg>();
+        private static readonly int s_controlDataSize = Marshal.SizeOf<Interop.Winsock.ControlData>();
+        private static readonly int s_controlDataIPv6Size = Marshal.SizeOf<Interop.Winsock.ControlDataIPv6>();
+        private static readonly int s_wsaBufferSize = Marshal.SizeOf<WSABuffer>();
+        private static readonly int s_wsaMsgSize = Marshal.SizeOf<Interop.Winsock.WSAMsg>();
 
         private IntPtr GetSocketAddressSizePtr()
         {
@@ -40,39 +33,37 @@ namespace System.Net.Sockets
             return *(int*)GetSocketAddressSizePtr();
         }
 
+        // SetUnmanagedStructures
         //
-        // SetUnmanagedStructures -
-        // Fills in Overlapped Structures used in an Async Overlapped Winsock call
-        //   these calls are outside the runtime and are unmanaged code, so we need
-        //   to prepare specific structures and ints that lie in unmanaged memory
-        //   since the Overlapped calls can be Async
-        //
-
+        // Fills in overlapped Structures used in an async overlapped Winsock call.
+        // These calls are outside the runtime and are unmanaged code, so we need
+        // to prepare specific structures and ints that lie in unmanaged memory
+        // since the overlapped calls may complete asynchronously.
         internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, Internals.SocketAddress socketAddress, SocketFlags socketFlags)
         {
-            m_MessageBuffer = new byte[s_WSAMsgSize];
-            _WSABufferArray = new byte[s_WSABufferSize];
+            _messageBuffer = new byte[s_wsaMsgSize];
+            _wsaBufferArray = new byte[s_wsaBufferSize];
 
             bool ipv4, ipv6;
             Socket.GetIPProtocolInformation(((Socket)AsyncObject).AddressFamily, socketAddress, out ipv4, out ipv6);
 
-            //prepare control buffer
+            // Prepare control buffer.
             if (ipv4)
             {
-                _controlBuffer = new byte[s_ControlDataSize];
+                _controlBuffer = new byte[s_controlDataSize];
             }
             else if (ipv6)
             {
-                _controlBuffer = new byte[s_ControlDataIPv6Size];
+                _controlBuffer = new byte[s_controlDataIPv6Size];
             }
 
-            //pin buffers
+            // Pin buffers.
             object[] objectsToPin = new object[(_controlBuffer != null) ? 5 : 4];
             objectsToPin[0] = buffer;
-            objectsToPin[1] = m_MessageBuffer;
-            objectsToPin[2] = _WSABufferArray;
+            objectsToPin[1] = _messageBuffer;
+            objectsToPin[2] = _wsaBufferArray;
 
-            //prepare socketaddress buffer
+            // Prepare socketaddress buffer.
             _socketAddress = socketAddress;
             _socketAddress.CopyAddressSizeIntoBuffer();
             objectsToPin[3] = _socketAddress.Buffer;
@@ -84,17 +75,17 @@ namespace System.Net.Sockets
 
             base.SetUnmanagedStructures(objectsToPin);
 
-            //prepare data buffer
-            _WSABuffer = (WSABuffer*)Marshal.UnsafeAddrOfPinnedArrayElement(_WSABufferArray, 0);
-            _WSABuffer->Length = size;
-            _WSABuffer->Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
+            // Prepare data buffer.
+            _wsaBuffer = (WSABuffer*)Marshal.UnsafeAddrOfPinnedArrayElement(_wsaBufferArray, 0);
+            _wsaBuffer->Length = size;
+            _wsaBuffer->Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
 
 
-            //setup structure
-            _message = (Interop.Winsock.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(m_MessageBuffer, 0);
+            // Setup structure.
+            _message = (Interop.Winsock.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(_messageBuffer, 0);
             _message->socketAddress = Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, 0);
             _message->addressLength = (uint)_socketAddress.Size;
-            _message->buffers = Marshal.UnsafeAddrOfPinnedArrayElement(_WSABufferArray, 0);
+            _message->buffers = Marshal.UnsafeAddrOfPinnedArrayElement(_wsaBufferArray, 0);
             _message->count = 1;
 
             if (_controlBuffer != null)
@@ -110,41 +101,40 @@ namespace System.Net.Sockets
         {
             IPAddress address = null;
 
-            //ipv4
-            if (_controlBuffer.Length == s_ControlDataSize)
+            if (_controlBuffer.Length == s_controlDataSize)
             {
+                // IPv4
                 Interop.Winsock.ControlData controlData = Marshal.PtrToStructure<Interop.Winsock.ControlData>(_message->controlBuffer.Pointer);
                 if (controlData.length != UIntPtr.Zero)
                 {
                     address = new IPAddress((long)controlData.address);
                 }
+
                 _ipPacketInformation = new IPPacketInformation(((address != null) ? address : IPAddress.None), (int)controlData.index);
             }
-            //ipv6
-            else if (_controlBuffer.Length == s_ControlDataIPv6Size)
+            else if (_controlBuffer.Length == s_controlDataIPv6Size)
             {
+                // IPv6
                 Interop.Winsock.ControlDataIPv6 controlData = Marshal.PtrToStructure<Interop.Winsock.ControlDataIPv6>(_message->controlBuffer.Pointer);
                 if (controlData.length != UIntPtr.Zero)
                 {
                     address = new IPAddress(controlData.address);
                 }
+
                 _ipPacketInformation = new IPPacketInformation(((address != null) ? address : IPAddress.IPv6None), (int)controlData.index);
             }
-            //other
             else
             {
+                // Other
                 _ipPacketInformation = new IPPacketInformation();
             }
         }
 
-        //
-        // This method is called after an asynchronous call is made for the user,
-        // it checks and acts accordingly if the IO:
+        // This method is called after an asynchronous call is made for the user.
+        // It checks and acts accordingly if the IO:
         // 1) completed synchronously.
         // 2) was pended.
         // 3) failed.
-        //
-
         internal void SyncReleaseUnmanagedStructures()
         {
             InitIPPacketInformation();
@@ -160,17 +150,18 @@ namespace System.Net.Sockets
         internal override object PostCompletion(int numBytes)
         {
             InitIPPacketInformation();
-            if (ErrorCode == 0)
+            if (ErrorCode == 0 && Logging.On)
             {
-                if (Logging.On) LogBuffer(numBytes);
+                LogBuffer(numBytes);
             }
+
             return (int)numBytes;
         }
 
         private void LogBuffer(int size)
         {
             GlobalLog.Assert(Logging.On, "ReceiveMessageOverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", Logging.HashString(this));
-            Logging.Dump(Logging.Sockets, AsyncObject, "PostCompletion", _WSABuffer->Pointer, Math.Min(_WSABuffer->Length, size));
+            Logging.Dump(Logging.Sockets, AsyncObject, "PostCompletion", _wsaBuffer->Pointer, Math.Min(_wsaBuffer->Length, size));
         }
-    }; // class OverlappedAsyncResult
-} // namespace System.Net.Sockets
+    }
+}

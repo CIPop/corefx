@@ -385,7 +385,7 @@ namespace System.Net.Sockets
                 // This can throw ObjectDisposedException (retrieving the delegate AND resolving the handle).
                 if (socket.WSARecvMsg_Blocking(
                     handle.DangerousGetHandle(),
-                    Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult.m_MessageBuffer, 0),
+                    Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult._messageBuffer, 0),
                     out bytesTransferred,
                     IntPtr.Zero,
                     IntPtr.Zero) == SocketError.SocketError)
@@ -993,7 +993,7 @@ namespace System.Net.Sockets
             int bytesTransfered;
             SocketError errorCode = (SocketError)socket.WSARecvMsg(
                 handle,
-                Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult.m_MessageBuffer, 0),
+                Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult._messageBuffer, 0),
                 out bytesTransfered,
                 asyncResult.OverlappedHandle,
                 IntPtr.Zero);
