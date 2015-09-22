@@ -45,10 +45,8 @@ namespace System.Net.Sockets
             return maxFd + 1;
         }
 
-        //
         // Transform the list socketList such that the only sockets left are those
-        // with a file descriptor contained in the array "fileDescriptorArray"
-        //
+        // with a file descriptor contained in the array "fileDescriptorArray".
         internal static void FilterSocketListUsingFdSet(ref Interop.libc.fd_set fdset, IList socketList)
         {
             if (socketList == null || socketList.Count == 0)

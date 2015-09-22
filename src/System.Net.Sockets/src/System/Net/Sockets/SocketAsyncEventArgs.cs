@@ -496,7 +496,7 @@ namespace System.Net.Sockets
             // First calculate the special AcceptEx address buffer size.
             // It is the size of two native sockaddr buffers with 16 extra bytes each.
             // The native sockaddr buffers vary by address family so must reference the current socket.
-            m_AcceptAddressBufferCount = 2 * (_currentSocket.m_RightEndPoint.Serialize().Size + 16);
+            m_AcceptAddressBufferCount = 2 * (_currentSocket._rightEndPoint.Serialize().Size + 16);
 
             // If our caller specified a buffer (willing to get received data with the Accept) then
             // it needs to be large enough for the two special sockaddr buffers that AcceptEx requires.
@@ -730,17 +730,17 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogBuffer(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
                     }
 
                     // Get the endpoint.
-                    Internals.SocketAddress remoteSocketAddress = IPEndPointExtensions.Serialize(_currentSocket.m_RightEndPoint);
+                    Internals.SocketAddress remoteSocketAddress = IPEndPointExtensions.Serialize(_currentSocket._rightEndPoint);
 
                     socketError = FinishOperationAccept(remoteSocketAddress);
 
                     if (socketError == SocketError.Success)
                     {
-                        m_AcceptSocket = _currentSocket.UpdateAcceptSocket(m_AcceptSocket, _currentSocket.m_RightEndPoint.Create(remoteSocketAddress));
+                        m_AcceptSocket = _currentSocket.UpdateAcceptSocket(m_AcceptSocket, _currentSocket._rightEndPoint.Create(remoteSocketAddress));
 
                         if (s_LoggingEnabled)
                             Logging.PrintInfo(Logging.Sockets, m_AcceptSocket,
@@ -759,7 +759,7 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogBuffer(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
                     }
 
                     socketError = FinishOperationConnect();
@@ -779,7 +779,7 @@ namespace System.Net.Sockets
                 case SocketAsyncOperation.Disconnect:
 
                     _currentSocket.SetToDisconnected();
-                    _currentSocket.m_RemoteEndPoint = null;
+                    _currentSocket._remoteEndPoint = null;
 
                     break;
 
@@ -789,7 +789,7 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogBuffer(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
                     }
                     break;
 
@@ -799,7 +799,7 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogBuffer(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
                     }
 
                     // Deal with incoming address.
@@ -823,7 +823,7 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogBuffer(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, false);
                     }
 
                     // Deal with incoming address.
@@ -849,7 +849,7 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogBuffer(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
                     }
                     break;
 
@@ -859,7 +859,7 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogSendPacketsBuffers(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
                     }
 
                     FinishOperationSendPackets();
@@ -871,7 +871,7 @@ namespace System.Net.Sockets
                     {
                         // Log and Perf counters.
                         if (s_LoggingEnabled) LogBuffer(bytesTransferred);
-                        if (Socket.s_PerfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
+                        if (Socket.s_perfCountersEnabled) UpdatePerfCounters(bytesTransferred, true);
                     }
                     break;
             }

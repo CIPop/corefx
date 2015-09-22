@@ -25,7 +25,7 @@ namespace System.Net.Sockets
             {
                 Socket socket = (Socket)AsyncObject;
                 socket.SetToDisconnected();
-                socket.m_RemoteEndPoint = null;
+                socket._remoteEndPoint = null;
             }
 
             return base.PostCompletion(numBytes);
