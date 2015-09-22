@@ -2106,7 +2106,7 @@ namespace System.Net.Sockets
                 {
                     throw new ArgumentException(SR.Format(SR.ArgumentOutOfRange_Bounds_Lower_Upper, 0, (int)UInt16.MaxValue), "optionValue.LingerTime");
                 }
-                setLingerOption(lingerOption);
+                SetLingerOption(lingerOption);
             }
             else if (optionLevel == SocketOptionLevel.IP && (optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership))
             {
@@ -2115,7 +2115,7 @@ namespace System.Net.Sockets
                 {
                     throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "MulticastOption"), "optionValue");
                 }
-                setMulticastOption(optionName, multicastOption);
+                SetMulticastOption(optionName, multicastOption);
             }
             else if (optionLevel == SocketOptionLevel.IPv6 && (optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership))
             {
@@ -2125,7 +2125,7 @@ namespace System.Net.Sockets
                 {
                     throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "IPv6MulticastOption"), "optionValue");
                 }
-                setIPv6MulticastOption(optionName, multicastOption);
+                SetIPv6MulticastOption(optionName, multicastOption);
             }
             else
             {
@@ -2142,16 +2142,16 @@ namespace System.Net.Sockets
             }
             if (optionLevel == SocketOptionLevel.Socket && optionName == SocketOptionName.Linger)
             {
-                return getLingerOpt();
+                return GetLingerOpt();
             }
             else if (optionLevel == SocketOptionLevel.IP && (optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership))
             {
-                return getMulticastOpt(optionName);
+                return GetMulticastOpt(optionName);
             }
             else if (optionLevel == SocketOptionLevel.IPv6 && (optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership))
             {
                 // Handle IPv6 case
-                return getIPv6MulticastOpt(optionName);
+                return GetIPv6MulticastOpt(optionName);
             }
 
             int optionValue = 0;
@@ -5688,7 +5688,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private void setMulticastOption(SocketOptionName optionName, MulticastOption MR)
+        private void SetMulticastOption(SocketOptionName optionName, MulticastOption MR)
         {
             SocketError errorCode = SocketPal.SetMulticastOption(_handle, optionName, MR);
 
@@ -5709,7 +5709,7 @@ namespace System.Net.Sockets
         }
 
         // IPv6 setsockopt for JOIN / LEAVE multicast group.
-        private void setIPv6MulticastOption(SocketOptionName optionName, IPv6MulticastOption MR)
+        private void SetIPv6MulticastOption(SocketOptionName optionName, IPv6MulticastOption MR)
         {
             SocketError errorCode = SocketPal.SetIPv6MulticastOption(_handle, optionName, MR);
 
@@ -5729,7 +5729,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private void setLingerOption(LingerOption lref)
+        private void SetLingerOption(LingerOption lref)
         {
             SocketError errorCode = SocketPal.SetLingerOption(_handle, lref);
 
@@ -5749,7 +5749,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private LingerOption getLingerOpt()
+        private LingerOption GetLingerOpt()
         {
             LingerOption lingerOption;
             SocketError errorCode = SocketPal.GetLingerOption(_handle, out lingerOption);
@@ -5772,7 +5772,7 @@ namespace System.Net.Sockets
             return lingerOption;
         }
 
-        private MulticastOption getMulticastOpt(SocketOptionName optionName)
+        private MulticastOption GetMulticastOpt(SocketOptionName optionName)
         {
             MulticastOption multicastOption;
             SocketError errorCode = SocketPal.GetMulticastOption(_handle, optionName, out multicastOption);
@@ -5797,7 +5797,7 @@ namespace System.Net.Sockets
         }
 
         // IPv6 getsockopt for JOIN / LEAVE multicast group.
-        private IPv6MulticastOption getIPv6MulticastOpt(SocketOptionName optionName)
+        private IPv6MulticastOption GetIPv6MulticastOpt(SocketOptionName optionName)
         {
             IPv6MulticastOption multicastOption;
             SocketError errorCode = SocketPal.GetIPv6MulticastOption(_handle, optionName, out multicastOption);
