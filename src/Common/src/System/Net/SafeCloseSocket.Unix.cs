@@ -109,6 +109,11 @@ namespace System.Net.Sockets
             {
                 int errorCode;
 
+                if (_asyncContext != null)
+                {
+                    _asyncContext.Close();
+                }
+
                 // If m_Blockable was set in BlockingRelease, it's safe to block here, which means
                 // we can honor the linger options set on the socket.  It also means closesocket() might return WSAEWOULDBLOCK, in which
                 // case we need to do some recovery.
@@ -190,10 +195,6 @@ namespace System.Net.Sockets
 #endif
                 GlobalLog.Print("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ") close#3():" + (errorCode == -1 ? (int)Interop.Sys.GetLastError() : errorCode).ToString());
 
-                if (errorCode == 0 && _asyncContext != null)
-                {
-                    _asyncContext.Close();
-                }
                 return SocketPal.GetSocketErrorForErrorCode((Interop.Error)errorCode);
             }
 
