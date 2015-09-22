@@ -17,13 +17,6 @@ namespace System.Net.Sockets
     //     - This will require a new state for each queue, unregistred, to track whether or
     //       not the queue is currently registered to receive events
     // - Audit Close()-related code for the possibility of file descriptor recycling issues
-    //     - This will at least involve moving the call to SocketAsyncContext.Close() in
-    //       SafeCloseSocket to before the file descriptor is actually closed.
-    //         - This timing change will require adding a "forcible complete" flag to
-    //           AsyncOperation.TryCopmlete that completes the operation whether or not
-    //           the underlying system call returns EAGAIN/EINPROGRESS/EWOULDBLOCK.
-    //         - Note that this may be required regardless of file descriptor recycling in
-    //           order to match Winsock behavior, particularly with regards to error codes.
     //     - It might make sense to change _closeLock to a ReaderWriterLockSlim that is
     //       acquired for read by all public methods before attempting a completion and
     //       acquired for write by Close() and HandlEvents()
@@ -88,7 +81,7 @@ namespace System.Net.Sockets
                 return DoTryComplete(fileDescriptor);
             }
 
-            public bool TryCompleteAsync(int fileDescriptor)
+            public bool TryCompleteAsync(int fileDescriptor, bool forceComplete)
             {
                 int state = Interlocked.CompareExchange(ref _state, (int)State.Running, (int)State.Waiting);
                 if (state == (int)State.Cancelled)
@@ -98,7 +91,14 @@ namespace System.Net.Sockets
                 }
                 Debug.Assert(state != (int)State.Complete && state != (int)State.Running);
 
-                if (DoTryComplete(fileDescriptor))
+                bool completed = DoTryComplete(fileDescriptor);
+                if (!completed && forceComplete)
+                {
+                    ErrorCode = SocketError.OperationAborted;
+                    completed = true;
+                }
+
+                if (completed)
                 {
                     var @event = CallbackOrEvent as ManualResetEventSlim;
                     if (@event != null)
@@ -364,6 +364,8 @@ namespace System.Net.Sockets
                 _handle = GCHandle.Alloc(this, GCHandleType.Normal);
             }
 
+            events |= _registeredEvents;
+
             Interop.Error errorCode;
             if (!_engine.TryRegister(_fileDescriptor, _registeredEvents, events, _handle, out errorCode))
             {
@@ -376,7 +378,7 @@ namespace System.Net.Sockets
                 throw new Exception(string.Format("SocketAsyncContext.Register: {0}", errorCode));
             }
 
-            _registeredEvents |= events;
+            _registeredEvents = events;
         }
 
         private void UnregisterRead()
@@ -393,7 +395,6 @@ namespace System.Net.Sockets
             {
                 Interop.Error errorCode;
                 bool unregistered = _engine.TryRegister(_fileDescriptor, _registeredEvents, events, _handle, out errorCode);
-
                 if (unregistered)
                 {
                     _registeredEvents = events;
@@ -418,13 +419,6 @@ namespace System.Net.Sockets
             Interop.Error errorCode;
             bool unregistered = _engine.TryRegister(_fileDescriptor, _registeredEvents, SocketAsyncEvents.None, _handle, out errorCode);
             _registeredEvents = (SocketAsyncEvents)(-1);
-
-            // We may receive any of the errors below if _fileDescriptor has already been closed.
-            unregistered = unregistered ||
-                errorCode == Interop.Error.EBADF ||
-                errorCode == Interop.Error.ENOENT ||
-                errorCode == Interop.Error.EPERM;
-
             if (unregistered)
             {
                 _registeredEvents = SocketAsyncEvents.None;
@@ -465,7 +459,7 @@ namespace System.Net.Sockets
             while (!acceptOrConnectQueue.IsEmpty)
             {
                 AcceptOrConnectOperation op = acceptOrConnectQueue.Head;
-                bool completed = op.TryCompleteAsync(_fileDescriptor);
+                bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: true);
                 Debug.Assert(completed);
                 acceptOrConnectQueue.Dequeue();
             }
@@ -474,7 +468,7 @@ namespace System.Net.Sockets
             while (!sendQueue.IsEmpty)
             {
                 SendReceiveOperation op = sendQueue.Head;
-                bool completed = op.TryCompleteAsync(_fileDescriptor);
+                bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: true);
                 Debug.Assert(completed);
                 sendQueue.Dequeue();
             }
@@ -483,7 +477,7 @@ namespace System.Net.Sockets
             while (!receiveQueue.IsEmpty)
             {
                 TransferOperation op = receiveQueue.Head;
-                bool completed = op.TryCompleteAsync(_fileDescriptor);
+                bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: true);
                 Debug.Assert(completed);
                 receiveQueue.Dequeue();
             }
@@ -1322,7 +1316,7 @@ namespace System.Net.Sockets
                     while (!receiveQueue.IsEmpty)
                     {
                         TransferOperation op = receiveQueue.Head;
-                        bool completed = op.TryCompleteAsync(_fileDescriptor);
+                        bool completed = op.TryCompleteAsync(_fileDescriptor, forceComplete: false);
                         Debug.Assert(completed);
                         receiveQueue.Dequeue();
                     }
@@ -1359,7 +1353,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _acceptOrConnectQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
@@ -1373,7 +1367,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _receiveQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
@@ -1401,7 +1395,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _acceptOrConnectQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
@@ -1415,7 +1409,7 @@ namespace System.Net.Sockets
                         do
                         {
                             op = _sendQueue.Head;
-                            if (!op.TryCompleteAsync(_fileDescriptor))
+                            if (!op.TryCompleteAsync(_fileDescriptor, forceComplete: false))
                             {
                                 break;
                             }
