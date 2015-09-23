@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Threading;
 
 using Xunit;
 
@@ -6,7 +9,7 @@ namespace System.Net.Sockets.Tests
 {
     public class Disconnect
     {
-        private const int TestPortBase = 8040;
+        private const int TestPortBase = TestPortBases.Disconnect;
 
         public void OnCompleted(object sender, SocketAsyncEventArgs args)
         {

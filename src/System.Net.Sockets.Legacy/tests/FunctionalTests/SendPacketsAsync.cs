@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
 using System.Net.Test.Common;
 using System.Threading;
 
@@ -13,7 +16,7 @@ namespace System.Net.Sockets.Tests
         //       merged into corefx.
         private const int DummySendPacketsIssue = 123456;
 
-        private const int TestPortBase = 8100;
+        private const int TestPortBase = TestPortBases.SendPacketsAsync;
         private readonly ITestOutputHelper _log;
 
         private IPEndPoint Server = new IPEndPoint(IPAddress.IPv6Loopback, 8080); 

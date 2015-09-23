@@ -1,4 +1,7 @@
-﻿using System.Net.Test.Common;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Test.Common;
 using System.Threading;
 
 using Xunit;
@@ -16,7 +19,7 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv4Support() || Capability.IPv6Support());
         }
 
-        private const int TestPortBase = 8020;
+        private const int TestPortBase = 7020;
         public void OnConnectCompleted(object sender, SocketAsyncEventArgs args)
         {
             EventWaitHandle handle = (EventWaitHandle)args.UserToken;
