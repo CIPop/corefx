@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Threading;
 
 using Xunit;
 
@@ -6,7 +9,7 @@ namespace System.Net.Sockets.Tests
 {
     public class ConnectExTest
     {
-        private const int TestPortBase = 8030;
+        private const int TestPortBase = TestPortBases.ConnectEx;
 
         private static void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
         {

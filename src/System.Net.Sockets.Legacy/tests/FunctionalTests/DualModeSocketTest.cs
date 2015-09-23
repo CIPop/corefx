@@ -1,4 +1,7 @@
-﻿using System.Net.Test.Common;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Test.Common;
 using System.Threading;
 
 using Xunit;
@@ -15,7 +18,7 @@ namespace System.Net.Sockets.Tests
         private const int DummyOSXPacketInfoIssue = 123458;
         private const int DummyOSXDualModePacketInfoIssue = 123459;
 
-        private const int TestPortBase = 8200;  // to 8300
+        private const int TestPortBase = TestPortBases.DualMode;
         private readonly ITestOutputHelper _log;
 
         public DualMode(ITestOutputHelper output)

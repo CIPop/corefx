@@ -1,4 +1,7 @@
-﻿using System.Net.Test.Common;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Test.Common;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -10,7 +13,7 @@ namespace System.Net.Sockets.Tests
     /// </summary>
     public class AgnosticListenerTest
     {
-        private static int TestPortBase = 8010;
+        private static int TestPortBase = TestPortBases.AgnosticListener;
 
         public AgnosticListenerTest(ITestOutputHelper _log)
         {

@@ -1,4 +1,7 @@
-﻿using System.Net.Sockets.Tests;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Sockets.Tests;
 using System.Net.Test.Common;
 
 using Xunit;

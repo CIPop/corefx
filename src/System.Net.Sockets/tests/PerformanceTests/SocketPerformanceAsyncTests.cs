@@ -1,4 +1,7 @@
-﻿using System.Net.Sockets.Tests;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Sockets.Tests;
 using System.Net.Test.Common;
 
 using Xunit;
@@ -11,7 +14,7 @@ namespace System.Net.Sockets.Performance.Tests
     {
         private const int DummyOSXPerfIssue = 123456;
 
-        public const int TestPortBase = 8300;
+        public const int TestPortBase = 7300;
         private readonly ITestOutputHelper _log;
 
         public SocketPerformanceAsyncTests(ITestOutputHelper output)

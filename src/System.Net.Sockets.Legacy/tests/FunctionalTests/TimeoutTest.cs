@@ -1,10 +1,13 @@
-﻿using Xunit;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
     public class TimeoutTest
     {
-        private const int TestPortBase = 8110;
+        private const int TestPortBase = TestPortBases.Timeout;
 
         [Fact]
         public void GetAndSet_Success()

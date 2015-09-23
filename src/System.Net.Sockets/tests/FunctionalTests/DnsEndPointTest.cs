@@ -1,4 +1,7 @@
-﻿using System.Net.Test.Common;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Test.Common;
 using System.Threading;
 
 using Xunit;
@@ -28,10 +31,10 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv4Support());
 
             SocketTestServer server = SocketTestServer.SocketTestServerFactory(
-                new IPEndPoint(IPAddress.Loopback, 8080));
+                new IPEndPoint(IPAddress.Loopback, 7080));
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("localhost", 8080);
+            args.RemoteEndPoint = new DnsEndPoint("localhost", 7080);
             args.Completed += OnConnectAsyncCompleted;
 
             ManualResetEvent complete = new ManualResetEvent(false);
@@ -57,7 +60,7 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv4Support());
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080);
+            args.RemoteEndPoint = new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 7080);
             args.Completed += OnConnectAsyncCompleted;
 
             ManualResetEvent complete = new ManualResetEvent(false);
@@ -81,7 +84,7 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv4Support());
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("localhost", 8080);
+            args.RemoteEndPoint = new DnsEndPoint("localhost", 7080);
             args.Completed += OnConnectAsyncCompleted;
 
             ManualResetEvent complete = new ManualResetEvent(false);
@@ -108,13 +111,13 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
 
             SocketTestServer server4 = SocketTestServer.SocketTestServerFactory(
-                new IPEndPoint(IPAddress.Loopback, 8080));
+                new IPEndPoint(IPAddress.Loopback, 7080));
 
             SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(
                 new IPEndPoint(IPAddress.IPv6Loopback, 8081));
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("localhost", 8080);
+            args.RemoteEndPoint = new DnsEndPoint("localhost", 7080);
             args.Completed += OnConnectAsyncCompleted;
 
             ManualResetEvent complete = new ManualResetEvent(false);
@@ -155,7 +158,7 @@ namespace System.Net.Sockets.Tests
         public void Socket_StaticConnectAsync_HostNotFound()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080);
+            args.RemoteEndPoint = new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 7080);
             args.Completed += OnConnectAsyncCompleted;
 
             ManualResetEvent complete = new ManualResetEvent(false);
@@ -176,7 +179,7 @@ namespace System.Net.Sockets.Tests
         public void Socket_StaticConnectAsync_ConnectionRefused()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("localhost", 8080);
+            args.RemoteEndPoint = new DnsEndPoint("localhost", 7080);
             args.Completed += OnConnectAsyncCompleted;
 
             ManualResetEvent complete = new ManualResetEvent(false);
@@ -206,7 +209,7 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv6Support());
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("127.0.0.1", 8080, AddressFamily.InterNetworkV6);
+            args.RemoteEndPoint = new DnsEndPoint("127.0.0.1", 7080, AddressFamily.InterNetworkV6);
             args.Completed += CallbackThatShouldNotBeCalled;
 
             Assert.False(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));

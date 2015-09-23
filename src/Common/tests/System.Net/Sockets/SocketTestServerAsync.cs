@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.Net.Test.Common;
 using System.Threading;
 
 namespace System.Net.Sockets.Tests
-{   // Code taken from https://msdn.microsoft.com/en-us/library/system.net.sockets.socketasynceventargs.aspx
+{
+    // Code taken from https://msdn.microsoft.com/en-us/library/system.net.sockets.socketasynceventargs.aspx
 
     // Implements the connection logic for the socket server.   
     // After accepting a connection, all data read from the client  

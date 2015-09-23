@@ -1,4 +1,7 @@
-﻿using System.Net.Test.Common;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Test.Common;
 using System.Threading;
 
 using Xunit;
@@ -7,7 +10,7 @@ namespace System.Net.Sockets.Tests
 {
     public class DnsEndPointTest
     {
-        private const int TestPortBase = 8080;
+        private const int TestPortBase = TestPortBases.DnsEndPoint;
 
         [Fact]
         public void Socket_ConnectDnsEndPoint_Success()
