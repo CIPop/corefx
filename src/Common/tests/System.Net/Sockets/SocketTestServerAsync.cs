@@ -75,7 +75,7 @@ namespace System.Net.Sockets.Tests
         // 
         private void Init()
         {
-            // Allocates one large byte buffer which all I/O operations use a piece of.  This gaurds  
+            // Allocates one large byte buffer which all I/O operations use a piece of.  This guards  
             // against memory fragmentation.
             _bufferManager.InitBuffer();
 
