@@ -4,6 +4,9 @@
 using System.Collections.Generic;
 using System.Net.Test.Common;
 using System.Threading;
+using System.Threading.Tasks;
+
+using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
@@ -27,6 +30,7 @@ namespace System.Net.Sockets.Tests
         private int m_totalBytesRead;           // counter of the total # bytes received by the server 
         private int m_numConnectedSockets;      // the total number of clients connected to the server 
         private Semaphore m_maxNumberAcceptedClientsSemaphore;
+        private int m_acceptRetryCount = 10;
 
         private object listenSocketLock = new object();
 
@@ -168,23 +172,39 @@ namespace System.Net.Sockets.Tests
         {
             if (e.SocketError != SocketError.Success)
             {
-                return;
+                _log.WriteLine(this.GetHashCode() + " ProcessAccept(m_numConnectedSockets={0}): {1}", m_numConnectedSockets, e.SocketError);
+
+                // If possible, retry the accept after a short wait.
+                if (e.SocketError == SocketError.OperationAborted || e.SocketError == SocketError.Interrupted)
+                {
+                    return;
+                }
+
+                if (Interlocked.Decrement(ref m_acceptRetryCount) <= 0)
+                {
+                    Assert.True(false, "accept retry limit exceeded.");
+                    return;
+                }
+
+                Task.Delay(500).Wait();
             }
-
-            Interlocked.Increment(ref m_numConnectedSockets);
-            _log.WriteLine(this.GetHashCode() + " ProcessAccept(m_numConnectedSockets={0})", m_numConnectedSockets);
-
-            // Get the socket for the accepted client connection and put it into the ReadEventArg object user token.
-            SocketAsyncEventArgs readEventArgs = m_readWritePool.Pop();
-
-            ((AsyncUserToken)readEventArgs.UserToken).Socket = e.AcceptSocket;
-
-            // As soon as the client is connected, post a receive to the connection 
-            bool willRaiseEvent = e.AcceptSocket.ReceiveAsync(readEventArgs);
-            if (!willRaiseEvent)
+            else
             {
-                _log.WriteLine(this.GetHashCode() + " ProcessAccept -> ProcessReceive");
-                ProcessReceive(readEventArgs);
+                Interlocked.Increment(ref m_numConnectedSockets);
+                _log.WriteLine(this.GetHashCode() + " ProcessAccept(m_numConnectedSockets={0})", m_numConnectedSockets);
+
+                // Get the socket for the accepted client connection and put it into the ReadEventArg object user token.
+                SocketAsyncEventArgs readEventArgs = m_readWritePool.Pop();
+
+                ((AsyncUserToken)readEventArgs.UserToken).Socket = e.AcceptSocket;
+
+                // As soon as the client is connected, post a receive to the connection 
+                bool willRaiseEvent = e.AcceptSocket.ReceiveAsync(readEventArgs);
+                if (!willRaiseEvent)
+                {
+                    _log.WriteLine(this.GetHashCode() + " ProcessAccept -> ProcessReceive");
+                    ProcessReceive(readEventArgs);
+                }
             }
 
             // Accept the next connection request
