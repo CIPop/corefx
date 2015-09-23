@@ -14,7 +14,7 @@ namespace System.Net.Sockets.Performance.Tests
     {
         private const int DummyOSXPerfIssue = 123456;
 
-        public const int TestPortBase = 7300;
+        public const int TestPortBase = 9310;
         private readonly ITestOutputHelper _log;
 
         public SocketPerformanceAsyncTests(ITestOutputHelper output)

@@ -14,7 +14,7 @@ namespace System.Net.Sockets.Performance.Tests
     {
         private const int DummyOSXPerfIssue = 123456;
 
-        private const int TestPortBase = 8300;
+        private const int TestPortBase = 9300;
         private readonly ITestOutputHelper _log;
 
         public SocketPerformanceAPMTests(ITestOutputHelper output)

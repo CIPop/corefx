@@ -25,20 +25,29 @@ namespace System.Net.Sockets.Performance.Tests
             onCloseCallback();
         }
 
-        public override void Connect(Action onConnectCallback)
+        public override void Connect(Action<SocketError> onConnectCallback)
         {
             _s.BeginConnect(_endpoint, OnConnect, onConnectCallback);
         }
 
         private void OnConnect(IAsyncResult result)
         {
-            Action callback = (Action)result.AsyncState;
-            _s.EndConnect(result);
+            Action<SocketError> callback = (Action<SocketError>)result.AsyncState;
 
-            callback();
+            SocketError error = SocketError.Success;
+            try
+            {
+                _s.EndConnect(result);
+            }
+            catch (SocketException ex)
+            {
+                error = ex.SocketErrorCode;
+            }
+
+            callback(error);
         }
 
-        public override void Receive(Action<int> onReceiveCallback)
+        public override void Receive(Action<int, SocketError> onReceiveCallback)
         {
             _s.BeginReceive(
                 _recvBuffer, 
@@ -51,12 +60,23 @@ namespace System.Net.Sockets.Performance.Tests
 
         private void OnReceive(IAsyncResult result)
         {
-            Action<int> callback = (Action<int>)result.AsyncState;
-            int recvBytes = _s.EndReceive(result);
-            callback(recvBytes);
+            Action<int, SocketError> callback = (Action<int, SocketError>)result.AsyncState;
+
+            int recvBytes = 0;
+            SocketError error = SocketError.Success;
+            try
+            {
+                recvBytes = _s.EndReceive(result);
+            }
+            catch (SocketException ex)
+            {
+                error = ex.SocketErrorCode;
+            }
+
+            callback(recvBytes, error);
         }
 
-        public override void Send(Action<int> onSendCallback)
+        public override void Send(Action<int, SocketError> onSendCallback)
         {
             _s.BeginSend(
                 _sendBuffer, 
@@ -69,9 +89,20 @@ namespace System.Net.Sockets.Performance.Tests
 
         private void OnSend(IAsyncResult result)
         {
-            Action<int> callback = (Action<int>)result.AsyncState;
-            int sentBytes = _s.EndSend(result);
-            callback(sentBytes);
+            Action<int, SocketError> callback = (Action<int, SocketError>)result.AsyncState;
+
+            int sentBytes = 0;
+            SocketError error = SocketError.Success;
+            try
+            {
+                sentBytes = _s.EndSend(result);
+            }
+            catch (SocketException ex)
+            {
+                error = ex.SocketErrorCode;
+            }
+
+            callback(sentBytes, error);
         }
 
         protected override string ImplementationName()
