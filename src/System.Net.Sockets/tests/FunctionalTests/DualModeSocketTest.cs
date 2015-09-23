@@ -14,6 +14,7 @@ namespace System.Net.Sockets.Tests
         // TODO: This is a stand-in for an issue that will need to be filed when this code is
         //       merged into corefx.
         private const int DummySendToThrowsIssue = 123456;
+        private const int DummyOSXPacketInfoIssue = 123457;
 
         private const int TestPortBase = 8200;  // to 8300
         private readonly ITestOutputHelper _log;
@@ -489,6 +490,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void ReceiveFromAsyncV4BoundToAnyV4_Success()
         {
             ReceiveFromAsync_Helper(IPAddress.Any, IPAddress.Loopback, TestPortBase + 53);

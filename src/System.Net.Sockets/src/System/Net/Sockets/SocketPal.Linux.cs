@@ -22,5 +22,10 @@ namespace System.Net.Sockets
             int err = Interop.libc.connect(fileDescriptor, sockAddr, (uint)socketAddressLen);
             Debug.Assert(err == 0, "TryCompleteConnect: failed to disassociate socket after failed connect()");
         }
+
+        public static void SetReceivingDualModeIPv4PacketInformation(Socket socket)
+        {
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
+        }
     }
 }

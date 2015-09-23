@@ -512,6 +512,11 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
+        public static void SetReceivingDualModeIPv4PacketInformation(Socket socket)
+        {
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
+        }
+
         public static SocketError SetMulticastOption(SafeCloseSocket handle, SocketOptionName optionName, MulticastOption optionValue)
         {
             Interop.Winsock.IPMulticastRequest ipmr = new Interop.Winsock.IPMulticastRequest();
