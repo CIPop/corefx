@@ -4,21 +4,14 @@ using System.Net.Test.Common;
 using Xunit;
 using Xunit.Abstractions;
 
-//
-// expectedMilliseconds has been computed as 10x the observed execution time on a Z420 machine using a RET version
-// of the runtime.
-// Known DEBUG-only (CHK builds) code overhead will cause the tests to execute approximatively 50x slower in ProjectK 
-// and about 10x slower on N.
-// Experimental results show that ARM executions (chk or ret) can be 31x slower.
-// 
-
 namespace System.Net.Sockets.Performance.Tests
 {
     [Trait("Perf", "true")]
     public class SocketPerformanceAPMTests
     {
-        private const int TestPortBase = 8300;
+        private const int DummyOSXPerfIssue = 123456;
 
+        private const int TestPortBase = 8300;
         private readonly ITestOutputHelper _log;
 
         public SocketPerformanceAPMTests(ITestOutputHelper output)
@@ -50,6 +43,7 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPerfIssue, PlatformID.OSX)]
         public void SocketPerformance_MultipleSocketClientAPM_LocalHostServerAPM()
         {
             int port = TestPortBase + 1;
@@ -96,6 +90,7 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPerfIssue, PlatformID.OSX)]
         public void SocketPerformance_MultipleSocketClientAPM_LocalHostServerAsync()
         {
             int port = TestPortBase + 3;
@@ -142,6 +137,7 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPerfIssue, PlatformID.OSX)]
         public void SocketPerformance_MultipleSocketClientAsync_LocalHostServerAPM()
         {
             int port = TestPortBase + 5;
