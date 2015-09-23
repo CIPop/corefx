@@ -254,6 +254,7 @@ namespace System.Net.Sockets
                     {
                         // The connect attempt on the user's socket failed. Return the corresponding error.
                         exception = new SocketException((int)args.SocketError);
+                        _state = State.Completed;
                     }
                 }
             }
