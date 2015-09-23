@@ -237,7 +237,9 @@ namespace System.Net.Sockets
 
             protected override bool DoTryComplete(int fileDescriptor)
             {
-                return SocketPal.TryCompleteAccept(fileDescriptor, SocketAddress, ref SocketAddressLen, out AcceptedFileDescriptor, out ErrorCode);
+                bool completed = SocketPal.TryCompleteAccept(fileDescriptor, SocketAddress, ref SocketAddressLen, out AcceptedFileDescriptor, out ErrorCode);
+                Debug.Assert(ErrorCode == SocketError.Success || AcceptedFileDescriptor == -1);
+                return completed;
             }
 
             protected override void InvokeCallback()
@@ -548,6 +550,7 @@ namespace System.Net.Sockets
             SocketError errorCode;
             if (SocketPal.TryCompleteAccept(_fileDescriptor, socketAddress, ref socketAddressLen, out acceptedFd, out errorCode))
             {
+                Debug.Assert(errorCode == SocketError.Success || acceptedFd == -1);
                 return errorCode;
             }
 
@@ -599,6 +602,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             if (SocketPal.TryCompleteAccept(_fileDescriptor, socketAddress, ref socketAddressLen, out acceptedFd, out errorCode))
             {
+                Debug.Assert(errorCode == SocketError.Success || acceptedFd == -1);
+
                 if (errorCode == SocketError.Success)
                 {
                     ThreadPool.QueueUserWorkItem(args =>
@@ -622,6 +627,7 @@ namespace System.Net.Sockets
                 if (isStopped)
                 {
                     // TODO: is this error reasonable for a closed socket? Check with Winsock.
+                    operation.AcceptedFileDescriptor = -1;
                     operation.ErrorCode = SocketError.Shutdown;
                     operation.QueueCompletionCallback();
                     return SocketError.Shutdown;

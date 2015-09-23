@@ -908,12 +908,13 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    Interop.Sys.Close(fd);
                     errorCode = GetLastSocketError();
                     acceptedFd = -1;
+                    Interop.Sys.Close(fd);
                 }
                 return true;
             }
+
             acceptedFd = -1;
 
             Interop.Error errno = Interop.Sys.GetLastError();
