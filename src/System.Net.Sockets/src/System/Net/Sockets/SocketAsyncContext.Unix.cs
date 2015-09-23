@@ -91,11 +91,15 @@ namespace System.Net.Sockets
                 }
                 Debug.Assert(state != (int)State.Complete && state != (int)State.Running);
 
-                bool completed = DoTryComplete(fileDescriptor);
-                if (!completed && forceComplete)
+                bool completed;
+                if (forceComplete)
                 {
                     ErrorCode = SocketError.OperationAborted;
                     completed = true;
+                }
+                else
+                {
+                    completed = DoTryComplete(fileDescriptor);
                 }
 
                 if (completed)
