@@ -3,6 +3,7 @@
 
 using System.Net.Test.Common;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -2304,6 +2305,7 @@ namespace System.Net.Sockets.Tests
                 }
                 catch (SocketException) 
                 {
+                    Task.Delay(100).Wait(); // Give the other end a chance to call Accept().
                     serverSocket.Dispose(); // Cancels the test
                 }
             }
