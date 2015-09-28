@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace System.Net.Sockets
 {
-    internal partial class SafeCloseSocket :
+    internal sealed partial class SafeCloseSocket :
 #if DEBUG
         DebugSafeHandleMinusOneIsInvalid
 #else

@@ -19,7 +19,7 @@ namespace System.Net.Internals
 #else       
     internal
 #endif
-        class SocketAddress
+    class SocketAddress
     {
         internal const int IPv6AddressSize = SocketAddressPal.IPv6AddressSize;
         internal const int IPv4AddressSize = SocketAddressPal.IPv4AddressSize;

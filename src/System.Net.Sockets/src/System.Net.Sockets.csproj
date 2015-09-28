@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <Compile Include="System\Net\DnsAPMExtensions.cs"/>
-    <Compile Include="System\Net\StartIPOptions.cs"/>
     <Compile Include="System\Net\SocketPerfCounters.cs"/>
 
     <Compile Include="System\Net\Sockets\IOControlCode.cs" />
@@ -133,9 +132,9 @@
     <Compile Include="$(CommonPath)\System\Net\TcpValidationHelpers.cs">
       <Link>Common\System\Net\TcpValidationHelpers.cs</Link>
     </Compile>
-
-    <Compile Include="$(CommonPath)\System\Net\_Win32.cs">
-      <Link>Common\System\Net\_Win32.cs</Link>
+    
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\StartIPOptions.cs" >
+      <Link>Common\System\Net\NetworkInformation\StartIPOptions.cs</Link>
     </Compile>
     
     <!-- System.Net.Internals -->
