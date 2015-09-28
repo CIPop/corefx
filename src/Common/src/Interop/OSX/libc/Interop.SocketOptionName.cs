@@ -3,7 +3,6 @@
 
 internal static partial class Interop
 {
-    // NOTE: this is only correct for Linux on x86-64
     internal static partial class libc
     {
         public const int SO_DEBUG = 0x0001;
@@ -40,6 +39,7 @@ internal static partial class Interop
 
         public const int IPV6_V6ONLY = 27;
         public const int IPV6_RECVPKTINFO = 61;
+        public const int IPV6_PKTINFO = 46;
 
         public const int TCP_NODELAY = 0x1;
     }

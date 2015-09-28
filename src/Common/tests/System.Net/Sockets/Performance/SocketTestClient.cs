@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -98,12 +101,20 @@ namespace System.Net.Sockets.Performance.Tests
             }
         }
 
-        public abstract void Connect(Action onConnectCallback);
+        public abstract void Connect(Action<SocketError> onConnectCallback);
 
-        private void OnConnect()
+        private void OnConnect(SocketError error)
         {
             _timeConnect.Stop();
-            _log.WriteLine(this.GetHashCode() + " OnConnect() _timeConnect={0}", _timeConnect.ElapsedMilliseconds);
+            _log.WriteLine(this.GetHashCode() + " OnConnect({0}) _timeConnect={1}", error, _timeConnect.ElapsedMilliseconds);
+
+            // TODO: an error should fail the test.
+            if (error != SocketError.Success)
+            {
+                _timeClose.Start();
+                Close(OnClose);
+                return;
+            }
 
             _timeSendRecv.Start();
 
@@ -115,12 +126,20 @@ namespace System.Net.Sockets.Performance.Tests
             Receive(OnReceive);
         }
 
-        public abstract void Send(Action<int> onSendCallback);
+        public abstract void Send(Action<int, SocketError> onSendCallback);
 
         // Called when the entire _sendBuffer has been sent.
-        private void OnSend(int bytesSent)
+        private void OnSend(int bytesSent, SocketError error)
         {
-            _log.WriteLine(this.GetHashCode() + " OnSend({0})", bytesSent);
+            _log.WriteLine(this.GetHashCode() + " OnSend({0}, {1})", bytesSent, error);
+
+            // TODO: an error should fail the test.
+            if (error != SocketError.Success)
+            {
+                _timeClose.Start();
+                Close(OnClose);
+                return;
+            }
 
             if (bytesSent == _sendBuffer.Length)
             {
@@ -148,13 +167,21 @@ namespace System.Net.Sockets.Performance.Tests
             //TODO: _s.Shutdown(SocketShutdown.Send);
         }
 
-        public abstract void Receive(Action<int> onReceiveCallback);
+        public abstract void Receive(Action<int, SocketError> onReceiveCallback);
 
         // Called when the entire _recvBuffer has been received.
-        private void OnReceive(int receivedBytes)
+        private void OnReceive(int receivedBytes, SocketError error)
         {
-            _log.WriteLine(this.GetHashCode() + " OnSend({0})", receivedBytes);
+            _log.WriteLine(this.GetHashCode() + " OnSend({0}, {1})", receivedBytes, error);
             _recvBufferIndex += receivedBytes;
+
+            // TODO: an error should fail the test.
+            if (error != SocketError.Success)
+            {
+                _timeClose.Start();
+                Close(OnClose);
+                return;
+            }
 
             if (_recvBufferIndex == _recvBuffer.Length)
             {
@@ -178,7 +205,7 @@ namespace System.Net.Sockets.Performance.Tests
             _recvBufferIndex = 0;
 
             // Expect echo server.
-            if (memcmp(_sendBuffer, _recvBuffer, _sendBuffer.Length) != 0)
+            if (!SocketTestMemcmp.Compare(_sendBuffer, _recvBuffer))
             {
                 _log.WriteLine("Received different data from echo server");
             }
@@ -238,9 +265,5 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         protected abstract string ImplementationName();
-        
-        //TODO: Either find a different fast way to compare or extract this in Interop.
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int memcmp(byte[] b1, byte[] b2, long count);
     }
 }

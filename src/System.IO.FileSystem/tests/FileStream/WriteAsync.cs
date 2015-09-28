@@ -1,16 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace System.IO.FileSystem.Tests
+namespace System.IO.Tests
 {
     public class FileStream_WriteAsync : FileSystemTest
     {
@@ -328,8 +325,23 @@ namespace System.IO.FileSystem.Tests
             }
         }
 
+        [Fact]
+        public Task ManyConcurrentWriteAsyncs()
+        {
+            // For inner loop, just test one case
+            return ManyConcurrentWriteAsyncs(
+                useAsync: RuntimeInformation.IsOSPlatform(OSPlatform.Windows),
+                presize: false,
+                exposeHandle: false,
+                cancelable: true,
+                bufferSize: 4096,
+                writeSize: 1024,
+                numWrites: 10);
+        }
+
         [Theory]
         [MemberData("MemberData_FileStreamAsyncWriting")]
+        [OuterLoop] // many combinations: we test just one in inner loop and the rest outer
         public async Task ManyConcurrentWriteAsyncs(
             bool useAsync, bool presize, bool exposeHandle, bool cancelable, int bufferSize, int writeSize, int numWrites)
         {
@@ -369,8 +381,23 @@ namespace System.IO.FileSystem.Tests
             Assert.Equal<byte>(expectedData, actualData);
         }
 
+        [Fact]
+        public Task CopyToAsyncBetweenFileStreams()
+        {
+            // For inner loop, just test one case
+            return CopyToAsyncBetweenFileStreams(
+                useAsync: RuntimeInformation.IsOSPlatform(OSPlatform.Windows),
+                preSize: false,
+                exposeHandle: false,
+                cancelable: true,
+                bufferSize: 4096,
+                writeSize: 1024,
+                numWrites: 10);
+        }
+
         [Theory]
         [MemberData("MemberData_FileStreamAsyncWriting")]
+        [OuterLoop] // many combinations: we test just one in inner loop and the rest outer
         public async Task CopyToAsyncBetweenFileStreams(
             bool useAsync, bool preSize, bool exposeHandle, bool cancelable, int bufferSize, int writeSize, int numWrites)
         {
@@ -396,7 +423,7 @@ namespace System.IO.FileSystem.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task BufferCorrectlyMaintaindWhenReadAndWrite(bool useAsync)
+        public async Task BufferCorrectlyMaintainedWhenReadAndWrite(bool useAsync)
         {
             string path = GetTestFilePath();
             File.WriteAllBytes(path, TestBuffer);

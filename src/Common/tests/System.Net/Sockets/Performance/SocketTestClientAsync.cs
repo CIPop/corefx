@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Diagnostics;
 
 using Xunit.Abstractions;
 
@@ -21,7 +24,7 @@ namespace System.Net.Sockets.Performance.Tests
             recvEventArgs.Completed += IO_Complete;
         }
         
-        public override void Connect(Action onConnectCallback)
+        public override void Connect(Action<SocketError> onConnectCallback)
         {
             var connectEventArgs = new SocketAsyncEventArgs();
             connectEventArgs.RemoteEndPoint = _endpoint;
@@ -29,7 +32,6 @@ namespace System.Net.Sockets.Performance.Tests
             connectEventArgs.Completed += OnConnect;
 
             bool willRaiseEvent = _s.ConnectAsync(connectEventArgs);
-
             if (!willRaiseEvent)
             {
                 ProcessConnect(connectEventArgs);
@@ -43,38 +45,38 @@ namespace System.Net.Sockets.Performance.Tests
 
         private void ProcessConnect(SocketAsyncEventArgs e)
         {
-            if (e.SocketError != SocketError.Success)
-            {
-                return;
-            }
-
-            Action callback = (Action)e.UserToken;
-            callback();
+            Action<SocketError> callback = (Action<SocketError>)e.UserToken;
+            callback(e.SocketError);
         }
 
-        public override void Send(Action<int> onSendCallback)
+        public override void Send(Action<int, SocketError> onSendCallback)
         {
             sendEventArgs.SetBuffer(_sendBuffer, _sendBufferIndex, _sendBuffer.Length - _sendBufferIndex);
             sendEventArgs.UserToken = onSendCallback;
-            _s.SendAsync(sendEventArgs);
+
+            bool willRaiseEvent = _s.SendAsync(sendEventArgs);
+            if (!willRaiseEvent)
+            {
+                IO_Complete(this, sendEventArgs);
+            }
         }
 
-        public override void Receive(Action<int> onReceiveCallback)
+        public override void Receive(Action<int, SocketError> onReceiveCallback)
         {
             recvEventArgs.SetBuffer(_recvBuffer, _recvBufferIndex, _recvBuffer.Length - _recvBufferIndex);
             recvEventArgs.UserToken = onReceiveCallback;
-            _s.ReceiveAsync(recvEventArgs);            
+
+            bool willRaiseEvent = _s.ReceiveAsync(recvEventArgs);
+            if (!willRaiseEvent)
+            {
+                IO_Complete(this, recvEventArgs);
+            }
         }
 
         private void IO_Complete(object sender, SocketAsyncEventArgs e)
         {
-            if (e.SocketError != SocketError.Success)
-            {
-                return;
-            }
-
-            Action<int> callback = (Action<int>)e.UserToken;
-            callback(e.BytesTransferred);
+            Action<int, SocketError> callback = (Action<int, SocketError>)e.UserToken;
+            callback(e.BytesTransferred, e.SocketError);
         }
 
         public override void Close(Action onCloseCallback)

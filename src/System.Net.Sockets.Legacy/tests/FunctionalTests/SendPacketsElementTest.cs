@@ -1,4 +1,7 @@
-﻿using Xunit;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
@@ -9,7 +12,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void NullBufferCtor_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement((byte[])null);
             });
         }
@@ -17,7 +21,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void NullBufferCtorWithOffset_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement((byte[])null, 0, 0);
             });
         }
@@ -25,7 +30,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void NullBufferCtorWithEndOfPacket_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
                 // Elements with null Buffers are ignored on Send
                 SendPacketsElement element = new SendPacketsElement((byte[])null, 0, 0, true);
             });
@@ -59,7 +65,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void BufferCtorNegOffset_ArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement(new byte[10], -1, 11);
             });
         }
@@ -67,7 +74,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void BufferCtorNegCount_ArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement(new byte[10], 0, -1);
             });
         }
@@ -75,7 +83,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void BufferCtorLargeOffset_ArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement(new byte[10], 11, 1);
             });
         }
@@ -83,7 +92,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void BufferCtorLargeCount_ArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement(new byte[10], 5, 10);
             });
         }
@@ -132,7 +142,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void FileCtorNull_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement((string)null);
             });
         }
@@ -188,7 +199,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void FileCtorNegOffset_ArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement("SomeFileName", -1, 11);
             });
         }
@@ -196,7 +208,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void FileCtorNegCount_ArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
                 SendPacketsElement element = new SendPacketsElement("SomeFileName", 0, -1);
             });
         }

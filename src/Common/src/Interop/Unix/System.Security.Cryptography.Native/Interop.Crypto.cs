@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-
+using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
@@ -32,6 +33,9 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern IntPtr GetX509NotAfter(SafeX509Handle x509);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern IntPtr GetX509CrlNextUpdate(SafeX509CrlHandle crl);
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern int GetX509Version(SafeX509Handle x509);
@@ -94,9 +98,6 @@ internal static partial class Interop
         internal static extern string GetX509RootStorePath();
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern int UpRefEvpPkey(SafeEvpPkeyHandle handle);
-
-        [DllImport(Libraries.CryptoNative)]
         private static extern int GetPkcs7Certificates(SafePkcs7Handle p7, out SafeSharedX509StackHandle certs);
 
         [DllImport(Libraries.CryptoNative)]
@@ -109,6 +110,9 @@ internal static partial class Interop
             int minute,
             int second,
             [MarshalAs(UnmanagedType.Bool)] bool isDst);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern int CheckX509Hostname(SafeX509Handle x509, string hostname, int cchHostname);
 
         internal static byte[] GetAsn1StringBytes(IntPtr asn1)
         {
@@ -132,12 +136,10 @@ internal static partial class Interop
 
         internal static void SetX509ChainVerifyTime(SafeX509StoreCtxHandle ctx, DateTime verifyTime)
         {
-            // Let Unspecified mean Local, so only convert if the source was UTC.
-            if (verifyTime.Kind == DateTimeKind.Utc)
-            {
-                verifyTime = verifyTime.ToLocalTime();
-            }
-
+            // OpenSSL is going to convert our input time to universal, so we should be in Local or
+            // Unspecified (local-assumed).
+            Debug.Assert(verifyTime.Kind != DateTimeKind.Utc, "UTC verifyTime should have been normalized to Local");
+            
             int succeeded = SetX509ChainVerifyTime(
                 ctx,
                 verifyTime.Year,

@@ -45,9 +45,14 @@ namespace System.Net.Sockets
 
                 case Interop.libc.EVFILT_WRITE:
                     events = SocketAsyncEvents.Write;
+
+                    // kqueue does not play well with disconnected connection-oriented sockets, frequently
+                    // reporting spurious EOF events. Fortunately, EOF may be handled as an EVFILT_READ |
+                    // EVFILT_WRITE event: the usual processing for these events will recognize and
+                    // handle the EOF condition.
                     if ((flags & Interop.libc.EV_EOF) != 0)
                     {
-                        events |= SocketAsyncEvents.Close;
+                        events |= SocketAsyncEvents.Read;
                     }
                     break;
 
@@ -65,10 +70,12 @@ namespace System.Net.Sockets
 
         public unsafe void EventLoop()
         {
-            var events = stackalloc Interop.libc.kevent64_s[64];
+            const int EventCount = 64;
+
+            var events = stackalloc Interop.libc.kevent64_s[EventCount];
             for (;;)
             {
-                int numEvents = Interop.libc.kevent64(_kqueueFd, null, 0, events, 64, 0, null);
+                int numEvents = Interop.libc.kevent64(_kqueueFd, null, 0, events, EventCount, 0, null);
                 if (numEvents == -1)
                 {
                     // TODO: error handling + EINTR?
@@ -85,7 +92,11 @@ namespace System.Net.Sockets
                 {
                     var handle = (GCHandle)(IntPtr)events[i].udata;
                     var context = (SocketAsyncContext)handle.Target;
-                    context.HandleEvents(GetSocketAsyncEvents(events[i].filter, events[i].flags));
+
+                    if (context != null)
+                    {
+                        context.HandleEvents(GetSocketAsyncEvents(events[i].filter, events[i].flags));
+                    }
                 }
             }
         }

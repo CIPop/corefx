@@ -2,8 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Xunit;
 
 public class FileSystemWatcherTests
@@ -43,6 +46,25 @@ public class FileSystemWatcherTests
         string pattern = "honey.jar";
         using (FileSystemWatcher watcher = new FileSystemWatcher(path, pattern))
             ValidateDefaults(watcher, path, pattern);
+    }
+
+    [Fact]
+    public static void FileSystemWatcher_ctor_InvalidStrings()
+    {
+        // Null filter
+        Assert.Throws<ArgumentNullException>("filter", () => new FileSystemWatcher(".", null));
+
+        // Null path
+        Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null));
+        Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null, "*"));
+
+        // Empty path
+        Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty));
+        Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty, "*"));
+
+        // Invalid directory
+        Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(Guid.NewGuid().ToString()));
+        Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(Guid.NewGuid().ToString(), "*"));
     }
 
     [Fact]
@@ -159,10 +181,14 @@ public class FileSystemWatcherTests
         watcher.Filter = "abc.dll";
         Assert.Equal("abc.dll", watcher.Filter);
 
-        // expect no change for OrdinalIgnoreCase-equal strings
-        // it's unclear why desktop does this but preserve it for compat        
-        watcher.Filter = "ABC.DLL";
-        Assert.Equal("abc.dll", watcher.Filter);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || // expect no change for OrdinalIgnoreCase-equal strings
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            // expect no change for OrdinalIgnoreCase-equal strings
+            // it's unclear why desktop does this but preserve it for compat        
+            watcher.Filter = "ABC.DLL";
+            Assert.Equal("abc.dll", watcher.Filter);
+        }
 
         // We can make this setting by first changing to another value then back.
         watcher.Filter = null;
@@ -375,12 +401,15 @@ public class FileSystemWatcherTests
         watcher.Path = currentDir;
         Assert.Equal(currentDir, watcher.Path);
 
-        // expect no change for OrdinalIgnoreCase-equal strings
-        watcher.Path = currentDir.ToUpperInvariant();
-        Assert.Equal(currentDir, watcher.Path);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || // expect no change for OrdinalIgnoreCase-equal strings
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            watcher.Path = currentDir.ToUpperInvariant();
+            Assert.Equal(currentDir, watcher.Path);
 
-        watcher.Path = currentDir.ToLowerInvariant();
-        Assert.Equal(currentDir, watcher.Path);
+            watcher.Path = currentDir.ToLowerInvariant();
+            Assert.Equal(currentDir, watcher.Path);
+        }
 
         // expect a change for same "full-path" but different string path, FSW does not normalize
         string currentDirRelative = currentDir +
@@ -417,4 +446,76 @@ public class FileSystemWatcherTests
             watcher.Renamed -= handler;
         }
     }
+
+    [PlatformSpecific(PlatformID.Linux)]
+    [Fact]
+    public static void FileSystemWatcher_CreateManyConcurrentInstances()
+    {
+        int maxUserInstances = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_instances"));
+        var watchers = new List<FileSystemWatcher>();
+
+        using (var dir = Utility.CreateTestDirectory())
+        {
+            try
+            {
+                Assert.Throws<IOException>(() =>
+                {
+                    // Create enough inotify instances to exceed the number of allowed watches
+                    for (int i = 0; i <= maxUserInstances; i++)
+                    {
+                        watchers.Add(new FileSystemWatcher(dir.Path) { EnableRaisingEvents = true });
+                    }
+                });
+            }
+            finally
+            {
+                foreach (FileSystemWatcher watcher in watchers)
+                {
+                    watcher.Dispose();
+                }
+            }
+        }
+    }
+
+    [PlatformSpecific(PlatformID.Linux)]
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public static void FileSystemWatcher_CreateManyConcurrentWatches(bool enableBeforeCreatingWatches)
+    {
+        int maxUserWatches = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_watches"));
+
+        using (var dir = Utility.CreateTestDirectory())
+        using (var watcher = new FileSystemWatcher(dir.Path) { IncludeSubdirectories = true, NotifyFilter = NotifyFilters.FileName })
+        {
+            Exception exc = null;
+            ManualResetEventSlim mres = new ManualResetEventSlim();
+            watcher.Error += (s, e) =>
+            {
+                exc = e.GetException();
+                mres.Set();
+            };
+
+            if (enableBeforeCreatingWatches)
+                watcher.EnableRaisingEvents = true;
+
+            // Create enough directories to exceed the number of allowed watches
+            for (int i = 0; i <= maxUserWatches; i++)
+            {
+                Directory.CreateDirectory(Path.Combine(dir.Path, i.ToString()));
+            }
+
+            if (!enableBeforeCreatingWatches)
+                watcher.EnableRaisingEvents = true;
+
+            Assert.True(mres.Wait(Utility.WaitForExpectedEventTimeout));
+            Assert.IsType<IOException>(exc);
+
+            // Make sure existing watches still work even after we've had one or more failures
+            AutoResetEvent are = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created);
+            Utility.CreateTestFile(Path.Combine(dir.Path, Path.GetRandomFileName())).Dispose();
+            Utility.ExpectEvent(are, "file created");
+        }
+    }
+
 }

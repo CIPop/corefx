@@ -1,15 +1,18 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
 using Xunit;
 
-namespace NCLTest.Sockets
+namespace System.Net.Sockets.Tests
 {
     public class UDPClientTest
     {
-        private const int TestPortBase = 8400;
+        private const int TestPortBase = TestPortBases.UDPClient;
         private ManualResetEvent _waitHandle = new ManualResetEvent(false);
 
         [Fact]
@@ -39,6 +42,7 @@ namespace NCLTest.Sockets
         }
 
         [Fact]
+        [ActiveIssue(3447, PlatformID.Windows)]
         public void BeginSend_AsyncOperationCompletes_Success()
         {
             UdpClient udpClient = new UdpClient();

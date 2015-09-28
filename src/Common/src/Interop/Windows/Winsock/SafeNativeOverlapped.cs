@@ -11,8 +11,10 @@ namespace System.Net.Sockets
 {
     internal class SafeNativeOverlapped : SafeHandle
     {
-        internal static readonly SafeNativeOverlapped Zero = new SafeNativeOverlapped();
+        private static readonly SafeNativeOverlapped s_zero = new SafeNativeOverlapped();
         private SafeCloseSocket _safeCloseSocket;
+
+        internal static SafeNativeOverlapped Zero { get { return s_zero; } }
 
         protected SafeNativeOverlapped()
             : this(IntPtr.Zero)
@@ -91,4 +93,3 @@ namespace System.Net.Sockets
         }
     }
 }
-

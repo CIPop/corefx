@@ -2,31 +2,33 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections;
+using System.Security.Authentication;
 
 namespace System.Net.Security
 {
-    // The class implements SSL session caching mechanism based on a static table of SSL credentials
+    // Implements SSL session caching mechanism based on a static table of SSL credentials.
     internal static class SslSessionsCache
     {
-        private const int c_CheckExpiredModulo = 32;
+        private const int CheckExpiredModulo = 32;
         private static Hashtable s_CachedCreds = new Hashtable(32);
 
         //
-        // Uses cryptographically strong certificate thumbprint comparison
+        // Uses certificate thumb-print comparison.
         //
         private struct SslCredKey
         {
             private byte[] _CertThumbPrint;
             private int _AllowedProtocols;
+            private bool isServerMode;
             private EncryptionPolicy _EncryptionPolicy;
-            private int _HashCode;
+            private readonly int _HashCode;
 
             //
-            // SECURITY: X509Certificate.GetCertHash() is virtual hence before going here
+            // SECURITY: X509Certificate.GetCertHash() is virtual hence before going here,
             //           the caller of this ctor has to ensure that a user cert object was inspected and
             //           optionally cloned.
             //
-            internal SslCredKey(byte[] thumbPrint, int allowedProtocols, EncryptionPolicy encryptionPolicy)
+            internal SslCredKey(byte[] thumbPrint, int allowedProtocols, bool serverMode, EncryptionPolicy encryptionPolicy)
             {
                 _CertThumbPrint = thumbPrint == null ? Array.Empty<byte>() : thumbPrint;
                 _HashCode = 0;
@@ -34,16 +36,27 @@ namespace System.Net.Security
                 {
                     _HashCode ^= _CertThumbPrint[0];
                     if (1 < _CertThumbPrint.Length)
+                    {
                         _HashCode ^= (_CertThumbPrint[1] << 8);
+                    }
+
                     if (2 < _CertThumbPrint.Length)
+                    {
                         _HashCode ^= (_CertThumbPrint[2] << 16);
+                    }
+
                     if (3 < _CertThumbPrint.Length)
+                    {
                         _HashCode ^= (_CertThumbPrint[3] << 24);
+                    }
                 }
-                _HashCode ^= (int)allowedProtocols;
+
+                _HashCode ^= allowedProtocols;
                 _HashCode ^= (int)encryptionPolicy;
-                _AllowedProtocols = allowedProtocols;
+                _HashCode ^= serverMode ? 5 : 7; //TODO used a prime number here as it's a XOR. Figure out appropriate value.
+                _AllowedProtocols = allowedProtocols;               
                 _EncryptionPolicy = encryptionPolicy;
+                isServerMode = serverMode;
             }
 
             public override int GetHashCode()
@@ -54,78 +67,77 @@ namespace System.Net.Security
             public static bool operator ==(SslCredKey sslCredKey1,
                                             SslCredKey sslCredKey2)
             {
-                if ((object)sslCredKey1 == (object)sslCredKey2)
-                {
-                    return true;
-                }
-                if ((object)sslCredKey1 == null || (object)sslCredKey2 == null)
-                {
-                    return false;
-                }
                 return sslCredKey1.Equals(sslCredKey2);
             }
 
             public static bool operator !=(SslCredKey sslCredKey1,
                                             SslCredKey sslCredKey2)
             {
-                if ((object)sslCredKey1 == (object)sslCredKey2)
-                {
-                    return false;
-                }
-                if ((object)sslCredKey1 == null || (object)sslCredKey2 == null)
-                {
-                    return true;
-                }
                 return !sslCredKey1.Equals(sslCredKey2);
             }
 
             public override bool Equals(Object y)
             {
-                SslCredKey she = (SslCredKey)y;
+                SslCredKey other = (SslCredKey)y;
 
-                if (_CertThumbPrint.Length != she._CertThumbPrint.Length)
+                if (_CertThumbPrint.Length != other._CertThumbPrint.Length)
+                {
                     return false;
+                }
 
-                if (_HashCode != she._HashCode)
+                if (_HashCode != other._HashCode)
+                {
                     return false;
+                }
 
-                if (_EncryptionPolicy != she._EncryptionPolicy)
+                if (_EncryptionPolicy != other._EncryptionPolicy)
+                {
                     return false;
+                }
 
-                if (_AllowedProtocols != she._AllowedProtocols)
+                if (_AllowedProtocols != other._AllowedProtocols)
+                {
                     return false;
+                }
+
+                if (isServerMode != other.isServerMode)
+                {
+                    return false;
+                }
 
                 for (int i = 0; i < _CertThumbPrint.Length; ++i)
-                    if (_CertThumbPrint[i] != she._CertThumbPrint[i])
+                {
+                    if (_CertThumbPrint[i] != other._CertThumbPrint[i])
+                    {
                         return false;
+                    }
+                }
 
                 return true;
             }
         }
 
         //
-        // Returns null or previously cached cred handle
+        // Returns null or previously cached cred handle.
         //
         // ATTN: The returned handle can be invalid, the callers of InitializeSecurityContext and AcceptSecurityContext
-        // must be prepared to execute a backout code if the call fails.
+        // must be prepared to execute a back-out code if the call fails.
         //
-        // Note:thumbPrint is a cryptographicaly strong hash of a certificate
-        //
-        internal static SafeFreeCredentials TryCachedCredential(byte[] thumbPrint, int allowedProtocols, EncryptionPolicy encryptionPolicy)
+        internal static SafeFreeCredentials TryCachedCredential(byte[] thumbPrint, SslProtocols sslProtocols, bool isServer, EncryptionPolicy encryptionPolicy)
         {
             if (s_CachedCreds.Count == 0)
             {
-                GlobalLog.Print("TryCachedCredential() Not Found, Current Cache Count = " + s_CachedCreds.Count);
+                GlobalLog.Print("TryCachedCredential() Not found, Current Cache Count = " + s_CachedCreds.Count);
                 return null;
             }
 
-            object key = new SslCredKey(thumbPrint, allowedProtocols, encryptionPolicy);
+            object key = new SslCredKey(thumbPrint, (int)sslProtocols, isServer, encryptionPolicy);
 
             SafeCredentialReference cached = s_CachedCreds[key] as SafeCredentialReference;
 
             if (cached == null || cached.IsClosed || cached._Target.IsInvalid)
             {
-                GlobalLog.Print("TryCachedCredential() Not Found, Current Cache Count = " + s_CachedCreds.Count);
+                GlobalLog.Print("TryCachedCredential() Not found or invalid, Current Cache Count = " + s_CachedCreds.Count);
                 return null;
             }
 
@@ -137,9 +149,9 @@ namespace System.Net.Security
         //
         // The app is calling this method after starting an SSL handshake.
         //
-        // ATTN: The thumbPrint must be from inspected and possbly cloned user Cert object or we get a security hole in SslCredKey ctor.
+        // ATTN: The thumbPrint must be from inspected and possibly cloned user Cert object or we get a security hole in SslCredKey ctor.
         //
-        internal static void CacheCredential(SafeFreeCredentials creds, byte[] thumbPrint, int allowedProtocols, EncryptionPolicy encryptionPolicy)
+        internal static void CacheCredential(SafeFreeCredentials creds, byte[] thumbPrint, SslProtocols sslProtocols, bool isServer, EncryptionPolicy encryptionPolicy)
         {
             GlobalLog.Assert(creds != null, "CacheCredential|creds == null");
             if (creds.IsInvalid)
@@ -148,7 +160,7 @@ namespace System.Net.Security
                 return;
             }
 
-            object key = new SslCredKey(thumbPrint, allowedProtocols, encryptionPolicy);
+            object key = new SslCredKey(thumbPrint, (int)sslProtocols, isServer, encryptionPolicy);
 
             SafeCredentialReference cached = s_CachedCreds[key] as SafeCredentialReference;
 
@@ -176,12 +188,12 @@ namespace System.Net.Security
                         //
                         // Security relief (DoS):
                         //     A number of active creds is never greater than a number of _outstanding_
-                        //     security sessions, i.e. ssl connections.
+                        //     security sessions, i.e. SSL connections.
                         //     So we will try to shrink cache to the number of active creds once in a while.
                         //
                         //    We won't shrink cache in the case when NO new handles are coming to it.
                         //
-                        if ((s_CachedCreds.Count % c_CheckExpiredModulo) == 0)
+                        if ((s_CachedCreds.Count % CheckExpiredModulo) == 0)
                         {
                             DictionaryEntry[] toRemoveAttempt = new DictionaryEntry[s_CachedCreds.Count];
                             s_CachedCreds.CopyTo(toRemoveAttempt, 0);
@@ -196,9 +208,13 @@ namespace System.Net.Security
                                     cached.Dispose();
 
                                     if (!creds.IsClosed && !creds.IsInvalid && (cached = SafeCredentialReference.CreateReference(creds)) != null)
+                                    {
                                         s_CachedCreds[toRemoveAttempt[i].Key] = cached;
+                                    }
                                     else
+                                    {
                                         s_CachedCreds.Remove(toRemoveAttempt[i].Key);
+                                    }
                                 }
                             }
                             GlobalLog.Print("Scavenged cache, New Cache Count = " + s_CachedCreds.Count);

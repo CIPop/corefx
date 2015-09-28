@@ -1,23 +1,21 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Diagnostics.Contracts;
-
 namespace System.Net.Sockets
 {
-    // class that wraps the semantics of a winsock TRANSMIT_PACKETS_ELEMENTS struct
+    // Class that wraps the semantics of a Winsock TRANSMIT_PACKETS_ELEMENTS struct.
     public class SendPacketsElement
     {
-        internal string m_FilePath;
-        internal byte[] m_Buffer;
-        internal int m_Offset;
-        internal int m_Count;
-        internal Interop.Winsock.TransmitPacketsElementFlags m_Flags;
+        internal string _filePath;
+        internal byte[] _buffer;
+        internal int _offset;
+        internal int _count;
+        internal SendPacketsElementFlags _flags;
 
-        // hide default constructor
+        // Hide the default constructor.
         private SendPacketsElement() { }
 
-        // constructors for file elements
+        // Constructors for file elements.
         public SendPacketsElement(string filepath) :
             this(filepath, 0, 0, false)
         { }
@@ -28,12 +26,12 @@ namespace System.Net.Sockets
 
         public SendPacketsElement(string filepath, int offset, int count, bool endOfPacket)
         {
-            // We will validate if the file exists on send
+            // We will validate if the file exists on send.
             if (filepath == null)
             {
                 throw new ArgumentNullException("filepath");
             }
-            // The native API will validate the file length on send
+            // The native API will validate the file length on send.
             if (offset < 0)
             {
                 throw new ArgumentOutOfRangeException("offset");
@@ -42,13 +40,11 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException("count");
             }
-            Contract.EndContractBlock();
 
-            Initialize(filepath, null, offset, count, Interop.Winsock.TransmitPacketsElementFlags.File,
-                endOfPacket);
+            Initialize(filepath, null, offset, count, SendPacketsElementFlags.File, endOfPacket);
         }
 
-        // constructors for buffer elements
+        // Constructors for buffer elements.
         public SendPacketsElement(byte[] buffer) :
             this(buffer, 0, (buffer != null ? buffer.Length : 0), false)
         { }
@@ -71,54 +67,47 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException("count");
             }
-            Contract.EndContractBlock();
 
-            Initialize(null, buffer, offset, count, Interop.Winsock.TransmitPacketsElementFlags.Memory,
-                endOfPacket);
+            Initialize(null, buffer, offset, count, SendPacketsElementFlags.Memory, endOfPacket);
         }
 
         private void Initialize(string filePath, byte[] buffer, int offset, int count,
-            Interop.Winsock.TransmitPacketsElementFlags flags, bool endOfPacket)
+            SendPacketsElementFlags flags, bool endOfPacket)
         {
-            m_FilePath = filePath;
-            m_Buffer = buffer;
-            m_Offset = offset;
-            m_Count = count;
-            m_Flags = flags;
+            _filePath = filePath;
+            _buffer = buffer;
+            _offset = offset;
+            _count = count;
+            _flags = flags;
             if (endOfPacket)
             {
-                m_Flags |= Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket;
+                _flags |= SendPacketsElementFlags.EndOfPacket;
             }
         }
 
-        // Filename property
         public string FilePath
         {
-            get { return m_FilePath; }
+            get { return _filePath; }
         }
 
-        // Buffer property
         public byte[] Buffer
         {
-            get { return m_Buffer; }
+            get { return _buffer; }
         }
 
-        // Count property
         public int Count
         {
-            get { return m_Count; }
+            get { return _count; }
         }
 
-        // Offset property
         public int Offset
         {
-            get { return m_Offset; }
+            get { return _offset; }
         }
 
-        // EndOfPacket property
         public bool EndOfPacket
         {
-            get { return (m_Flags & Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket) != 0; }
+            get { return (_flags & SendPacketsElementFlags.EndOfPacket) != 0; }
         }
     }
 }

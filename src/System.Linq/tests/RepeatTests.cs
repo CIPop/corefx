@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Linq.Tests
 {
-    public class RepeatTests
+    public class RepeatTests : EnumerableTests
     {
         [Fact]
         public void Repeat_ProduceCorrectSequence()
@@ -33,6 +33,15 @@ namespace System.Linq.Tests
             Assert.Equal(array.Length, 100);
             for (var i = 0; i < array.Length; i++)
                 Assert.Equal(1, array[i]);
+        }
+
+        [Fact]
+        public void Repeat_ToList_ProduceCorrectResult()
+        {
+            var list = Enumerable.Repeat(1, 100).ToList();
+            Assert.Equal(list.Count, 100);
+            for (var i = 0; i < list.Count; i++)
+                Assert.Equal(1, list[i]);
         }
 
         [Fact]
@@ -66,7 +75,7 @@ namespace System.Linq.Tests
         [Fact]
         public void Repeat_ThrowExceptionOnNegativeCount()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Repeat(1, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Repeat(1, -1));
         }
 
 
@@ -84,19 +93,19 @@ namespace System.Linq.Tests
         [Fact]
         public void Repeat_EnumerableAndEnumeratorAreSame()
         {
-            var repeatEnumberable = Enumerable.Repeat(1, 1);
-            using (var repeatEnumberator = repeatEnumberable.GetEnumerator())
+            var repeatEnumerable = Enumerable.Repeat(1, 1);
+            using (var repeatEnumerator = repeatEnumerable.GetEnumerator())
             {
-                Assert.Same(repeatEnumberable, repeatEnumberator);
+                Assert.Same(repeatEnumerable, repeatEnumerator);
             }
         }
 
         [Fact]
         public void Repeat_GetEnumeratorReturnUniqueInstances()
         {
-            var repeatEnumberable = Enumerable.Repeat(1, 1);
-            using (var enum1 = repeatEnumberable.GetEnumerator())
-            using (var enum2 = repeatEnumberable.GetEnumerator())
+            var repeatEnumerable = Enumerable.Repeat(1, 1);
+            using (var enum1 = repeatEnumerable.GetEnumerator())
+            using (var enum2 = repeatEnumerable.GetEnumerator())
             {
                 Assert.NotSame(enum1, enum2);
             }

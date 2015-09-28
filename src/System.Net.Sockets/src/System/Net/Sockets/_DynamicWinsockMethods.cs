@@ -11,17 +11,17 @@ namespace System.Net.Sockets
     {
         // In practice there will never be more than four of these, so its not worth a complicated
         // hash table structure.  Store them in a list and search through it.
-        private static List<DynamicWinsockMethods> s_MethodTable = new List<DynamicWinsockMethods>();
+        private static List<DynamicWinsockMethods> s_methodTable = new List<DynamicWinsockMethods>();
 
         public static DynamicWinsockMethods GetMethods(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
-            lock (s_MethodTable)
+            lock (s_methodTable)
             {
                 DynamicWinsockMethods methods;
 
-                for (int i = 0; i < s_MethodTable.Count; i++)
+                for (int i = 0; i < s_methodTable.Count; i++)
                 {
-                    methods = s_MethodTable[i];
+                    methods = s_methodTable[i];
                     if (methods._addressFamily == addressFamily && methods._socketType == socketType && methods._protocolType == protocolType)
                     {
                         return methods;
@@ -29,7 +29,7 @@ namespace System.Net.Sockets
                 }
 
                 methods = new DynamicWinsockMethods(addressFamily, socketType, protocolType);
-                s_MethodTable.Add(methods);
+                s_methodTable.Add(methods);
                 return methods;
             }
         }
@@ -45,9 +45,9 @@ namespace System.Net.Sockets
         private TransmitPacketsDelegate _transmitPackets;
 
         private DisconnectExDelegate _disconnectEx;
-        private DisconnectExDelegate_Blocking _disconnectEx_Blocking;
+        private DisconnectExDelegateBlocking _disconnectExBlocking;
         private WSARecvMsgDelegate _recvMsg;
-        private WSARecvMsgDelegate_Blocking _recvMsg_Blocking;
+        private WSARecvMsgDelegateBlocking _recvMsgBlocking;
 
         private DynamicWinsockMethods(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
@@ -57,7 +57,8 @@ namespace System.Net.Sockets
             _lockObject = new object();
         }
 
-        public T GetDelegate<T>(SafeCloseSocket socketHandle) where T : class
+        public T GetDelegate<T>(SafeCloseSocket socketHandle)
+            where T : class
         {
             if (typeof(T) == typeof(AcceptExDelegate))
             {
@@ -79,20 +80,20 @@ namespace System.Net.Sockets
                 EnsureDisconnectEx(socketHandle);
                 return (T)(object)_disconnectEx;
             }
-            else if (typeof(T) == typeof(DisconnectExDelegate_Blocking))
+            else if (typeof(T) == typeof(DisconnectExDelegateBlocking))
             {
                 EnsureDisconnectEx(socketHandle);
-                return (T)(object)_disconnectEx_Blocking;
+                return (T)(object)_disconnectExBlocking;
             }
             else if (typeof(T) == typeof(WSARecvMsgDelegate))
             {
                 EnsureWSARecvMsg(socketHandle);
                 return (T)(object)_recvMsg;
             }
-            else if (typeof(T) == typeof(WSARecvMsgDelegate_Blocking))
+            else if (typeof(T) == typeof(WSARecvMsgDelegateBlocking))
             {
                 EnsureWSARecvMsg(socketHandle);
-                return (T)(object)_recvMsg_Blocking;
+                return (T)(object)_recvMsgBlocking;
             }
             else if (typeof(T) == typeof(TransmitPacketsDelegate))
             {
@@ -104,7 +105,7 @@ namespace System.Net.Sockets
             return null;
         }
 
-        // private methods to actually load the function pointers
+        // Private methods that actually load the function pointers.
         private IntPtr LoadDynamicFunctionPointer(SafeCloseSocket socketHandle, ref Guid guid)
         {
             IntPtr ptr = IntPtr.Zero;
@@ -114,15 +115,15 @@ namespace System.Net.Sockets
             unsafe
             {
                 errorCode = Interop.Winsock.WSAIoctl(
-                               socketHandle,
-                               Interop.Winsock.IoctlSocketConstants.SIOGETEXTENSIONFUNCTIONPOINTER,
-                               ref guid,
-                               sizeof(Guid),
-                               out ptr,
-                               sizeof(IntPtr),
-                               out length,
-                               IntPtr.Zero,
-                               IntPtr.Zero);
+                   socketHandle,
+                   Interop.Winsock.IoctlSocketConstants.SIOGETEXTENSIONFUNCTIONPOINTER,
+                   ref guid,
+                   sizeof(Guid),
+                   out ptr,
+                   sizeof(IntPtr),
+                   out length,
+                   IntPtr.Zero,
+                   IntPtr.Zero);
             }
 
             if (errorCode != SocketError.Success)
@@ -192,7 +193,7 @@ namespace System.Net.Sockets
                         Guid guid = new Guid("{0x7fda2e11,0x8630,0x436f,{0xa0, 0x31, 0xf5, 0x36, 0xa6, 0xee, 0xc1, 0x57}}");
                         IntPtr ptrDisconnectEx = LoadDynamicFunctionPointer(socketHandle, ref guid);
                         _disconnectEx = Marshal.GetDelegateForFunctionPointer<DisconnectExDelegate>(ptrDisconnectEx);
-                        _disconnectEx_Blocking = Marshal.GetDelegateForFunctionPointer<DisconnectExDelegate_Blocking>(ptrDisconnectEx);
+                        _disconnectExBlocking = Marshal.GetDelegateForFunctionPointer<DisconnectExDelegateBlocking>(ptrDisconnectEx);
                     }
                 }
             }
@@ -209,7 +210,7 @@ namespace System.Net.Sockets
                         Guid guid = new Guid("{0xf689d7c8,0x6f1f,0x436b,{0x8a,0x53,0xe5,0x4f,0xe3,0x51,0xc3,0x22}}");
                         IntPtr ptrWSARecvMsg = LoadDynamicFunctionPointer(socketHandle, ref guid);
                         _recvMsg = Marshal.GetDelegateForFunctionPointer<WSARecvMsgDelegate>(ptrWSARecvMsg);
-                        _recvMsg_Blocking = Marshal.GetDelegateForFunctionPointer<WSARecvMsgDelegate_Blocking>(ptrWSARecvMsg);
+                        _recvMsgBlocking = Marshal.GetDelegateForFunctionPointer<WSARecvMsgDelegateBlocking>(ptrWSARecvMsg);
                     }
                 }
             }
@@ -264,7 +265,7 @@ namespace System.Net.Sockets
 
     internal delegate bool DisconnectExDelegate(SafeCloseSocket socketHandle, SafeHandle overlapped, int flags, int reserved);
 
-    internal delegate bool DisconnectExDelegate_Blocking(IntPtr socketHandle, IntPtr overlapped, int flags, int reserved);
+    internal delegate bool DisconnectExDelegateBlocking(IntPtr socketHandle, IntPtr overlapped, int flags, int reserved);
 
     internal delegate SocketError WSARecvMsgDelegate(
                 SafeCloseSocket socketHandle,
@@ -273,7 +274,7 @@ namespace System.Net.Sockets
                 SafeHandle overlapped,
                 IntPtr completionRoutine);
 
-    internal delegate SocketError WSARecvMsgDelegate_Blocking(
+    internal delegate SocketError WSARecvMsgDelegateBlocking(
                 IntPtr socketHandle,
                 IntPtr msg,
                 out int bytesTransferred,

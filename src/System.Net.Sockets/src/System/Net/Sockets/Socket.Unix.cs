@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace System.Net.Sockets
 {
@@ -45,10 +44,8 @@ namespace System.Net.Sockets
             return maxFd + 1;
         }
 
-        //
         // Transform the list socketList such that the only sockets left are those
-        // with a file descriptor contained in the array "fileDescriptorArray"
-        //
+        // with a file descriptor contained in the array "fileDescriptorArray".
         internal static void FilterSocketListUsingFdSet(ref Interop.libc.fd_set fdset, IList socketList)
         {
             if (socketList == null || socketList.Count == 0)

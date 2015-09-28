@@ -9,9 +9,7 @@ using Microsoft.Win32;
 
 namespace System.Net.Sockets
 {
-    //
-    //  ConnectOverlappedAsyncResult - used to take care of storage for async Socket BeginAccept call.
-    //
+    // ConnectOverlappedAsyncResult - used to take care of storage for async Socket BeginConnect call.
     internal partial class ConnectOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
         public void CompletionCallback(SocketError errorCode)
@@ -19,15 +17,15 @@ namespace System.Net.Sockets
             CompletionCallback(0, errorCode);
         }
 
-        //
         // This method is called by base.CompletionPortCallback base.OverlappedCallback as part of IO completion
-        //
         internal override object PostCompletion(int numBytes)
         {
             var errorCode = (SocketError)ErrorCode;
             if (errorCode == SocketError.Success)
             {
-                return (Socket)AsyncObject;
+                var socket = (Socket)AsyncObject;
+                socket.SetToConnected();
+                return socket;
             }
 
             return null;

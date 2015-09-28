@@ -12,12 +12,8 @@ namespace System.Net
 namespace System.Net.Internals
 #endif
 {
-    /// <devdoc>
-    ///    <para>
-    ///       This class is used when subclassing EndPoint, and provides indication
-    ///       on how to format the memory buffers that the platform uses for network addresses.
-    ///    </para>
-    /// </devdoc>
+    // This class is used when subclassing EndPoint, and provides indication
+    // on how to format the memory buffers that the platform uses for network addresses.
 #if SYSTEM_NET_PRIMITIVES_DLL
     public 
 #else       
@@ -101,7 +97,7 @@ namespace System.Net.Internals
             : this(ipAddress.AddressFamily,
                 ((ipAddress.AddressFamily == AddressFamily.InterNetwork) ? IPv4AddressSize : IPv6AddressSize))
         {
-            // No Port
+            // No Port.
             SocketAddressPal.SetPort(Buffer, 0);
 
             if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
@@ -164,7 +160,7 @@ namespace System.Net.Internals
             return new IPEndPoint(address, port);
         }
 
-        // For ReceiveFrom we need to pin address size, using reserved Buffer space
+        // For ReceiveFrom we need to pin address size, using reserved Buffer space.
         internal void CopyAddressSizeIntoBuffer()
         {
             Buffer[Buffer.Length - IntPtr.Size] = unchecked((byte)(InternalSize));
@@ -173,7 +169,7 @@ namespace System.Net.Internals
             Buffer[Buffer.Length - IntPtr.Size + 3] = unchecked((byte)(InternalSize >> 24));
         }
 
-        // Can be called after the above method did work
+        // Can be called after the above method did work.
         internal int GetAddressSizeOffset()
         {
             return Buffer.Length - IntPtr.Size;

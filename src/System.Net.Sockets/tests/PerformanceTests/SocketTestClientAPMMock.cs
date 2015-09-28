@@ -21,17 +21,17 @@ namespace System.Net.Sockets.Performance.Tests
             throw new NotSupportedException();
         }
 
-        public override void Connect(Action onConnectCallback)
+        public override void Connect(Action<SocketError> onConnectCallback)
         {
             throw new NotSupportedException();
         }
 
-        public override void Receive(Action<int> onReceiveCallback)
+        public override void Receive(Action<int, SocketError> onReceiveCallback)
         {
             throw new NotSupportedException();
         }
 
-        public override void Send(Action<int> onSendCallback)
+        public override void Send(Action<int, SocketError> onSendCallback)
         {
             throw new NotSupportedException();
         }

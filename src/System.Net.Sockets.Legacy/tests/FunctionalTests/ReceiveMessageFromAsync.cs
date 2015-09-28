@@ -1,4 +1,7 @@
-﻿using System.Net.Test.Common;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Test.Common;
 using System.Threading;
 
 using Xunit;
@@ -7,7 +10,10 @@ namespace System.Net.Sockets.Tests
 {
     public class ReceiveMessageFromAsync
     {
-        private const int TestPortBase = 8090;
+        // This is a stand-in for an issue to be filed when this code is merged into corefx.
+        private const int DummyOSXPacketInfoIssue = 123456;
+
+        private const int TestPortBase = TestPortBases.ReceiveMessageFromAsync;
 
         public void OnCompleted(object sender, SocketAsyncEventArgs args)
         {
@@ -16,6 +22,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void Success()
         {
             ManualResetEvent completed = new ManualResetEvent(false);

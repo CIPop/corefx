@@ -1,4 +1,7 @@
-﻿using System.Net.Test.Common;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Net.Test.Common;
 using System.Threading;
 
 using Xunit;
@@ -8,7 +11,7 @@ namespace System.Net.Sockets.Tests
 {
     public class UdpClientTest
     {
-        private const int TestPortBase = 8400;
+        private const int TestPortBase = 7400;
         private ManualResetEvent _waitHandle = new ManualResetEvent(false);
 
         private void AsyncCompleted(IAsyncResult ar)

@@ -7,7 +7,6 @@ namespace System.Net.Sockets
     {
         private byte[] _protocolInformation;
         private SocketInformationOptions _options;
-
         private EndPoint _remoteEndPoint;
 
         public byte[] ProtocolInformation
@@ -21,7 +20,6 @@ namespace System.Net.Sockets
                 _protocolInformation = value;
             }
         }
-
 
         public SocketInformationOptions Options
         {

@@ -1,12 +1,13 @@
-﻿using Xunit;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
     public class TimeoutTest
     {
-        private const int TestPortBase = 8110;
-
-        private const int ServerPort = TestPortBase;
+        private const int TestPortBase = TestPortBases.Timeout;
 
         [Fact]
         public void GetAndSet_Success()
@@ -33,16 +34,17 @@ namespace System.Net.Sockets.Tests
             {
                 using (Socket remoteSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    localSocket.Bind(new IPEndPoint(IPAddress.IPv6Loopback, ServerPort));
+                    localSocket.Bind(new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase));
                     localSocket.Listen(1);
                     IAsyncResult localAsync = localSocket.BeginAccept(null, null);
 
-                    remoteSocket.Connect(IPAddress.IPv6Loopback, ServerPort);
+                    remoteSocket.Connect(IPAddress.IPv6Loopback, TestPortBase);
 
                     Socket acceptedSocket = localSocket.EndAccept(localAsync);
                     acceptedSocket.ReceiveTimeout = 100;
 
-                    SocketException sockEx = Assert.Throws<SocketException>( () => {
+                    SocketException sockEx = Assert.Throws<SocketException>( () =>
+                    {
                         acceptedSocket.Receive(new byte[1]);
                     });
                     
@@ -59,11 +61,11 @@ namespace System.Net.Sockets.Tests
             {
                 using (Socket remoteSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    localSocket.Bind(new IPEndPoint(IPAddress.IPv6Loopback, ServerPort));
+                    localSocket.Bind(new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase + 1));
                     localSocket.Listen(1);
                     IAsyncResult localAsync = localSocket.BeginAccept(null, null);
 
-                    remoteSocket.Connect(IPAddress.IPv6Loopback, ServerPort);
+                    remoteSocket.Connect(IPAddress.IPv6Loopback, TestPortBase + 1);
 
                     Socket acceptedSocket = localSocket.EndAccept(localAsync);
                     acceptedSocket.SendTimeout = 100;

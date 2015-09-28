@@ -1,12 +1,19 @@
-﻿using Xunit;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
     public class ReceiveMessageFrom
     {
-        private const int TestPortBase = 8060;
+        // This is a stand-in for an issue to be filed when this code is merged into corefx.
+        private const int DummyOSXPacketInfoIssue = 123456;
+
+        private const int TestPortBase = TestPortBases.ReceiveMessageFrom;
 
         [Fact]
+        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
         public void Success()
         {
             if (Socket.OSSupportsIPv4)

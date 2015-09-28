@@ -1,9 +1,15 @@
-﻿using Xunit;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
     public class LingerStateTest
     {
+        // This is a stand-in for an issue to be filed when this code is merged into corefx.
+        private const int DummyOSXLingerStateIssue = 123456;
+
         private void TestLingerState_Success(Socket sock, bool enabled, int lingerTime)
         {
             sock.LingerState = new LingerOption(enabled, lingerTime);
@@ -14,12 +20,14 @@ namespace System.Net.Sockets.Tests
 
         private void TestLingerState_ArgumentException(Socket sock, bool enabled, int lingerTime)
         {
-            Assert.Throws<ArgumentException>( () => {
+            Assert.Throws<ArgumentException>(() =>
+            {
                 sock.LingerState = new LingerOption(enabled, lingerTime);
             });
         }
 
         [Fact]
+        [ActiveIssue(DummyOSXLingerStateIssue, PlatformID.OSX)]
         public void Socket_LingerState_Boundaries_CorrectBehavior()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

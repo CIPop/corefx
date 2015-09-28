@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
 using System.Net.Test.Common;
 using System.Threading;
 
@@ -9,7 +12,11 @@ namespace System.Net.Sockets.Tests
 {
     public class SendPacketsAsync
     {
-        private const int TestPortBase = 8100;
+        // TODO: This is a stand-in for an issue that will need to be filed once this code is
+        //       merged into corefx.
+        private const int DummySendPacketsIssue = 123456;
+
+        private const int TestPortBase = TestPortBases.SendPacketsAsync;
         private readonly ITestOutputHelper _log;
 
         private IPEndPoint Server = new IPEndPoint(IPAddress.IPv6Loopback, 8080); 
@@ -51,6 +58,7 @@ namespace System.Net.Sockets.Tests
         #region Basic Arguments
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void Disposed_Throw()
         {
             using (SocketTestServer.SocketTestServerFactory(Server))
@@ -60,7 +68,8 @@ namespace System.Net.Sockets.Tests
                     sock.Connect(Server);
                     sock.Dispose();
 
-                    Assert.Throws<ObjectDisposedException>(() => {
+                    Assert.Throws<ObjectDisposedException>(() =>
+                    {
                         sock.SendPacketsAsync(new SocketAsyncEventArgs());
                     });
                 }
@@ -68,6 +77,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NullArgs_Throw()
         {
             using (SocketTestServer.SocketTestServerFactory(Server))
@@ -76,7 +86,8 @@ namespace System.Net.Sockets.Tests
                 {
                     sock.Connect(Server);
 
-                    ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
+                    ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+                    {
                         sock.SendPacketsAsync(null);
                     });
                     Assert.Equal("e", ex.ParamName);
@@ -85,21 +96,25 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NotConnected_Throw()
         {
             Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
             // Needs to be connected before send
 
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            {
                 socket.SendPacketsAsync(new SocketAsyncEventArgs());
             });
             Assert.Equal("e.SendPacketsElements", ex.ParamName);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NullList_Throws()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            {
                 SendPackets((SendPacketsElement[])null, SocketError.Success, 0);
             });
 
@@ -107,18 +122,21 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NullElement_Ignored()
         {
             SendPackets((SendPacketsElement)null, 0);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void EmptyList_Ignored()
         {
             SendPackets(new SendPacketsElement[0], SocketError.Success, 0);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SocketAsyncEventArgs_DefaultSendSize_0()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -130,30 +148,35 @@ namespace System.Net.Sockets.Tests
         #region Buffers
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NormalBuffer_Success()
         {
             SendPackets(new SendPacketsElement(new byte[10]), 10);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NormalBufferRange_Success()
         {
             SendPackets(new SendPacketsElement(new byte[10], 5, 5), 5);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void EmptyBuffer_Ignored()
         {
             SendPackets(new SendPacketsElement(new byte[0]), 0);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void BufferZeroCount_Ignored()
         {
             SendPackets(new SendPacketsElement(new byte[10], 4, 0), 0);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void BufferMixedBuffers_ZeroCountBufferIgnored()
         {
             SendPacketsElement[] elements = new SendPacketsElement[] 
@@ -166,6 +189,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void BufferZeroCountThenNormal_ZeroCountIgnored()
         {
             Assert.True(Capability.IPv6Support());
@@ -218,14 +242,17 @@ namespace System.Net.Sockets.Tests
         #region Files
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_EmptyFileName_Throws()
         {
-            Assert.Throws<ArgumentException>(() => {
+            Assert.Throws<ArgumentException>(() =>
+            {
                 SendPackets(new SendPacketsElement(String.Empty), 0);
             });
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_BlankFileName_Throws()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -236,51 +263,62 @@ namespace System.Net.Sockets.Tests
         }
         
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_BadCharactersFileName_Throws()
         {
-            Assert.Throws<ArgumentException>(() => {
+            Assert.Throws<ArgumentException>(() =>
+            {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement("blarkd@dfa?/sqersf"), 0);
             });
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_MissingDirectoryName_Throws()
         {
-            Assert.Throws<DirectoryNotFoundException>(() => {
+            Assert.Throws<DirectoryNotFoundException>(() =>
+            {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement(@"nodir\nofile"), 0);
             });
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_MissingFile_Throws()
         {
-            Assert.Throws<FileNotFoundException>(() => {
+            Assert.Throws<FileNotFoundException>(() =>
+            {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement("DoesntExit"), 0);
             });
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_File_Success()
         {
             SendPackets(new SendPacketsElement(TestFileName), TestFileSize); // Whole File
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_FileZeroCount_Success()
         {
             SendPackets(new SendPacketsElement(TestFileName, 0, 0), TestFileSize);  // Whole File
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
+        [ActiveIssue(3497, PlatformID.Windows)]
         public void SendPacketsElement_FilePart_Success()
         {
             SendPackets(new SendPacketsElement(TestFileName, 10, 20), 20);
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_FileMultiPart_Success()
         {
             SendPacketsElement[] elements = new SendPacketsElement[] 
@@ -293,6 +331,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_FileLargeOffset_Throws()
         {
             // Length is validated on Send
@@ -300,6 +339,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_FileLargeCount_Throws()
         {
             // Length is validated on Send
@@ -312,6 +352,7 @@ namespace System.Net.Sockets.Tests
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
         // that used Sockets. 
         [Fact]
+        [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void TestFinalizers()
         {
             // Making several passes through the FReachable list.

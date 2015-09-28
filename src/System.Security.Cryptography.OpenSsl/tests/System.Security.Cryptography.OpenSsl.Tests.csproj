@@ -51,8 +51,7 @@
     <Compile Include="$(CommonTestPath)\Streams\PositionValueStream.cs">
       <Link>CommonTest\Streams\PositionValueStream.cs</Link>
     </Compile>
-
-    <Compile Include="ECDsaOpenSslProvider.cs" />
+    <Compile Include="EcDsaOpenSslProvider.cs" />
     <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaFactory.cs">
       <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaFactory.cs</Link>
     </Compile>
@@ -62,7 +61,7 @@
     <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaStub.cs">
       <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaStub.cs</Link>
     </Compile>
-
+    <Compile Include="RsaOpenSslTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

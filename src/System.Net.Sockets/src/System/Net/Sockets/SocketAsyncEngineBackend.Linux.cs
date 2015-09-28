@@ -52,10 +52,12 @@ namespace System.Net.Sockets
 
         public unsafe void EventLoop()
         {
-            var events = stackalloc Interop.libc.epoll_event[64];
+            const int EventCount = 64;
+
+            var events = stackalloc Interop.libc.epoll_event[EventCount];
             for (;;)
             {
-                int numEvents = Interop.libc.epoll_wait(_epollFd, events, 64, -1);
+                int numEvents = Interop.libc.epoll_wait(_epollFd, events, EventCount, -1);
                 if (numEvents == -1)
                 {
                     // TODO: error handling + EINTR?
@@ -70,9 +72,23 @@ namespace System.Net.Sockets
 
                 for (int i = 0; i < numEvents; i++)
                 {
+                    uint evts = events[i].events;
+
+                    // epoll does not play well with disconnected connection-oriented sockets, frequently
+                    // reporting spurious EPOLLHUP events. Fortunately, EPOLLHUP may be handled as an
+                    // EPOLLIN | EPOLLOUT event: the usual processing for these events will recognize and
+                    // handle the HUP condition.
+                    if ((evts & Interop.libc.EPOLLHUP) != 0)
+                    {
+                        evts = (evts & ~Interop.libc.EPOLLHUP) | Interop.libc.EPOLLIN | Interop.libc.EPOLLOUT;
+                    }
+
                     var handle = (GCHandle)events[i].data;
                     var context = (SocketAsyncContext)handle.Target;
-                    context.HandleEvents(GetSocketAsyncEvents(events[i].events));
+                    if (context != null)
+                    {
+                        context.HandleEvents(GetSocketAsyncEvents(evts));
+                    }
                 }
             }
         }

@@ -27,9 +27,7 @@ namespace System.Net.Sockets
             }
         }
 
-        //
         // Binds the Socket Win32 Handle to the ThreadPool's CompletionPort.
-        //
         public ThreadPoolBoundHandle GetOrAllocateThreadPoolBoundHandle()
         {
             if (_released)
@@ -38,19 +36,15 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(typeof(Socket).FullName);
             }
 
-            //
-            // Check to see if the socket native m_Handle is already
+            // Check to see if the socket native _handle is already
             // bound to the ThreadPool's completion port.
-            //
             if (_iocpBoundHandle == null)
             {
                 lock (_iocpBindingLock)
                 {
                     if (_iocpBoundHandle == null)
                     {
-                        //
-                        // Bind the socket native m_Handle to the ThreadPool.
-                        //
+                        // Bind the socket native _handle to the ThreadPool.
                         GlobalLog.Print("SafeCloseSocket#" + Logging.HashString(this) + "::BindToCompletionPort() calling ThreadPool.BindHandle()");
 
                         try
@@ -84,10 +78,9 @@ namespace System.Net.Sockets
         }
 
         internal static SafeCloseSocket Accept(
-                                            SafeCloseSocket socketHandle,
-                                            byte[] socketAddress,
-                                            ref int socketAddressSize
-                                            )
+            SafeCloseSocket socketHandle,
+            byte[] socketAddress,
+            ref int socketAddressSize)
         {
             return CreateSocket(InnerSafeCloseSocket.Accept(socketHandle, socketAddress, ref socketAddressSize));
         }
@@ -108,7 +101,7 @@ namespace System.Net.Sockets
             {
                 SocketError errorCode;
 
-                // If m_Blockable was set in BlockingRelease, it's safe to block here, which means
+                // If _blockable was set in BlockingRelease, it's safe to block here, which means
                 // we can honor the linger options set on the socket.  It also means closesocket() might return WSAEWOULDBLOCK, in which
                 // case we need to do some recovery.
                 if (_blockable)
@@ -212,7 +205,7 @@ namespace System.Net.Sockets
 
             internal unsafe static InnerSafeCloseSocket CreateWSASocket(byte* pinnedBuffer)
             {
-                //-1 is the value for FROM_PROTOCOL_INFO
+                // NOTE: -1 is the value for FROM_PROTOCOL_INFO.
                 InnerSafeCloseSocket result = Interop.Winsock.WSASocketW((AddressFamily)(-1), (SocketType)(-1), (ProtocolType)(-1), pinnedBuffer, 0, Interop.Winsock.SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
                 if (result.IsInvalid)
                 {

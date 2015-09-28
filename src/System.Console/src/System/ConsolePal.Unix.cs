@@ -26,17 +26,17 @@ namespace System
     {
         public static Stream OpenStandardInput()
         {
-            return new UnixConsoleStream(Interop.Devices.stdin, FileAccess.Read);
+            return new UnixConsoleStream(SafeFileHandle.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDIN_FILENO)), FileAccess.Read);
         }
 
         public static Stream OpenStandardOutput()
         {
-            return new UnixConsoleStream(Interop.Devices.stdout, FileAccess.Write);
+            return new UnixConsoleStream(SafeFileHandle.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDOUT_FILENO)), FileAccess.Write);
         }
 
         public static Stream OpenStandardError()
         {
-            return new UnixConsoleStream(Interop.Devices.stderr, FileAccess.Write);
+            return new UnixConsoleStream(SafeFileHandle.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDERR_FILENO)), FileAccess.Write);
         }
 
         public static Encoding InputEncoding
@@ -289,8 +289,8 @@ namespace System
         {
             fixed (byte* bufPtr = buffer)
             {
-                long result;
-                while (Interop.CheckIo(result = (long)Interop.libc.read(fd, (byte*)bufPtr + offset, (IntPtr)count))) ;
+                int result;
+                while (Interop.CheckIo(result = Interop.Sys.Read(fd, (byte*)bufPtr + offset, count))) ;
                 Debug.Assert(result <= count);
                 return (int)result;
             }
@@ -308,7 +308,7 @@ namespace System
                 while (count > 0)
                 {
                     int bytesWritten;
-                    while (Interop.CheckIo(bytesWritten = (int)Interop.libc.write(fd, bufPtr + offset, (IntPtr)count))) ;
+                    while (Interop.CheckIo(bytesWritten = Interop.Sys.Write(fd, bufPtr + offset, count))) ;
                     count -= bytesWritten;
                     offset += bytesWritten;
                 }
@@ -324,22 +324,14 @@ namespace System
             internal readonly int _handleType;
 
             /// <summary>Initialize the stream.</summary>
-            /// <param name="devPath">A path to a "/dev/std*" file.</param>
+            /// <param name="handle">The file handle wrapped by this stream.</param>
             /// <param name="access">FileAccess.Read or FileAccess.Write.</param>
-            internal UnixConsoleStream(string devPath, FileAccess access)
+            internal UnixConsoleStream(SafeFileHandle handle, FileAccess access)
                 : base(access)
             {
-                Debug.Assert(devPath != null && devPath.StartsWith("/dev/std"));
-                Debug.Assert(access == FileAccess.Read || access == FileAccess.Write);
-                
-                // Open the file descriptor for this stream
-                Interop.Sys.OpenFlags flags = 0;
-                switch (access)
-                {
-                    case FileAccess.Read: flags = Interop.Sys.OpenFlags.O_RDONLY; break;
-                    case FileAccess.Write: flags = Interop.Sys.OpenFlags.O_WRONLY; break;
-                }
-                _handle = SafeFileHandle.Open(devPath, flags, 0);
+                Debug.Assert(handle != null, "Expected non-null console handle");
+                Debug.Assert(!handle.IsInvalid, "Expected valid console handle");
+                _handle = handle;
 
                 // Determine the type of the descriptor (e.g. regular file, character file, pipe, etc.)
                 bool gotFd = false;
@@ -552,8 +544,8 @@ namespace System
                     {
                         // Read in all of the terminfo data
                         long termInfoLength;
-                        while (Interop.CheckIo(termInfoLength = Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
-                        while (Interop.CheckIo(Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_SET))) ; // reset back to beginning
+                        while (Interop.CheckIo(termInfoLength = Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
+                        while (Interop.CheckIo(Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_SET))) ; // reset back to beginning
                         const int MaxTermInfoLength = 4096; // according to the term and tic man pages, 4096 is the terminfo file size max
                         const int HeaderLength = 12;
                         if (termInfoLength <= HeaderLength || termInfoLength > MaxTermInfoLength)
@@ -1005,8 +997,8 @@ namespace System
                     // Determine how much space is needed to store the formatted string.
                     string stringArg = arg as string;
                     int neededLength = stringArg != null ?
-                        Interop.libc.snprintf(null, IntPtr.Zero, format, stringArg) :
-                        Interop.libc.snprintf(null, IntPtr.Zero, format, (int)arg);
+                        Interop.Sys.SNPrintF(null, 0, format, stringArg) :
+                        Interop.Sys.SNPrintF(null, 0, format, (int)arg);
                     if (neededLength == 0)
                     {
                         return string.Empty;
@@ -1021,8 +1013,8 @@ namespace System
                     fixed (byte* ptr = bytes)
                     {
                         int length = stringArg != null ?
-                            Interop.libc.snprintf(ptr, (IntPtr)bytes.Length, format, stringArg) :
-                            Interop.libc.snprintf(ptr, (IntPtr)bytes.Length, format, (int)arg);
+                            Interop.Sys.SNPrintF(ptr, bytes.Length, format, stringArg) :
+                            Interop.Sys.SNPrintF(ptr, bytes.Length, format, (int)arg);
                         if (length != neededLength)
                         {
                             throw new InvalidOperationException(SR.InvalidOperation_PrintF);

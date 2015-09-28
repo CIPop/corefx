@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using Xunit;
 using System.Threading.Tasks;
+using Xunit;
 using TelemData = System.Collections.Generic.KeyValuePair<string, object>;
 
-namespace System.Diagnostics.Tracing.Telemetry.Tests
+namespace System.Diagnostics.Tracing.Tests
 {
     /// <summary>
     /// Tests for TelemetrySource and TelemetryListener
@@ -442,27 +441,31 @@ namespace System.Diagnostics.Tracing.Telemetry.Tests
             // having lots of concurrency.   
             for (int k = 0; k < 10; k++)
             {
-                var tasks = new Task[1]; // TODO FIX NOW should be 100  reduced to avoid failures while we investigate the race.  
+                // TODO FIX NOW:  Task[1] should be Task[100] but it fails.  
+                var tasks = new Task[1];
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     tasks[i] = (factory.StartNew(delegate ()
                     {
-                    // Create a set of TelemetryListeners (which add themselves to the AllListeners list. 
-                    var listeners = new List<TelemetryListener>();
+                        // Create a set of TelemetryListeners (which add themselves to the AllListeners list. 
+                        var listeners = new List<TelemetryListener>();
                         for (int j = 0; j < 100; j++)
                             listeners.Insert(0, (new TelemetryListener("Task " + i + " TestListener" + j)));
 
-                    // They are all in the list
-                    list = GetActiveNonDefaultListeners();
+                        // They are all in the list
+                        list = GetActiveNonDefaultListeners();
                         foreach (var listener in listeners)
                             Assert.Contains(listener, list);
 
-                    // Dispose them all 
-                    foreach (var listener in listeners)
-                            listener.Dispose();
+                        // Dispose them all, first the even then the odd, just to mix it up and be more stressful.  
+                        for (int j = 0; j < listeners.Count; j += 2)      // Even
+                            listeners[j].Dispose();
+                        for (int j = 1; j < listeners.Count; j += 2)      // odd
+                            listeners[j].Dispose();
 
-                    // And now they are not in the list.  
-                    list = GetActiveNonDefaultListeners();
+
+                        // And now they are not in the list.  
+                        list = GetActiveNonDefaultListeners();
                         foreach (var listener in listeners)
                             Assert.DoesNotContain(listener, list);
                     }));
@@ -483,7 +486,7 @@ namespace System.Diagnostics.Tracing.Telemetry.Tests
             int completionCount = 0;
 
             IDisposable subscription = listener.Subscribe(MakeObserver<KeyValuePair<string, object>>(_ => { }, () => completionCount++));
-            
+
             listener.Dispose();
             listener.Dispose();
 
@@ -617,7 +620,8 @@ namespace System.Diagnostics.Tracing.Telemetry.Tests
 
         public void OnError(Exception error)
         {
-            Assert.True(false, "Error happened on IObserver");
+            // No errors should be thrown.
+            throw new ShouldNotBeInvokedException();
         }
 
         public void OnNext(T value)

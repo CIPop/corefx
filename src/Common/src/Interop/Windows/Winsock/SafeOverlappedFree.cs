@@ -15,9 +15,11 @@ namespace System.Net.Sockets
 #else
     internal sealed class SafeOverlappedFree : SafeHandleZeroOrMinusOneIsInvalid {
 #endif
-        internal static readonly SafeOverlappedFree Zero = new SafeOverlappedFree(false);
+        private static readonly SafeOverlappedFree s_zero = new SafeOverlappedFree(false);
 
         private SafeCloseSocket _socketHandle;
+
+        internal static SafeOverlappedFree Zero { get { return s_zero; } }
 
         private SafeOverlappedFree() : base(true) { }
         private SafeOverlappedFree(bool ownsHandle) : base(ownsHandle) { }
@@ -63,7 +65,8 @@ namespace System.Net.Sockets
                 // avoid reuse after delete of the native overlapped structure.
                 socketHandle.Dispose();
             }
-            // Release the native overlapped structure
+
+            // Release the native overlapped structure.
             return Interop.mincore_obsolete.LocalFree(handle) == IntPtr.Zero;
         }
     }

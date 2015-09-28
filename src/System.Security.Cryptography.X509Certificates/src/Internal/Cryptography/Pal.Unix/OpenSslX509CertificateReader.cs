@@ -18,7 +18,7 @@ namespace Internal.Cryptography.Pal
         private static DateTimeFormatInfo s_validityDateTimeFormatInfo;
 
         private SafeX509Handle _cert;
-        private SafeEvpPkeyHandle _privateKey;
+        private SafeEvpPKeyHandle _privateKey;
         private X500DistinguishedName _subjectName;
         private X500DistinguishedName _issuerName;
 
@@ -199,7 +199,7 @@ namespace Internal.Cryptography.Pal
             get
             {
                 int extensionCount = Interop.libcrypto.X509_get_ext_count(_cert);
-                LowLevelListWithIList<X509Extension> extensions = new LowLevelListWithIList<X509Extension>(extensionCount);
+                X509Extension[] extensions = new X509Extension[extensionCount];
 
                 for (int i = 0; i < extensionCount; i++)
                 {
@@ -220,21 +220,20 @@ namespace Internal.Cryptography.Pal
 
                     byte[] extData = Interop.Crypto.GetAsn1StringBytes(dataPtr);
                     bool critical = Interop.libcrypto.X509_EXTENSION_get_critical(ext);
-                    X509Extension extension = new X509Extension(oid, extData, critical);
 
-                    extensions.Add(extension);
+                    extensions[i] = new X509Extension(oid, extData, critical);
                 }
 
                 return extensions;
             }
         }
 
-        internal void SetPrivateKey(SafeEvpPkeyHandle privateKey)
+        internal void SetPrivateKey(SafeEvpPKeyHandle privateKey)
         {
             _privateKey = privateKey;
         }
 
-        internal SafeEvpPkeyHandle PrivateKeyHandle
+        internal SafeEvpPKeyHandle PrivateKeyHandle
         {
             get { return _privateKey; }
         }
@@ -249,6 +248,19 @@ namespace Internal.Cryptography.Pal
             using (SafeRsaHandle rsaHandle = Interop.libcrypto.EVP_PKEY_get1_RSA(_privateKey))
             {
                 return new RSAOpenSsl(rsaHandle.DangerousGetHandle());
+            }
+        }
+
+        public ECDsa GetECDsaPrivateKey()
+        {
+            if (_privateKey == null || _privateKey.IsInvalid)
+            {
+                return null;
+            }
+
+            using (SafeEcKeyHandle ecKeyHandle = Interop.libcrypto.EVP_PKEY_get1_EC_KEY(_privateKey))
+            {
+                return new ECDsaOpenSsl(ecKeyHandle.DangerousGetHandle());
             }
         }
 
@@ -310,7 +322,7 @@ namespace Internal.Cryptography.Pal
 
             if (_privateKey != null)
             {
-                SafeEvpPkeyHandle keyHandle = SafeEvpPkeyHandle.DuplicateHandle(_privateKey);
+                SafeEvpPKeyHandle keyHandle = _privateKey.DuplicateHandle();
                 duplicate.SetPrivateKey(keyHandle);
             }
 
@@ -325,7 +337,7 @@ namespace Internal.Cryptography.Pal
             return new X500DistinguishedName(buf);
         }
 
-        private static DateTime ExtractValidityDateTime(IntPtr validityDatePtr)
+        internal static DateTime ExtractValidityDateTime(IntPtr validityDatePtr)
         {
             byte[] bytes = Interop.Crypto.GetAsn1StringBytes(validityDatePtr);
 
