@@ -43,7 +43,8 @@ namespace System.Net.Sockets.Tests
                     Socket acceptedSocket = localSocket.EndAccept(localAsync);
                     acceptedSocket.ReceiveTimeout = 100;
 
-                    SocketException sockEx = Assert.Throws<SocketException>( () => {
+                    SocketException sockEx = Assert.Throws<SocketException>( () =>
+                    {
                         acceptedSocket.Receive(new byte[1]);
                     });
                     

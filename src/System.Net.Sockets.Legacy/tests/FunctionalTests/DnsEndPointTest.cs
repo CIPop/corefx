@@ -10,6 +10,10 @@ namespace System.Net.Sockets.Tests
 {
     public class DnsEndPointTest
     {
+        // TODO: These constants are fill-ins for issues that need to be opened
+        //       once this code is merged into corefx/master.
+        private const int DummyLoopbackV6Issue = 123456;
+
         private const int TestPortBase = TestPortBases.DnsEndPoint;
 
         [Fact]
@@ -30,7 +34,8 @@ namespace System.Net.Sockets.Tests
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 // TODO: Behavior difference from .Net Desktop. This will actually throw InternalSocketException.
-                SocketException ex = Assert.ThrowsAny<SocketException>(() => {
+                SocketException ex = Assert.ThrowsAny<SocketException>(() =>
+                {
                     sock.Connect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", TestPortBase + 1));
                 });
 
@@ -39,7 +44,8 @@ namespace System.Net.Sockets.Tests
                     "SocketErrorCode: {0}" + errorCode);
 
                 // TODO: Behavior difference from .Net Desktop. This will actually throw InternalSocketException.
-                ex = Assert.ThrowsAny<SocketException>(() => {
+                ex = Assert.ThrowsAny<SocketException>(() =>
+                {
                     sock.Connect(new DnsEndPoint("localhost", TestPortBase + 2));
                 });
 
@@ -52,7 +58,8 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                Assert.Throws<ArgumentException>(() => {
+                Assert.Throws<ArgumentException>(() =>
+                {
                     sock.SendTo(new byte[10], new DnsEndPoint("localhost", TestPortBase + 3));
                 });
             }
@@ -66,7 +73,8 @@ namespace System.Net.Sockets.Tests
                 sock.Bind(new IPEndPoint(IPAddress.Loopback, TestPortBase + 4));
                 EndPoint endpoint = new DnsEndPoint("localhost", TestPortBase + 4);
 
-                Assert.Throws<ArgumentException>(() => {
+                Assert.Throws<ArgumentException>(() =>
+                {
                     sock.ReceiveFrom(new byte[10], ref endpoint);
                 });
             }
@@ -91,7 +99,8 @@ namespace System.Net.Sockets.Tests
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 // TODO: Behavior difference from .Net Desktop. This will actually throw InternalSocketException.
-                SocketException ex = Assert.ThrowsAny<SocketException>(() => {
+                SocketException ex = Assert.ThrowsAny<SocketException>(() =>
+                {
                     IAsyncResult result = sock.BeginConnect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", TestPortBase + 6), null, null);
                     sock.EndConnect(result);
                 });
@@ -101,7 +110,8 @@ namespace System.Net.Sockets.Tests
                     "SocketErrorCode: {0}" + errorCode);
 
                 // TODO: Behavior difference from .Net Desktop. This will actually throw InternalSocketException.
-                ex = Assert.ThrowsAny<SocketException>(() => {
+                ex = Assert.ThrowsAny<SocketException>(() =>
+                {
                     IAsyncResult result = sock.BeginConnect(new DnsEndPoint("localhost", TestPortBase + 6), null, null);
                     sock.EndConnect(result);
                 });
@@ -115,7 +125,8 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                Assert.Throws<ArgumentException>(() => {
+                Assert.Throws<ArgumentException>(() =>
+                {
                     sock.BeginSendTo(new byte[10], 0, 0, SocketFlags.None, new DnsEndPoint("localhost", TestPortBase + 7), null, null);
                 });
             }
@@ -197,6 +208,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(DummyLoopbackV6Issue, PlatformID.AnyUnix)]
         public void Socket_StaticConnectAsync_Success()
         {
 

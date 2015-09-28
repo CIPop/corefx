@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace System.Net.Sockets
 {
@@ -138,7 +137,7 @@ namespace System.Net.Sockets
 
         public static SocketError Connect(SafeCloseSocket handle, byte[] peerAddress, int peerAddressLen)
         {
-            return Interop.Winsock.WSAConnect(
+            SocketError errorCode = Interop.Winsock.WSAConnect(
                 handle.DangerousGetHandle(),
                 peerAddress,
                 peerAddressLen,
@@ -146,6 +145,7 @@ namespace System.Net.Sockets
                 IntPtr.Zero,
                 IntPtr.Zero,
                 IntPtr.Zero);
+            return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
         public static SocketError Disconnect(Socket socket, SafeCloseSocket handle, bool reuseSocket)
@@ -177,7 +177,7 @@ namespace System.Net.Sockets
                 }
 
                 // This can throw ObjectDisposedException.
-                return Interop.Winsock.WSASend_Blocking(
+                SocketError errorCode = Interop.Winsock.WSASend_Blocking(
                     handle.DangerousGetHandle(),
                     WSABuffers,
                     WSABuffers.Length,
@@ -185,6 +185,13 @@ namespace System.Net.Sockets
                     socketFlags,
                     SafeNativeOverlapped.Zero,
                     IntPtr.Zero);
+
+                if (errorCode == SocketError.SocketError)
+                {
+                    errorCode = (SocketError)Marshal.GetLastWin32Error();
+                }
+
+                return errorCode;
             }
             finally
             {
@@ -795,10 +802,17 @@ namespace System.Net.Sockets
             return (SocketError)socketCount;
         }
 
-        public static SocketError Shutdown(SafeCloseSocket handle, SocketShutdown how)
+        public static SocketError Shutdown(SafeCloseSocket handle, bool isConnected, bool isDisconnected, SocketShutdown how)
         {
             SocketError err = Interop.Winsock.shutdown(handle, (int)how);
-            return err == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
+            if (err != SocketError.SocketError)
+            {
+                return SocketError.Success;
+            }
+
+            err = GetLastSocketError();
+            Debug.Assert(err != SocketError.NotConnected || (!isConnected && !isDisconnected));
+            return err;
         }
 
         public static unsafe SocketError ConnectAsync(Socket socket, SafeCloseSocket handle, byte[] socketAddress, int socketAddressLen, ConnectOverlappedAsyncResult asyncResult)

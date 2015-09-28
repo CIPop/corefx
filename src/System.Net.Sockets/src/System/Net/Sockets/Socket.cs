@@ -1,18 +1,17 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Net.Internals;
+using System.Net;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace System.Net.Sockets
 {
@@ -4433,7 +4432,7 @@ namespace System.Net.Sockets
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Shutdown() how:" + how.ToString());
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = SocketPal.Shutdown(_handle, how);
+            SocketError errorCode = SocketPal.Shutdown(_handle, _isConnected, _isDisconnected, how);
 
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Shutdown() Interop.Winsock.shutdown returns errorCode:" + errorCode);
 
@@ -5517,7 +5516,7 @@ namespace System.Net.Sockets
                     else
                     {
                         // Since our timeout is in ms and linger is in seconds, implement our own sortof linger here.
-                        errorCode = SocketPal.Shutdown(_handle, SocketShutdown.Send);
+                        errorCode = SocketPal.Shutdown(_handle, _isConnected, _isDisconnected, SocketShutdown.Send);
                         GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") shutdown():" + (errorCode == SocketError.SocketError ? SocketPal.GetLastSocketError() : errorCode).ToString());
 
                         // This should give us a timeout in milliseconds.
@@ -5605,7 +5604,7 @@ namespace System.Net.Sockets
 
             try
             {
-                SocketPal.Shutdown(_handle, how);
+                SocketPal.Shutdown(_handle, _isConnected, _isDisconnected, how);
             }
             catch (ObjectDisposedException) { }
         }

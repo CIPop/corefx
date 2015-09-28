@@ -68,7 +68,8 @@ namespace System.Net.Sockets.Tests
                     sock.Connect(Server);
                     sock.Dispose();
 
-                    Assert.Throws<ObjectDisposedException>(() => {
+                    Assert.Throws<ObjectDisposedException>(() =>
+                    {
                         sock.SendPacketsAsync(new SocketAsyncEventArgs());
                     });
                 }
@@ -85,7 +86,8 @@ namespace System.Net.Sockets.Tests
                 {
                     sock.Connect(Server);
 
-                    ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
+                    ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+                    {
                         sock.SendPacketsAsync(null);
                     });
                     Assert.Equal("e", ex.ParamName);
@@ -100,7 +102,8 @@ namespace System.Net.Sockets.Tests
             Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
             // Needs to be connected before send
 
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            {
                 socket.SendPacketsAsync(new SocketAsyncEventArgs());
             });
             Assert.Equal("e.SendPacketsElements", ex.ParamName);
@@ -110,7 +113,8 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NullList_Throws()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            {
                 SendPackets((SendPacketsElement[])null, SocketError.Success, 0);
             });
 
@@ -241,7 +245,8 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_EmptyFileName_Throws()
         {
-            Assert.Throws<ArgumentException>(() => {
+            Assert.Throws<ArgumentException>(() =>
+            {
                 SendPackets(new SendPacketsElement(String.Empty), 0);
             });
         }
@@ -261,7 +266,8 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_BadCharactersFileName_Throws()
         {
-            Assert.Throws<ArgumentException>(() => {
+            Assert.Throws<ArgumentException>(() =>
+            {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement("blarkd@dfa?/sqersf"), 0);
             });
@@ -271,7 +277,8 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_MissingDirectoryName_Throws()
         {
-            Assert.Throws<DirectoryNotFoundException>(() => {
+            Assert.Throws<DirectoryNotFoundException>(() =>
+            {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement(@"nodir\nofile"), 0);
             });
@@ -281,7 +288,8 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_MissingFile_Throws()
         {
-            Assert.Throws<FileNotFoundException>(() => {
+            Assert.Throws<FileNotFoundException>(() =>
+            {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement("DoesntExit"), 0);
             });
@@ -303,6 +311,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
+        [ActiveIssue(3497, PlatformID.Windows)]
         public void SendPacketsElement_FilePart_Success()
         {
             SendPackets(new SendPacketsElement(TestFileName, 10, 20), 20);

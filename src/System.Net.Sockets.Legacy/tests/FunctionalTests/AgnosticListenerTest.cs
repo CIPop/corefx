@@ -13,7 +13,7 @@ namespace System.Net.Sockets.Tests
     /// </summary>
     public class AgnosticListenerTest
     {
-        private static int TestPortBase = TestPortBases.AgnosticListener;
+        private const int TestPortBase = TestPortBases.AgnosticListener;
 
         public AgnosticListenerTest(ITestOutputHelper _log)
         {
