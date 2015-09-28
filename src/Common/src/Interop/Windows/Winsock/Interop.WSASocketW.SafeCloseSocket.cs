@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Winsock
     {
-        //
-        // used as last parameter to WSASocket call
-        //
+        // Used as last parameter to WSASocket call.
         [Flags]
         internal enum SocketConstructorFlags
         {
@@ -21,7 +19,7 @@ internal static partial class Interop
             WSA_FLAG_MULTIPOINT_D_ROOT = 0x08,
             WSA_FLAG_MULTIPOINT_D_LEAF = 0x10,
         }
-        
+
         [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern SafeCloseSocket.InnerSafeCloseSocket WSASocketW(
                                                 [In] AddressFamily addressFamily,
