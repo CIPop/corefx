@@ -523,69 +523,6 @@ internal static partial class Interop
             internal uint owningPid;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IPOptions
-        {
-            internal byte ttl;
-            internal byte tos;
-            internal byte flags;
-            internal byte optionsSize;
-            internal IntPtr optionsData;
-
-            internal IPOptions(PingOptions options)
-            {
-                ttl = 128;
-                tos = 0;
-                flags = 0;
-                optionsSize = 0;
-                optionsData = IntPtr.Zero;
-
-                if (options != null)
-                {
-                    this.ttl = (byte)options.Ttl;
-
-                    if (options.DontFragment)
-                    {
-                        flags = 2;
-                    }
-                }
-            }
-        }
-
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IcmpEchoReply
-        {
-            internal uint address;
-            internal uint status;
-            internal uint roundTripTime;
-            internal ushort dataSize;
-            internal ushort reserved;
-            internal IntPtr data;
-            internal IPOptions options;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        internal struct Ipv6Address
-        {
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-            internal byte[] Goo;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            internal byte[] Address;    // Replying address.
-            internal uint ScopeID;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Icmp6EchoReply
-        {
-            internal Ipv6Address Address;
-            internal uint Status;               // Reply IP_STATUS.
-            internal uint RoundTripTime; // RTT in milliseconds.
-            internal IntPtr data;
-            // internal IPOptions options;
-            // internal IntPtr data; data os after tjos
-        }
-
         internal delegate void StableUnicastIpAddressTableDelegate(IntPtr context, IntPtr table);
 
         [DllImport(Interop.Libraries.IpHlpApi)]
