@@ -19,11 +19,11 @@ namespace System.Net.NetworkInformation
         internal bool transient = false;
         internal bool dnsEligible = true;
 
-        internal SystemIPAddressInformation(IPAddress address, AdapterAddressFlags flags)
+        internal SystemIPAddressInformation(IPAddress address, Interop.IpHlpApi.AdapterAddressFlags flags)
         {
             _address = address;
-            transient = (flags & AdapterAddressFlags.Transient) > 0;
-            dnsEligible = (flags & AdapterAddressFlags.DnsEligible) > 0;
+            transient = (flags & Interop.IpHlpApi.AdapterAddressFlags.Transient) > 0;
+            dnsEligible = (flags & Interop.IpHlpApi.AdapterAddressFlags.DnsEligible) > 0;
         }
 
         public override IPAddress Address { get { return _address; } }

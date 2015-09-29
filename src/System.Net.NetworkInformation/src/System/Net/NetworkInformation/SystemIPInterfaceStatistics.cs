@@ -12,7 +12,7 @@ namespace System.Net.NetworkInformation
 {
     internal class SystemIPInterfaceStatistics : IPInterfaceStatistics
     {
-        private MibIfRow2 _ifRow;
+        private Interop.IpHlpApi.MibIfRow2 _ifRow;
 
         internal SystemIPInterfaceStatistics(long index)
         {
@@ -32,16 +32,16 @@ namespace System.Net.NetworkInformation
         public override long OutgoingPacketsWithErrors { get { return (long)_ifRow.outErrors; } }
         public override long IncomingUnknownProtocolPackets { get { return (long)_ifRow.inUnknownProtos; } }
 
-        internal static MibIfRow2 GetIfEntry2(long index)
+        internal static Interop.IpHlpApi.MibIfRow2 GetIfEntry2(long index)
         {
-            MibIfRow2 ifRow = new MibIfRow2();
+            Interop.IpHlpApi.MibIfRow2 ifRow = new Interop.IpHlpApi.MibIfRow2();
             if (index == 0)
             {
                 return ifRow;
             }
             ifRow.interfaceIndex = (uint)index;
-            uint result = UnsafeNetInfoNativeMethods.GetIfEntry2(ref ifRow);
-            if (result != IpHelperErrors.Success)
+            uint result = Interop.IpHlpApi.GetIfEntry2(ref ifRow);
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }
@@ -54,7 +54,7 @@ namespace System.Net.NetworkInformation
     /// <summary>IP statistics</summary>
     internal class SystemIPv4InterfaceStatistics : IPv4InterfaceStatistics
     {
-        private MibIfRow2 _ifRow;
+        private Interop.IpHlpApi.MibIfRow2 _ifRow;
 
         internal SystemIPv4InterfaceStatistics(long index)
         {

@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Net;
+using System.Net.Internals;
 using System.Net.Sockets;
-using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,6 +38,8 @@ namespace System.Net.NetworkInformation
         private bool _cancelled = false;
         private bool _disposeRequested = false;
         private object _lockObject = new object();
+        private static bool s_socketInitialized;
+        private static readonly object s_socketInitializationLock = new object();
 
         //used for icmpsendecho apis
         internal ManualResetEvent pingEvent = null;
@@ -287,163 +288,37 @@ namespace System.Net.NetworkInformation
             asyncOp.PostOperationCompleted(onPingCompletedDelegate, eventArgs);
         }
 
-        public PingReply Send(string hostNameOrAddress)
-        {
-            return Send(hostNameOrAddress, DefaultTimeout, DefaultSendBuffer, null);
-        }
-
-
-        public PingReply Send(string hostNameOrAddress, int timeout)
-        {
-            return Send(hostNameOrAddress, timeout, DefaultSendBuffer, null);
-        }
-
-
-        public PingReply Send(IPAddress address)
-        {
-            return Send(address, DefaultTimeout, DefaultSendBuffer, null);
-        }
-
-        public PingReply Send(IPAddress address, int timeout)
-        {
-            return Send(address, timeout, DefaultSendBuffer, null);
-        }
-
-        public PingReply Send(string hostNameOrAddress, int timeout, byte[] buffer)
-        {
-            return Send(hostNameOrAddress, timeout, buffer, null);
-        }
-
-        public PingReply Send(IPAddress address, int timeout, byte[] buffer)
-        {
-            return Send(address, timeout, buffer, null);
-        }
-
-        public PingReply Send(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options)
-        {
-            if (String.IsNullOrEmpty(hostNameOrAddress))
-            {
-                throw new ArgumentNullException("hostNameOrAddress");
-            }
-
-            IPAddress address;
-            if (!IPAddress.TryParse(hostNameOrAddress, out address))
-            {
-                try
-                {
-                    address = Dns.GetHostAddresses(hostNameOrAddress)[0];
-                }
-                catch (ArgumentException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    throw new PingException(SR.net_ping, ex);
-                }
-            }
-            return Send(address, timeout, buffer, options);
-        }
-
-
-        public PingReply Send(IPAddress address, int timeout, byte[] buffer, PingOptions options)
-        {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException("buffer");
-            }
-
-            if (buffer.Length > MaxBufferSize)
-            {
-                throw new ArgumentException(SR.net_invalidPingBufferSize, "buffer");
-            }
-
-            if (timeout < 0)
-            {
-                throw new ArgumentOutOfRangeException("timeout");
-            }
-
-            if (address == null)
-            {
-                throw new ArgumentNullException("address");
-            }
-
-            TestIsIpSupported(address); // Address family is installed?
-
-            if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
-            {
-                throw new ArgumentException(SR.net_invalid_ip_addr, "address");
-            }
-
-            //
-            // FxCop: need to snapshot the address here, so we're sure that it's not changed between the permission
-            // and the operation, and to be sure that IPAddress.ToString() is called and not some override that
-            // always returns "localhost" or something.
-            //
-            IPAddress addressSnapshot;
-            if (address.AddressFamily == AddressFamily.InterNetwork)
-            {
-                addressSnapshot = new IPAddress(address.GetAddressBytes());
-            }
-            else
-            {
-                addressSnapshot = new IPAddress(address.GetAddressBytes(), address.ScopeId);
-            }
-
-            CheckStart(false);
-            try
-            {
-                return InternalSend(addressSnapshot, buffer, timeout, options, false);
-            }
-            catch (Exception e)
-            {
-                throw new PingException(SR.net_ping, e);
-            }
-            finally
-            {
-                Finish(false);
-            }
-        }
-
-
-
-        public void SendAsync(string hostNameOrAddress, object userToken)
+        private void SendAsync(string hostNameOrAddress, object userToken)
         {
             SendAsync(hostNameOrAddress, DefaultTimeout, DefaultSendBuffer, userToken);
         }
-
 
         public void SendAsync(string hostNameOrAddress, int timeout, object userToken)
         {
             SendAsync(hostNameOrAddress, timeout, DefaultSendBuffer, userToken);
         }
 
-
-        public void SendAsync(IPAddress address, object userToken)
+        private void SendAsync(IPAddress address, object userToken)
         {
             SendAsync(address, DefaultTimeout, DefaultSendBuffer, userToken);
         }
 
-
-        public void SendAsync(IPAddress address, int timeout, object userToken)
+        private void SendAsync(IPAddress address, int timeout, object userToken)
         {
             SendAsync(address, timeout, DefaultSendBuffer, userToken);
         }
 
-
-        public void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, object userToken)
+        private void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, object userToken)
         {
             SendAsync(hostNameOrAddress, timeout, buffer, null, userToken);
         }
 
-
-        public void SendAsync(IPAddress address, int timeout, byte[] buffer, object userToken)
+        private void SendAsync(IPAddress address, int timeout, byte[] buffer, object userToken)
         {
             SendAsync(address, timeout, buffer, null, userToken);
         }
 
-
-        public void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options, object userToken)
+        private void SendAsync(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options, object userToken)
         {
             if (String.IsNullOrEmpty(hostNameOrAddress))
             {
@@ -487,9 +362,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-
-
-        public void SendAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options, object userToken)
+        private void SendAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options, object userToken)
         {
             if (buffer == null)
             {
@@ -658,7 +531,7 @@ namespace System.Net.NetworkInformation
 
             try
             {
-                IPAddress addressSnapshot = Dns.GetHostAddresses(stateObject.hostName)[0];
+                IPAddress addressSnapshot = Dns.GetHostAddressesAsync(stateObject.hostName).GetAwaiter().GetResult()[0];
                 InternalSend(addressSnapshot, stateObject.buffer, stateObject.timeout, stateObject.options, true);
             }
 
@@ -730,26 +603,26 @@ namespace System.Net.NetworkInformation
                     if (async)
                     {
                         var pingEventSafeWaitHandle = pingEvent.GetSafeWaitHandle();
-                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, (uint)address.GetAddress(), _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                     else
                     {
-                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.IcmpSendEcho2(_handlePingV4, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, (uint)address.GetAddress(), _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                 }
                 else
                 {
                     IPEndPoint ep = new IPEndPoint(address, 0);
-                    SocketAddress remoteAddr = ep.Serialize();
+                    Internals.SocketAddress remoteAddr = IPEndPointExtensions.Serialize(ep);
                     byte[] sourceAddr = new byte[28];
                     if (async)
                     {
                         var pingEventSafeWaitHandle = pingEvent.GetSafeWaitHandle();
-                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                     else
                     {
-                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)Interop.IpHlpApi.Icmp6SendEcho2(_handlePingV6, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                 }
             }
@@ -810,11 +683,13 @@ namespace System.Net.NetworkInformation
         // Tests if the current machine supports the given ip protocol family
         private void TestIsIpSupported(IPAddress ip)
         {
-            // Catches if IPv4 has been uninstalled on Vista+
-            if (ip.AddressFamily == AddressFamily.InterNetwork && !Socket.OSSupportsIPv4)
+            InitializeSockets();
+
+            // Catches if IPv4 has been uninstalled
+            if (ip.AddressFamily == AddressFamily.InterNetwork && !SocketProtocolSupportPal.OSSupportsIPv4)
                 throw new NotSupportedException(SR.net_ipv4_not_installed);
-            // Catches if IPv6 is not installed on XP
-            else if ((ip.AddressFamily == AddressFamily.InterNetworkV6 && !Socket.OSSupportsIPv6))
+            // Catches if IPv6 is not installed
+            else if ((ip.AddressFamily == AddressFamily.InterNetworkV6 && !SocketProtocolSupportPal.OSSupportsIPv6))
                 throw new NotSupportedException(SR.net_ipv6_not_installed);
         }
 
@@ -852,6 +727,27 @@ namespace System.Net.NetworkInformation
                         _defaultSendBuffer[i] = (byte)((int)'a' + i % 23);
                 }
                 return _defaultSendBuffer;
+            }
+        }
+
+        internal static void InitializeSockets()
+        {
+            if (!Volatile.Read(ref s_socketInitialized))
+            {
+                lock (s_socketInitializationLock)
+                {
+                    if (!s_socketInitialized)
+                    {
+                        // TODO: Note for PAL implementation: this call is not required for *NIX and should be avoided during PAL design.
+
+                        // Ensure that WSAStartup has been called once per process.  
+                        // The System.Net.NameResolution contract is responsible with the initialization.
+                        Dns.GetHostName();
+
+                        // Cache some settings locally.
+                        s_socketInitialized = true;
+                    }
+                }
             }
         }
     }

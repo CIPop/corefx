@@ -68,17 +68,6 @@ internal static partial class Interop
             internal string szProtocol;
         }
         
-        // Used as last parameter to WSASocket call.
-        [Flags]
-        internal enum SocketConstructorFlags
-        {
-            WSA_FLAG_OVERLAPPED = 0x01,
-            WSA_FLAG_MULTIPOINT_C_ROOT = 0x02,
-            WSA_FLAG_MULTIPOINT_C_LEAF = 0x04,
-            WSA_FLAG_MULTIPOINT_D_ROOT = 0x08,
-            WSA_FLAG_MULTIPOINT_D_LEAF = 0x10,
-        }
-        
         // Flags equivalent to winsock TRANSMIT_PACKETS_ELEMENT flags
         //    #define TP_ELEMENT_MEMORY   1
         //    #define TP_ELEMENT_FILE     2

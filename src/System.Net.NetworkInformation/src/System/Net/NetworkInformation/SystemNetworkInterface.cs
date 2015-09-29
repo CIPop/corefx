@@ -6,6 +6,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using Microsoft.Win32.SafeHandles;
+
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -32,7 +34,7 @@ namespace System.Net.NetworkInformation
         //have two completely different valid indexes for ipv4 and ipv6
         private uint _index = 0;
         private uint _ipv6Index = 0;
-        private AdapterFlags _adapterFlags;
+        private Interop.IpHlpApi.AdapterFlags _adapterFlags;
         private SystemIPInterfaceProperties _interfaceProperties = null;
 
         internal static int InternalLoopbackInterfaceIndex
@@ -54,8 +56,8 @@ namespace System.Net.NetworkInformation
         private static int GetBestInterfaceForAddress(IPAddress addr)
         {
             int index;
-            SocketAddress address = new SocketAddress(addr);
-            int error = (int)UnsafeNetInfoNativeMethods.GetBestInterfaceEx(address.m_Buffer, out index);
+            Internals.SocketAddress address = new Internals.SocketAddress(addr);
+            int error = (int)Interop.IpHlpApi.GetBestInterfaceEx(address.Buffer, out index);
             if (error != 0)
             {
                 throw new NetworkInformationException(error);
@@ -91,36 +93,38 @@ namespace System.Net.NetworkInformation
             Contract.Ensures(Contract.Result<NetworkInterface[]>() != null);
             AddressFamily family = AddressFamily.Unspecified;
             uint bufferSize = 0;
-            SafeLocalFree buffer = null;
-            FIXED_INFO fixedInfo = HostInformation.GetFixedInfo();
+            SafeLocalAllocHandle buffer = null;
+
+            // TODO: #2485: This will probably require 
+            Interop.IpHlpApi.FIXED_INFO fixedInfo = HostInformationPal.GetFixedInfo();
             List<SystemNetworkInterface> interfaceList = new List<SystemNetworkInterface>();
 
-            GetAdaptersAddressesFlags flags =
-                GetAdaptersAddressesFlags.IncludeGateways
-                | GetAdaptersAddressesFlags.IncludeWins;
+            Interop.IpHlpApi.GetAdaptersAddressesFlags flags =
+                Interop.IpHlpApi.GetAdaptersAddressesFlags.IncludeGateways
+                | Interop.IpHlpApi.GetAdaptersAddressesFlags.IncludeWins;
 
             // Figure out the right buffer size for the adapter information
-            uint result = UnsafeNetInfoNativeMethods.GetAdaptersAddresses(
-                family, (uint)flags, IntPtr.Zero, SafeLocalFree.Zero, ref bufferSize);
+            uint result = Interop.IpHlpApi.GetAdaptersAddresses(
+                family, (uint)flags, IntPtr.Zero, SafeLocalAllocHandle.Zero, ref bufferSize);
 
-            while (result == IpHelperErrors.ErrorBufferOverflow)
+            while (result == Interop.IpHlpApi.ERROR_BUFFER_OVERFLOW)
             {
                 try
                 {
                     // Allocate the buffer and get the adapter info
-                    buffer = SafeLocalFree.LocalAlloc((int)bufferSize);
-                    result = UnsafeNetInfoNativeMethods.GetAdaptersAddresses(
+                    buffer = SafeLocalAllocHandle.LocalAlloc((int)bufferSize);
+                    result = Interop.IpHlpApi.GetAdaptersAddresses(
                         family, (uint)flags, IntPtr.Zero, buffer, ref bufferSize);
 
                     // If succeeded, we're going to add each new interface
-                    if (result == IpHelperErrors.Success)
+                    if (result == Interop.IpHlpApi.ERROR_SUCCESS)
                     {
                         // Linked list of interfaces
                         IntPtr ptr = buffer.DangerousGetHandle();
                         while (ptr != IntPtr.Zero)
                         {
                             // Traverse the list, marshal in the native structures, and create new NetworkInterfaces
-                            IpAdapterAddresses adapterAddresses = Marshal.PtrToStructure<IpAdapterAddresses>(ptr);
+                            Interop.IpHlpApi.IpAdapterAddresses adapterAddresses = Marshal.PtrToStructure<Interop.IpHlpApi.IpAdapterAddresses>(ptr);
                             interfaceList.Add(new SystemNetworkInterface(fixedInfo, adapterAddresses));
 
                             ptr = adapterAddresses.next;
@@ -138,13 +142,13 @@ namespace System.Net.NetworkInformation
             }
 
             // if we don't have any interfaces detected, return empty.
-            if (result == IpHelperErrors.ErrorNoData || result == IpHelperErrors.ErrorInvalidParameter)
+            if (result == Interop.IpHlpApi.ERROR_NO_DATA || result == Interop.IpHlpApi.ERROR_INVALID_PARAMETER)
             {
                 return new SystemNetworkInterface[0];
             }
 
             // Otherwise we throw on an error
-            if (result != IpHelperErrors.Success)
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }
@@ -153,7 +157,7 @@ namespace System.Net.NetworkInformation
         }
 
         // Vista+
-        internal SystemNetworkInterface(FIXED_INFO fixedInfo, IpAdapterAddresses ipAdapterAddresses)
+        internal SystemNetworkInterface(Interop.IpHlpApi.FIXED_INFO fixedInfo, Interop.IpHlpApi.IpAdapterAddresses ipAdapterAddresses)
         {
             //store the common api information
             _id = ipAdapterAddresses.AdapterName;
@@ -213,12 +217,12 @@ namespace System.Net.NetworkInformation
         public override bool Supports(NetworkInterfaceComponent networkInterfaceComponent)
         {
             if (networkInterfaceComponent == NetworkInterfaceComponent.IPv6
-                && ((_adapterFlags & AdapterFlags.IPv6Enabled) != 0))
+                && ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.IPv6Enabled) != 0))
             {
                 return true;
             }
             if (networkInterfaceComponent == NetworkInterfaceComponent.IPv4
-                && ((_adapterFlags & AdapterFlags.IPv4Enabled) != 0))
+                && ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.IPv4Enabled) != 0))
             {
                 return true;
             }
@@ -246,7 +250,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return ((_adapterFlags & AdapterFlags.ReceiveOnly) > 0);
+                return ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.ReceiveOnly) > 0);
             }
         }
         /// <summary>The interface doesn't allow multicast.</summary>
@@ -254,7 +258,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return ((_adapterFlags & AdapterFlags.NoMulticast) == 0);
+                return ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.NoMulticast) == 0);
             }
         }
     }

@@ -2,6 +2,8 @@
 using System.Net;
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -25,11 +27,11 @@ namespace System.Net.NetworkInformation
         private uint _mtu = 0;
 
         // Vista+
-        internal SystemIPv4InterfaceProperties(FIXED_INFO fixedInfo, IpAdapterAddresses ipAdapterAddresses)
+        internal SystemIPv4InterfaceProperties(Interop.IpHlpApi.FIXED_INFO fixedInfo, Interop.IpHlpApi.IpAdapterAddresses ipAdapterAddresses)
         {
             _index = ipAdapterAddresses.index;
             _routingEnabled = fixedInfo.enableRouting;
-            _dhcpEnabled = ((ipAdapterAddresses.flags & AdapterFlags.DhcpEnabled) != 0);
+            _dhcpEnabled = ((ipAdapterAddresses.flags & Interop.IpHlpApi.AdapterFlags.DhcpEnabled) != 0);
             _haveWins = (ipAdapterAddresses.firstWinsServerAddress != IntPtr.Zero);
 
             _mtu = ipAdapterAddresses.mtu;
@@ -93,19 +95,19 @@ namespace System.Net.NetworkInformation
             if (index != 0)
             {
                 uint size = 0;
-                SafeLocalFree buffer = null;
+                SafeLocalAllocHandle buffer = null;
 
-                uint result = UnsafeNetInfoNativeMethods.GetPerAdapterInfo(index, SafeLocalFree.Zero, ref size);
-                while (result == IpHelperErrors.ErrorBufferOverflow)
+                uint result = Interop.IpHlpApi.GetPerAdapterInfo(index, SafeLocalAllocHandle.Zero, ref size);
+                while (result == Interop.IpHlpApi.ERROR_BUFFER_OVERFLOW)
                 {
                     try
                     {
                         //now we allocate the buffer and read the network parameters.
-                        buffer = SafeLocalFree.LocalAlloc((int)size);
-                        result = UnsafeNetInfoNativeMethods.GetPerAdapterInfo(index, buffer, ref size);
-                        if (result == IpHelperErrors.Success)
+                        buffer = SafeLocalAllocHandle.LocalAlloc((int)size);
+                        result = Interop.IpHlpApi.GetPerAdapterInfo(index, buffer, ref size);
+                        if (result == Interop.IpHlpApi.ERROR_SUCCESS)
                         {
-                            IpPerAdapterInfo ipPerAdapterInfo = Marshal.PtrToStructure<IpPerAdapterInfo>(buffer.DangerousGetHandle());
+                            Interop.IpHlpApi.IpPerAdapterInfo ipPerAdapterInfo = Marshal.PtrToStructure<Interop.IpHlpApi.IpPerAdapterInfo>(buffer.DangerousGetHandle());
 
                             _autoConfigEnabled = ipPerAdapterInfo.autoconfigEnabled;
                             _autoConfigActive = ipPerAdapterInfo.autoconfigActive;
@@ -118,7 +120,7 @@ namespace System.Net.NetworkInformation
                     }
                 }
 
-                if (result != IpHelperErrors.Success)
+                if (result != Interop.IpHlpApi.ERROR_SUCCESS)
                 {
                     throw new NetworkInformationException((int)result);
                 }

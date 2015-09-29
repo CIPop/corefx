@@ -17,13 +17,13 @@ namespace System.Net.NetworkInformation
     /// <summary>Icmp statistics for IPv4.</summary>
     internal class SystemIcmpV4Statistics : IcmpV4Statistics
     {
-        private MibIcmpInfo _stats;
+        private Interop.IpHlpApi.MibIcmpInfo _stats;
 
         internal SystemIcmpV4Statistics()
         {
-            uint result = UnsafeNetInfoNativeMethods.GetIcmpStatistics(out _stats);
+            uint result = Interop.IpHlpApi.GetIcmpStatistics(out _stats);
 
-            if (result != IpHelperErrors.Success)
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }

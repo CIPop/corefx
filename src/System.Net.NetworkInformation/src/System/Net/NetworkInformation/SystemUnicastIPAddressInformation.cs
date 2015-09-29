@@ -29,7 +29,7 @@ namespace System.Net.NetworkInformation
         private uint _preferredLifetime;
         private byte _prefixLength;
 
-        internal SystemUnicastIPAddressInformation(IpAdapterUnicastAddress adapterAddress)
+        internal SystemUnicastIPAddressInformation(Interop.IpHlpApi.IpAdapterUnicastAddress adapterAddress)
         {
             IPAddress ipAddress = adapterAddress.address.MarshalIPAddress();
             _innerInfo = new SystemIPAddressInformation(ipAddress, adapterAddress.flags);
@@ -165,7 +165,7 @@ namespace System.Net.NetworkInformation
             while (ptr != IntPtr.Zero)
             {
                 // Get the address
-                IpAdapterUnicastAddress addr = Marshal.PtrToStructure<IpAdapterUnicastAddress>(ptr);
+                Interop.IpHlpApi.IpAdapterUnicastAddress addr = Marshal.PtrToStructure<Interop.IpHlpApi.IpAdapterUnicastAddress>(ptr);
                 // Add the address to the list
                 addressList.InternalAdd(new SystemUnicastIPAddressInformation(addr));
                 // Move to the next address in the list

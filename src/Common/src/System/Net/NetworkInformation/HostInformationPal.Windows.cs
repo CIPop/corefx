@@ -16,7 +16,21 @@ namespace System.Net.NetworkInformation
         private static bool s_fixedInfoInitialized;
         private static object s_syncObject = new object();
 
-        private static Interop.IpHlpApi.FIXED_INFO GetFixedInfo()
+        public static string GetHostName()
+        {
+            EnsureFixedInfo();
+            return s_fixedInfo.hostName;
+        }
+
+        public static string GetDomainName()
+        {
+            EnsureFixedInfo();
+            return s_fixedInfo.domainName;
+        }
+
+        // TODO: #2485: Temporarily made GetFixedInfo() public to make things build.
+        // This function needs to be switched back to private since it has no correspondent in the Unix world.
+        public static Interop.IpHlpApi.FIXED_INFO GetFixedInfo()
         {
             uint size = 0;
             SafeLocalAllocHandle buffer = null;
@@ -64,18 +78,6 @@ namespace System.Net.NetworkInformation
                     }
                 }
             }
-        }
-
-        public static string GetHostName()
-        {
-            EnsureFixedInfo();
-            return s_fixedInfo.hostName;
-        }
-
-        public static string GetDomainName()
-        {
-            EnsureFixedInfo();
-            return s_fixedInfo.domainName;
         }
     }
 }

@@ -22,14 +22,14 @@ namespace System.Net.Sockets
     // to block the user thread in case a graceful close has been
     // requested.  (It's not legal to block any other thread - such closes
     // are always abortive.)
-    internal sealed partial class SafeCloseSocket :
+    internal partial class SafeCloseSocket :
 #if DEBUG
         DebugSafeHandleMinusOneIsInvalid
 #else
         SafeHandleMinusOneIsInvalid
 #endif
     {
-        private SafeCloseSocket() : base(true) { }
+        protected SafeCloseSocket() : base(true) { }
 
         private InnerSafeCloseSocket _innerSocket;
         private volatile bool _released;
@@ -98,7 +98,7 @@ namespace System.Net.Sockets
             return ret;
         }
 
-        private static void CreateSocket(InnerSafeCloseSocket socket, SafeCloseSocket target)
+        protected static void CreateSocket(InnerSafeCloseSocket socket, SafeCloseSocket target)
         {
             if (socket != null && socket.IsInvalid)
             {

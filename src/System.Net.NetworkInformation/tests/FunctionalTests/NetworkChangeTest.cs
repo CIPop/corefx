@@ -1,13 +1,13 @@
-﻿namespace NCLTest.NetworkInformation
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net.NetworkInformation;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-    [TestClass]
+using Xunit;
+
+namespace System.Net.NetworkInformation.Tests
+{
     public class NetworkChangeTest
     {
-        [TestMethod]
+        [Fact]
         public void NetworkAddressChanged_AddRemove_Success()
         {
             NetworkAddressChangedEventHandler handler = NetworkChange_NetworkAddressChanged;
@@ -15,7 +15,7 @@
             NetworkChange.NetworkAddressChanged -= handler;
         }
 
-        [TestMethod]
+        [Fact]
         public void NetworkAddressChanged_JustRemove_Success()
         {
             NetworkAddressChangedEventHandler handler = NetworkChange_NetworkAddressChanged;

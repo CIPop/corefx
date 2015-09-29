@@ -16,9 +16,9 @@ namespace System.Net.NetworkInformation
 
         protected override bool ReleaseHandle()
         {
-            uint err = UnsafeNetInfoNativeMethods.CancelMibChangeNotify2(base.handle);
+            uint err = Interop.IpHlpApi.CancelMibChangeNotify2(base.handle);
             base.handle = IntPtr.Zero;
-            return (err == UnsafeCommonNativeMethods.ErrorCodes.ERROR_SUCCESS);
+            return (err == Interop.IpHlpApi.ERROR_SUCCESS);
         }
     }
 }

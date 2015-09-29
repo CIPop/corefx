@@ -39,7 +39,7 @@ namespace System.Net.NetworkInformation
         private bool _runCallbackCalled;
 
         // We explicitly keep a copy of this to prevent it from getting GC'd.
-        private readonly StableUnicastIpAddressTableDelegate _onStabilizedDelegate;
+        private readonly Interop.IpHlpApi.StableUnicastIpAddressTableDelegate _onStabilizedDelegate;
 
         // Used to cancel notification after receiving the first callback, or when the AppDomain is going down.
         private SafeCancelMibChangeNotify _cancelHandle;
@@ -53,7 +53,7 @@ namespace System.Net.NetworkInformation
         {
             _callback = callback;
             _state = state;
-            _onStabilizedDelegate = new StableUnicastIpAddressTableDelegate(OnStabilized);
+            _onStabilizedDelegate = new Interop.IpHlpApi.StableUnicastIpAddressTableDelegate(OnStabilized);
             _runCallbackCalled = false;
         }
 
@@ -66,7 +66,7 @@ namespace System.Net.NetworkInformation
 
             TeredoHelper helper = new TeredoHelper(callback, state);
 
-            uint err = UnsafeCommonNativeMethods.ErrorCodes.ERROR_SUCCESS;
+            uint err = Interop.IpHlpApi.ERROR_SUCCESS;
             SafeFreeMibTable table = null;
 
             lock (s_pendingNotifications)
@@ -79,7 +79,7 @@ namespace System.Net.NetworkInformation
                     return false;
                 }
 
-                err = UnsafeNetInfoNativeMethods.NotifyStableUnicastIpAddressTable(AddressFamily.Unspecified,
+                err = Interop.IpHlpApi.NotifyStableUnicastIpAddressTable(AddressFamily.Unspecified,
                     out table, helper._onStabilizedDelegate, IntPtr.Zero, out helper._cancelHandle);
 
                 if (table != null)
@@ -87,7 +87,7 @@ namespace System.Net.NetworkInformation
                     table.Dispose();
                 }
 
-                if (err == UnsafeCommonNativeMethods.ErrorCodes.ERROR_IO_PENDING)
+                if (err == Interop.IpHlpApi.ERROR_IO_PENDING)
                 {
                     GlobalLog.Assert(!helper._cancelHandle.IsInvalid,
                         "CancelHandle invalid despite returning ERROR_IO_PENDING");
@@ -99,7 +99,7 @@ namespace System.Net.NetworkInformation
                 }
             }
 
-            if (err != UnsafeCommonNativeMethods.ErrorCodes.ERROR_SUCCESS)
+            if (err != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new Win32Exception((int)err);
             }
@@ -146,7 +146,7 @@ namespace System.Net.NetworkInformation
         // callbacks are done.
         private void OnStabilized(IntPtr context, IntPtr table)
         {
-            UnsafeNetInfoNativeMethods.FreeMibTable(table);
+            Interop.IpHlpApi.FreeMibTable(table);
 
             // Lock the TeredoHelper instance to ensure that only the first call to OnStabilized will get to call 
             // RunCallback.  This is the only place that TeredoHelpers get locked, as individual instances are not
