@@ -471,8 +471,6 @@ namespace System.Net.Security
         //
         internal void Close()
         {
-            // TODO: Close_Alert sequence (ApplyControlToken(SCHANNEL_SHUTDOWN))
-
             _exception = ExceptionDispatchInfo.Capture(new ObjectDisposedException("SslStream"));
             if (Context != null)
             {
