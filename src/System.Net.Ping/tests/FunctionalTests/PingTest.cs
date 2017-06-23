@@ -170,7 +170,7 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions()
         {
-            while (!Debugger.IsAttached)
+            while (!System.Diagnostics.Debugger.IsAttached)
             { }
 
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();

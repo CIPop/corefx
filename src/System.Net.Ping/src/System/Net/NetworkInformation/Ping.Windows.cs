@@ -32,8 +32,6 @@ namespace System.Net.NetworkInformation
         // We do not need to or want to capture such exceptions into the returned task.
         private Task<PingReply> SendPingAsyncCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            while (!Debugger.IsAttached) { }
-
             var tcs = new TaskCompletionSource<PingReply>();
             _taskCompletionSource = tcs;
 
