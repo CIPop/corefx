@@ -76,6 +76,7 @@ namespace System.Net.NetworkInformation
         {
             lock (_lockObject)
             {
+                // TODO: #??? Fails in UapAot (_status == 0 - Free)
                 Debug.Assert(_status == InProgress, $"Invalid status: {_status}");
                 _status = Free;
                 _lockObject.Set();
