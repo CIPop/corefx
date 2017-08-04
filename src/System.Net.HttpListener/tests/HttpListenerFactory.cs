@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -37,6 +38,8 @@ namespace System.Net.Tests
             for (int attempt = 0; attempt < MaxStartAttempts; attempt++)
             {
                 int port = GetNextPort();
+                Debug.WriteLine("HttpListenerFactory attempt={0} port={1}", attempt, port);
+
                 string prefix = $"http://{hostname}:{port}/{pathComponent}";
 
                 var listener = new HttpListener();

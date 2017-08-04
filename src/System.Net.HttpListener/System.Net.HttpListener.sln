@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.HttpListener.Tests", "tests\System.Net.HttpListener.Tests.csproj", "{851A40FE-7F07-415D-8592-5FE2096E84D3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -26,10 +26,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
-		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
-		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
-		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Debug|Any CPU.ActiveCfg = netstandard-OSX-Debug|Any CPU
+		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Debug|Any CPU.Build.0 = netstandard-OSX-Debug|Any CPU
+		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Release|Any CPU.ActiveCfg = netstandard-OSX-Release|Any CPU
+		{851A40FE-7F07-415D-8592-5FE2096E84D3}.Release|Any CPU.Build.0 = netstandard-OSX-Release|Any CPU
 		{31E8D18B-9E7D-4924-AFD8-5BD8D75C31FB}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
 		{31E8D18B-9E7D-4924-AFD8-5BD8D75C31FB}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
 		{31E8D18B-9E7D-4924-AFD8-5BD8D75C31FB}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU

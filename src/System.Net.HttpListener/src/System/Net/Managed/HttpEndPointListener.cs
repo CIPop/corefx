@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.Diagnostics;
 
 namespace System.Net
 {
@@ -50,6 +51,8 @@ namespace System.Net
 
         public HttpEndPointListener(HttpListener listener, IPAddress addr, int port, bool secure)
         {
+            Debug.WriteLine("HttpEndPointListener {0}: CTOR", this.GetHashCode());
+
             _listener = listener;
 
             if (secure)
@@ -83,6 +86,7 @@ namespace System.Net
             bool asyn;
             try
             {
+                Debug.WriteLine("HttpEndPointListener {0}: AcceptAsync - START", this.GetHashCode());
                 asyn = _socket.AcceptAsync(e);
             }
             catch (ObjectDisposedException)
@@ -107,6 +111,8 @@ namespace System.Net
             Socket accepted = args.SocketError == SocketError.Success ? args.AcceptSocket : null;
             epl.Accept(args);
 
+            Debug.WriteLine("HttpEndPointListener {0}: accepted={1} error={2}", epl.GetHashCode(),  accepted != null, args.SocketError.ToString());
+
             if (accepted == null)
                 return;
 
@@ -126,6 +132,7 @@ namespace System.Net
 
         private static void OnAccept(object sender, SocketAsyncEventArgs e)
         {
+            Debug.WriteLine("HttpEndPointListener {0}: AcceptAsync - End (OnAccept)", ((HttpEndPointListener)e.UserToken).GetHashCode());
             ProcessAccept(e);
         }
 
@@ -291,6 +298,7 @@ namespace System.Net
 
         public void Close()
         {
+            Debug.WriteLine("HttpEndPointListener {0} : Close()", this.GetHashCode());
             _socket.Close();
             lock (_unregisteredConnections)
             {

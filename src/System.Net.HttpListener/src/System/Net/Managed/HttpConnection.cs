@@ -36,6 +36,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 
 namespace System.Net
 {
@@ -186,6 +187,8 @@ namespace System.Net
 
         public void BeginReadRequest()
         {
+            Debug.WriteLine("HttpConnection:BeginReadRequest");
+
             if (_buffer == null)
                 _buffer = new byte[BufferSize];
             try

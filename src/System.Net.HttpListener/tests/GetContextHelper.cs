@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
@@ -17,6 +18,7 @@ namespace System.Net.Tests
 
         public GetContextHelper(HttpListener listener, string listeningUrl)
         {
+            Debug.WriteLine("GetContextHelper ctor");
             _listener = listener;
             _listeningUrl = listeningUrl;
             _client = new HttpClient();
